@@ -23,21 +23,23 @@
 using System;
 using OpenTK;
 
-// sv_move.c
-
 namespace SharpQuake
 {
-    partial class Server
+    internal partial class Server
     {
         private const float DI_NODIR = -1;
 
-        /// <summary>
-        /// SV_movestep
-        /// Called by monster program code.
-        /// The move will be adjusted for slopes and stairs, but if the move isn't
-        /// possible, no move is done, false is returned, and
-        /// pr_global_struct.trace_normal is set to the normal of the blocking wall
-        /// </summary>
+        /**
+         * <summary>
+         * Called by monster program code.
+         * <para>
+         * The move will be adjusted for slopes and stairs, but if the move isn't
+         * possible, no move is done, false is returned, and
+         * pr_global_struct.trace_normal is set to the normal of the blocking wall
+         * </para>
+         * </summary>
+         */
+
         public static bool MoveStep( edict_t ent, ref v3f move, bool relink )
         {
             trace_t trace;
@@ -69,7 +71,7 @@ namespace SharpQuake
                     {
                         if( ( (int)ent.v.flags & EdictFlags.FL_SWIM ) != 0 &&
                             PointContents( ref trace.endpos ) == Contents.CONTENTS_EMPTY )
-                            return false;	// swim monster left water
+                            return false; // swim monster left water
 
                         Mathlib.Copy( ref trace.endpos, out ent.v.origin );
                         if( relink )
@@ -113,7 +115,7 @@ namespace SharpQuake
                     return true;
                 }
 
-                return false;		// walked off an edge
+                return false; // walked off an edge
             }
 
             // check point traces down for dangling corners
@@ -123,8 +125,7 @@ namespace SharpQuake
             {
                 if( ( (int)ent.v.flags & EdictFlags.FL_PARTIALGROUND ) != 0 )
                 {
-                    // entity had floor mostly pulled out from underneath it
-                    // and is trying to correct
+                    // entity had floor mostly pulled out from underneath it and is trying to correct
                     if( relink )
                         LinkEdict( ent, true );
                     return true;
@@ -145,18 +146,15 @@ namespace SharpQuake
             return true;
         }
 
-        /// <summary>
-        /// SV_CheckBottom
-        /// </summary>
         public static bool CheckBottom( edict_t ent )
         {
             v3f mins, maxs;
             Mathlib.VectorAdd( ref ent.v.origin, ref ent.v.mins, out mins );
             Mathlib.VectorAdd( ref ent.v.origin, ref ent.v.maxs, out maxs );
 
-            // if all of the points under the corners are solid world, don't bother
-            // with the tougher checks
-            // the corners must be within 16 of the midpoint
+            /* if all of the points under the corners are solid world, don't bother
+             * with the tougher checks, the corners must be within 16 of the midpoint
+             */
             Vector3 start;
             start.Z = mins.z - 1;
             for( int x = 0; x <= 1; x++ )
@@ -168,13 +166,11 @@ namespace SharpQuake
                         goto RealCheck;
                 }
 
-            return true;        // we got out easy
+            return true; // we got out easy
 
 RealCheck:
 
-//
 // check it for real...
-//
             start.Z = mins.z;
 
             // the midpoint must be within 16 of the bottom
@@ -192,6 +188,7 @@ RealCheck:
 
             // the corners must be within 16 of the midpoint
             for( int x = 0; x <= 1; x++ )
+            {
                 for( int y = 0; y <= 1; y++ )
                 {
                     start.X = stop.X = ( x != 0 ? maxs.x : mins.x );
@@ -204,13 +201,11 @@ RealCheck:
                     if( trace.fraction == 1.0 || mid - trace.endpos.Z > STEPSIZE )
                         return false;
                 }
+            }
 
             return true;
         }
 
-        /// <summary>
-        /// SV_MoveToGoal
-        /// </summary>
         public static void MoveToGoal()
         {
             edict_t ent = ProgToEdict( Progs.GlobalStruct.self );
@@ -234,9 +229,6 @@ RealCheck:
             }
         }
 
-        /// <summary>
-        /// SV_CloseEnough
-        /// </summary>
         private static bool CloseEnough( edict_t ent, edict_t goal, float dist )
         {
             if( goal.v.absmin.x > ent.v.absmax.x + dist )
@@ -256,10 +248,7 @@ RealCheck:
             return true;
         }
 
-        /// <summary>
-        /// SV_StepDirection
-        /// Turns to the movement direction, and walks the current distance if facing it.
-        /// </summary>
+        // Turns to the movement direction, and walks the current distance if facing it.
         private static bool StepDirection( edict_t ent, float yaw, float dist )
         {
             ent.v.ideal_yaw = yaw;
@@ -288,9 +277,6 @@ RealCheck:
             return false;
         }
 
-        /// <summary>
-        /// SV_NewChaseDir
-        /// </summary>
         private static void NewChaseDir( edict_t actor, edict_t enemy, float dist )
         {
             float olddir = Mathlib.AngleMod( (int)( actor.v.ideal_yaw / 45 ) * 45 );
@@ -344,7 +330,7 @@ RealCheck:
             if( olddir != DI_NODIR && StepDirection( actor, olddir, dist ) )
                 return;
 
-            if( ( Sys.Random() & 1 ) != 0 ) 	//randomly determine direction of search
+            if( ( Sys.Random() & 1 ) != 0 )  //randomly determine direction of search
             {
                 for( tdir = 0; tdir <= 315; tdir += 45 )
                     if( tdir != turnaround && StepDirection( actor, tdir, dist ) )
@@ -360,18 +346,16 @@ RealCheck:
             if( turnaround != DI_NODIR && StepDirection( actor, turnaround, dist ) )
                 return;
 
-            actor.v.ideal_yaw = olddir;		// can't move
+            actor.v.ideal_yaw = olddir;  // can't move
 
-            // if a bridge was pulled out from underneath a monster, it may not have
-            // a valid standing position at all
+            /* if a bridge was pulled out from underneath a monster,
+             * it may not have a valid standing position at all
+             */
 
             if( !CheckBottom( actor ) )
                 FixCheckBottom( actor );
         }
 
-        /// <summary>
-        /// SV_FixCheckBottom
-        /// </summary>
         private static void FixCheckBottom( edict_t ent )
         {
             ent.v.flags = (int)ent.v.flags | EdictFlags.FL_PARTIALGROUND;

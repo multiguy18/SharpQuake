@@ -24,8 +24,6 @@ using System;
 using System.Runtime.InteropServices;
 using func_t = System.Int32;
 
-// progs.h
-
 using string_t = System.Int32;
 
 namespace SharpQuake
@@ -35,46 +33,42 @@ namespace SharpQuake
     [StructLayout( LayoutKind.Explicit, Size = 12, Pack = 1 )]
     internal unsafe struct eval_t
     {
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public int _string;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public float _float;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public fixed float vector[3];
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public int function;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public int _int;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public int edict;
     }
 
-    /// <summary>
-    /// On-disk edict
-    /// </summary>
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
     internal struct dedict_t
     {
         public bool free;
-        public int dummy1, dummy2;	 // former link_t area
+        public int dummy1, dummy2;
 
         public int num_leafs;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Progs.MAX_ENT_LEAFS)]
-        public short[] leafnums; // [MAX_ENT_LEAFS];
+        [MarshalAs( UnmanagedType.ByValArray, SizeConst = Progs.MAX_ENT_LEAFS )]
+        public short[] leafnums;
 
         public entity_state_t baseline;
 
-        public float freetime;			// sv.time when the object was freed
-        public entvars_t v;					// C exported fields from progs
-        // other fields from progs come immediately after
+        public float freetime; // sv.time when the object was freed
+        public entvars_t v; // C exported fields from progs, other fields from progs come immediately after
 
-        public static int SizeInBytes = Marshal.SizeOf(typeof(dedict_t));
+        public static int SizeInBytes = Marshal.SizeOf( typeof( dedict_t ) );
     }
 
     internal enum etype_t
@@ -167,7 +161,7 @@ namespace SharpQuake
         public ushort op;
         public short a, b, c;
 
-        public static int SizeInBytes = Marshal.SizeOf(typeof(dstatement_t));
+        public static int SizeInBytes = Marshal.SizeOf( typeof( dstatement_t ) );
 
         public void SwapBytes()
         {
@@ -195,7 +189,6 @@ namespace SharpQuake
     [StructLayout( LayoutKind.Explicit, Size = ( 4 * 28 ) )]
     internal struct pad_int28
     {
-        //int pad[28];
     }
 
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
@@ -279,15 +272,12 @@ namespace SharpQuake
         public string_t noise2;
         public string_t noise3;
 
-        public static int SizeInBytes = Marshal.SizeOf(typeof(entvars_t));
+        public static int SizeInBytes = Marshal.SizeOf( typeof( entvars_t ) );
     }
 
-    /// <summary>
-    /// PR_functions
-    /// </summary>
-    static partial class Progs
+    internal static partial class Progs
     {
-        public const int DEF_SAVEGLOBAL = (1<<15);
+        public const int DEF_SAVEGLOBAL = ( 1 << 15 );
         public const int MAX_PARMS = 8;
         public const int MAX_ENT_LEAFS = 16;
 
@@ -295,13 +285,11 @@ namespace SharpQuake
         private const int PROGHEADER_CRC = 5927;
     }
 
-    // eval_t;
-
     internal static class OFS
     {
         public const int OFS_NULL = 0;
         public const int OFS_RETURN = 1;
-        public const int OFS_PARM0 = 4;		// leave 3 ofs for each parm to hold vectors
+        public const int OFS_PARM0 = 4; // leave 3 ofs for each parm to hold vectors
         public const int OFS_PARM1 = 7;
         public const int OFS_PARM2 = 10;
         public const int OFS_PARM3 = 13;
@@ -312,21 +300,18 @@ namespace SharpQuake
         public const int RESERVED_OFS = 28;
     }
 
-    /// <summary>
-    /// In-memory edict
-    /// </summary>
     internal class edict_t
     {
         public bool free;
         public link_t area; // linked to a division node or leaf
 
         public int num_leafs;
-        public short[] leafnums; // [MAX_ENT_LEAFS];
+        public short[] leafnums;
 
         public entity_state_t baseline;
 
-        public float freetime;			// sv.time when the object was freed
-        public entvars_t v;					// C exported fields from progs
+        public float freetime; // sv.time when the object was freed
+        public entvars_t v; // C exported fields from progs
         public float[] fields; // other fields from progs
 
         public void Clear()
@@ -512,27 +497,19 @@ namespace SharpQuake
             this.leafnums = new short[Progs.MAX_ENT_LEAFS];
             this.fields = new float[( Progs.EdictSize - entvars_t.SizeInBytes ) >> 2];
         }
-    } // edict_t;
-
-    // edict_t;
-
-    // Source: pr_comp.h
-    // this file is shared by quake and qcc
-
-    // etype_t;
-    // dstatement_t;
+    }
 
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
     internal class ddef_t
     {
-        public ushort type;		// if DEF_SAVEGLOBGAL bit is set
+        public ushort type;  // if DEF_SAVEGLOBGAL bit is set
 
         // the variable needs to be saved in savegames
         public ushort ofs;
 
         public int s_name;
 
-        public static int SizeInBytes = Marshal.SizeOf(typeof(ddef_t));
+        public static int SizeInBytes = Marshal.SizeOf( typeof( ddef_t ) );
 
         public void SwapBytes()
         {
@@ -540,26 +517,26 @@ namespace SharpQuake
             this.ofs = (ushort)Common.LittleShort( (short)this.ofs );
             this.s_name = Common.LittleLong( this.s_name );
         }
-    } // ddef_t;
+    }
 
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
     internal class dfunction_t
     {
-        public int first_statement;	// negative numbers are builtins
+        public int first_statement; // negative numbers are builtins
         public int parm_start;
-        public int locals;				// total ints of parms + locals
+        public int locals;    // total ints of parms + locals
 
-        public int profile;		// runtime
+        public int profile;  // runtime
 
         public int s_name;
-        public int s_file;			// source file defined in
+        public int s_file;   // source file defined in
 
         public int numparms;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Progs.MAX_PARMS)]
-        public byte[] parm_size; // [MAX_PARMS];
+        [MarshalAs( UnmanagedType.ByValArray, SizeConst = Progs.MAX_PARMS )]
+        public byte[] parm_size;
 
-        public static int SizeInBytes = Marshal.SizeOf(typeof(dfunction_t));
+        public static int SizeInBytes = Marshal.SizeOf( typeof( dfunction_t ) );
 
         public string FileName
         {
@@ -591,16 +568,16 @@ namespace SharpQuake
         {
             return String.Format( "{{{0}: {1}()}}", this.FileName, this.Name );
         }
-    } // dfunction_t;
+    }
 
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
     internal class dprograms_t
     {
         public int version;
-        public int crc;			// check of header file
+        public int crc;   // check of header file
 
         public int ofs_statements;
-        public int numstatements;	// statement 0 is an error
+        public int numstatements; // statement 0 is an error
 
         public int ofs_globaldefs;
         public int numglobaldefs;
@@ -609,17 +586,17 @@ namespace SharpQuake
         public int numfielddefs;
 
         public int ofs_functions;
-        public int numfunctions;	// function 0 is an empty
+        public int numfunctions; // function 0 is an empty
 
         public int ofs_strings;
-        public int numstrings;		// first string is a null string
+        public int numstrings;  // first string is a null string
 
         public int ofs_globals;
         public int numglobals;
 
         public int entityfields;
 
-        public static int SizeInBytes = Marshal.SizeOf(typeof(dprograms_t));
+        public static int SizeInBytes = Marshal.SizeOf( typeof( dprograms_t ) );
 
         public void SwapBytes()
         {
@@ -639,7 +616,7 @@ namespace SharpQuake
             this.numglobals = Common.LittleLong( this.numglobals );
             this.entityfields = Common.LittleLong( this.entityfields );
         }
-    } // dprograms_t;
+    }
 
     //=================================================================
     // QuakeC compiler generated data from progdefs.q1
@@ -648,7 +625,7 @@ namespace SharpQuake
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
     internal class globalvars_t
     {
-        private pad_int28 pad; //int pad[28];
+        private pad_int28 pad;
         public int self;
         public int other;
         public int world;
@@ -704,7 +681,7 @@ namespace SharpQuake
         public func_t SetNewParms;
         public func_t SetChangeParms;
 
-        public static int SizeInBytes = Marshal.SizeOf(typeof(globalvars_t));
+        public static int SizeInBytes = Marshal.SizeOf( typeof( globalvars_t ) );
 
         public void SetParams( float[] src )
         {
@@ -728,7 +705,5 @@ namespace SharpQuake
             this.parm15 = src[14];
             this.parm16 = src[15];
         }
-    } // globalvars_t;
-
-    // entvars_t;
+    }
 }

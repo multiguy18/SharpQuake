@@ -24,8 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-// cmd.h -- Command buffer and command execution
-
 namespace SharpQuake
 {
     internal delegate void xcommand_t(); // typedef void (*xcommand_t) (void);
@@ -39,10 +37,10 @@ namespace SharpQuake
 
     internal enum cmd_source_t
     {
-        src_client,     // came in over a net connection as a clc_stringcmd
+        src_client, // came in over a net connection as a clc_stringcmd
 
         // host_client will be valid during this state.
-        src_command		// from the command buffer
+        src_command // from the command buffer
     }
 
     internal static class Cmd
@@ -63,7 +61,6 @@ namespace SharpQuake
             }
         }
 
-        // char	*Cmd_Args (void);
         public static string Args
         {
             get
@@ -87,30 +84,24 @@ namespace SharpQuake
         private const int MAX_ALIAS_NAME = 32;
         private const int MAX_ARGS = 80;
 
-        private static cmd_source_t _Source; // extern	cmd_source_t	cmd_source;
+        private static cmd_source_t _Source;
         private static Dictionary<string, string> _Aliases;
         private static Dictionary<string, xcommand_t> _Functions;
         private static int _Argc;
-        private static string[] _Argv;// char	*cmd_argv[MAX_ARGS];
-        private static string _Args;// char* cmd_args = NULL;
-        private static bool _Wait; // qboolean cmd_wait;
+        private static string[] _Argv;
+        private static string _Args;
+        private static bool _Wait;
 
         public static void Init()
         {
-            //
             // register our commands
-            //
             Add( "stuffcmds", StuffCmds_f );
             Add( "exec", Exec_f );
             Add( "echo", Echo_f );
             Add( "alias", Alias_f );
             Add( "cmd", ForwardToServer );
-            Add( "wait", Cbuf.Cmd_Wait_f ); // todo: move to Cbuf class?
         }
 
-        // Cmd_AddCommand()
-        // called by the init functions of other parts of the program to
-        // register commands and functions to call for them.
         public static void Add( string name, xcommand_t function )
         {
             // ??? because hunk allocation would get stomped
@@ -134,9 +125,6 @@ namespace SharpQuake
             _Functions.Add( name, function );
         }
 
-        // Cmd_CompleteCommand()
-        // attempts to match a partial command for automatic command line completion
-        // returns NULL if nothing fits
         public static string[] Complete( string partial )
         {
             if( String.IsNullOrEmpty( partial ) )
@@ -151,9 +139,6 @@ namespace SharpQuake
             return ( result.Count > 0 ? result.ToArray() : null );
         }
 
-        // Cmd_Argv ()
-        // will return an empty string, not a NULL
-        // if arg > argc, so string operations are allways safe.
         public static string Argv( int arg )
         {
             if( arg < 0 || arg >= _Argc )
@@ -162,16 +147,11 @@ namespace SharpQuake
             return _Argv[arg];
         }
 
-        // Cmd_Exists
         public static bool Exists( string name )
         {
             return ( Find( name ) != null );
         }
 
-        // void Cmd_TokenizeString (char *text);
-        // Takes a null terminated string.  Does not need to be /n terminated.
-        // breaks the string up into arg tokens.
-        // Parses the given string into command line tokens.
         public static void TokenizeString( string text )
         {
             // clear the args from the last string
@@ -199,11 +179,6 @@ namespace SharpQuake
             _Argv = argv.ToArray();
         }
 
-        // void	Cmd_ExecuteString (char *text, cmd_source_t src);
-        // Parses a single line of text into arguments and tries to execute it.
-        // The text can come from the command buffer, a remote client, or stdin.
-        //
-        // A complete command line has been parsed, so try to execute it
         // FIXME: lookupnoadd the token to speed search?
         public static void ExecuteString( string text, cmd_source_t src )
         {
@@ -213,7 +188,7 @@ namespace SharpQuake
 
             // execute the command line
             if( _Argc <= 0 )
-                return;		// no tokens
+                return;  // no tokens
 
             // check functions
             xcommand_t handler = Find( _Argv[0] ); // must search with comparison like Q_strcasecmp()
@@ -238,12 +213,6 @@ namespace SharpQuake
             }
         }
 
-        // void	Cmd_ForwardToServer (void);
-        // adds the current command line as a clc_stringcmd to the client message.
-        // things like godmode, noclip, etc, are commands directed to the server,
-        // so when they are typed in at the console, they will need to be forwarded.
-        //
-        // Sends the entire command line over to the server
         public static void ForwardToServer()
         {
             if( Client.cls.state != cactive_t.ca_connected )
@@ -253,7 +222,7 @@ namespace SharpQuake
             }
 
             if( Client.cls.demoplayback )
-                return;		// not really connected
+                return; // not really connected
 
             MsgWriter writer = Client.cls.message;
             writer.WriteByte( Protocol.clc_stringcmd );
@@ -290,13 +259,6 @@ namespace SharpQuake
             return result;
         }
 
-        /// <summary>
-        /// Cmd_StuffCmds_f
-        /// Adds command line parameters as script statements
-        /// Commands lead with a +, and continue until a - or another +
-        /// quake +prog jctest.qp +cmd amlev1
-        /// quake -nosound +cmd amlev1
-        /// </summary>
         private static void StuffCmds_f()
         {
             if( _Argc != 1 )
@@ -345,7 +307,6 @@ namespace SharpQuake
             }
         }
 
-        // Cmd_Exec_f
         private static void Exec_f()
         {
             if( _Argc != 2 )
@@ -365,7 +326,6 @@ namespace SharpQuake
             Cbuf.InsertText( script );
         }
 
-        // Cmd_Echo_f
         // Just prints the rest of the line to the console
         private static void Echo_f()
         {
@@ -376,7 +336,6 @@ namespace SharpQuake
             Con.Print( "\n" );
         }
 
-        // Cmd_Alias_f
         // Creates a new command that executes a command string (possibly ; seperated)
         private static void Alias_f()
         {
@@ -416,31 +375,25 @@ namespace SharpQuake
         }
     }
 
-    // cmd_source_t;
-
-    //Any number of commands can be added in a frame, from several different sources.
-    //Most commands come from either keybindings or console line input, but remote
-    //servers can also send across commands and entire text files can be execed.
-
-    //The + command line options are also added to the command buffer.
-
-    //The game starts with a Cbuf_AddText ("exec quake.rc\n"); Cbuf_Execute ();
+    /* Any number of commands can be added in a frame, from several different sources.
+     * Most commands come from either keybindings or console line input, but remote
+     * servers can also send across commands and entire text files can be execed.
+     *
+     * The + command line options are also added to the command buffer.
+     *
+     * The game starts with a Cbuf_AddText ("exec quake.rc\n"); Cbuf_Execute ();
+     */
 
     internal static class Cbuf
     {
         private static StringBuilder _Buf;
         private static bool _Wait;
 
-        // Cbuf_Init()
-        // allocates an initial text buffer that will grow as needed
         public static void Init()
         {
-            // nothing to do
+            Cmd.Add( "wait", Cmd_Wait_f );
         }
 
-        // Cbuf_AddText()
-        // as new commands are generated from the console or keybindings,
-        // the text is added to the end of the command buffer.
         public static void AddText( string text )
         {
             if( String.IsNullOrEmpty( text ) )
@@ -457,23 +410,12 @@ namespace SharpQuake
             }
         }
 
-        // Cbuf_InsertText()
-        // when a command wants to issue other commands immediately, the text is
-        // inserted at the beginning of the buffer, before any remaining unexecuted
-        // commands.
-        // Adds command text immediately after the current command
-        // ???Adds a \n to the text
         // FIXME: actually change the command buffer to do less copying
         public static void InsertText( string text )
         {
             _Buf.Insert( 0, text );
         }
 
-        // Cbuf_Execute()
-        // Pulls off \n terminated lines of text from the command buffer and sends
-        // them through Cmd_ExecuteString.  Stops when the buffer is empty.
-        // Normally called once per frame, but may be explicitly invoked.
-        // Do not call inside a command function!
         public static void Execute()
         {
             while( _Buf.Length > 0 )
@@ -496,9 +438,10 @@ namespace SharpQuake
 
                 string line = text.Substring( 0, i ).TrimEnd( '\n', ';' );
 
-                // delete the text from the command buffer and move remaining commands down
-                // this is necessary because commands (exec, alias) can insert data at the
-                // beginning of the text buffer
+                /* delete the text from the command buffer and move remaining commands down
+                 * this is necessary because commands (exec, alias) can insert data at the
+                 * beginning of the text buffer
+                 */
 
                 if( i == _Buf.Length )
                 {
@@ -525,10 +468,7 @@ namespace SharpQuake
             }
         }
 
-        // Cmd_Wait_f
-        // Causes execution of the remainder of the command buffer to be delayed until
-        // next frame.  This allows commands like:
-        // bind g "impulse 5 ; +attack ; wait ; -attack ; impulse 2"
+        // Delays execution of the command buffer until the next frame
         public static void Cmd_Wait_f()
         {
             _Wait = true;

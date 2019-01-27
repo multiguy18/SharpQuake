@@ -68,12 +68,10 @@ namespace SharpQuake
 
         public void Listen( bool state )
         {
-            // nothing to do
         }
 
         public void SearchForHosts( bool xmit )
         {
-            // nothing to do
         }
 
         public qsocket_t Connect( string host )
@@ -160,17 +158,12 @@ namespace SharpQuake
 
         public void Close( qsocket_t sock )
         {
-            // nothing to do
         }
 
         public void Shutdown()
         {
-            // nothing to do
         }
 
-        /// <summary>
-        /// VCR_ReadNext
-        /// </summary>
         private void ReadNext()
         {
             try
@@ -202,6 +195,6 @@ namespace SharpQuake
         public int op;
         public long session;
 
-        public static int SizeInBytes = Marshal.SizeOf(typeof(VcrRecord));
+        public static int SizeInBytes = Marshal.SizeOf( typeof( VcrRecord ) );
     }
 }

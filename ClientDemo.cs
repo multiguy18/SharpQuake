@@ -28,11 +28,6 @@ namespace SharpQuake
 {
     partial class Client
     {
-        /// <summary>
-        /// CL_StopPlayback
-        ///
-        /// Called when a demo file runs out, or the user starts a game
-        /// </summary>
         public static void StopPlayback()
         {
             if( !cls.demoplayback )
@@ -50,10 +45,6 @@ namespace SharpQuake
                 FinishTimeDemo();
         }
 
-        /// <summary>
-        /// CL_Record_f
-        /// record <demoname> <map> [cd track]
-        /// </summary>
         private static void Record_f()
         {
             if( Cmd.Source != cmd_source_t.src_command )
@@ -90,15 +81,11 @@ namespace SharpQuake
 
             string name = Path.Combine( Common.GameDir, Cmd.Argv( 1 ) );
 
-            //
             // start the map up
-            //
             if( c > 2 )
                 Cmd.ExecuteString( String.Format( "map {0}", Cmd.Argv( 2 ) ), cmd_source_t.src_command );
 
-            //
             // open the demo file
-            //
             name = Path.ChangeExtension( name, ".dem" );
 
             Con.Print( "recording to {0}.\n", name );
@@ -117,10 +104,6 @@ namespace SharpQuake
             cls.demorecording = true;
         }
 
-        /// <summary>
-        /// CL_Stop_f
-        /// stop recording a demo
-        /// </summary>
         private static void Stop_f()
         {
             if( Cmd.Source != cmd_source_t.src_command )
@@ -147,9 +130,6 @@ namespace SharpQuake
             Con.Print( "Completed demo\n" );
         }
 
-        // CL_PlayDemo_f
-        //
-        // play [demoname]
         private static void PlayDemo_f()
         {
             if( Cmd.Source != cmd_source_t.src_command )
@@ -161,14 +141,10 @@ namespace SharpQuake
                 return;
             }
 
-            //
             // disconnect from server
-            //
             Client.Disconnect();
 
-            //
             // open the demo file
-            //
             string name = Path.ChangeExtension( Cmd.Argv( 1 ), ".dem" );
 
             Con.Print( "Playing demo from {0}.\n", name );
@@ -182,7 +158,7 @@ namespace SharpQuake
             if( cls.demofile == null )
             {
                 Con.Print( "ERROR: couldn't open.\n" );
-                cls.demonum = -1;		// stop demo loop
+                cls.demonum = -1; // stop demo loop
                 return;
             }
 
@@ -207,14 +183,8 @@ namespace SharpQuake
 
             if( neg )
                 cls.forcetrack = -cls.forcetrack;
-            // ZOID, fscanf is evil
-            //	fscanf (cls.demofile, "%i\n", &cls.forcetrack);
         }
 
-        /// <summary>
-        /// CL_TimeDemo_f
-        /// timedemo [demoname]
-        /// </summary>
         private static void TimeDemo_f()
         {
             if( Cmd.Source != cmd_source_t.src_command )
@@ -228,38 +198,36 @@ namespace SharpQuake
 
             PlayDemo_f();
 
-            // cls.td_starttime will be grabbed at the second frame of the demo, so
-            // all the loading time doesn't get counted
+            /* cls.td_starttime will be grabbed at the second frame of the demo, so
+             * all the loading time doesn't get counted
+             */
             _Static.timedemo = true;
             _Static.td_startframe = Host.FrameCount;
-            _Static.td_lastframe = -1;		// get a new message this frame
+            _Static.td_lastframe = -1; // get a new message this frame
         }
 
-        /// <summary>
-        /// CL_GetMessage
-        /// Handles recording and playback of demos, on top of NET_ code
-        /// </summary>
-        /// <returns></returns>
         private static int GetMessage()
         {
             if( cls.demoplayback )
             {
                 // decide if it is time to grab the next message
-                if( cls.signon == SIGNONS )	// allways grab until fully connected
+                if( cls.signon == SIGNONS ) // allways grab until fully connected
                 {
                     if( cls.timedemo )
                     {
                         if( Host.FrameCount == cls.td_lastframe )
-                            return 0;		// allready read this frame's message
+                            return 0; // allready read this frame's message
                         cls.td_lastframe = Host.FrameCount;
-                        // if this is the second frame, grab the real td_starttime
-                        // so the bogus time on the first frame doesn't count
+
+                        /* if this is the second frame, grab the real td_starttime
+                         * so the bogus time on the first frame doesn't count
+                         */
                         if( Host.FrameCount == cls.td_startframe + 1 )
                             cls.td_starttime = (float)Host.RealTime;
                     }
                     else if( cl.time <= cl.mtime[0] )
                     {
-                        return 0;	// don't need another message yet
+                        return 0; // don't need another message yet
                     }
                 }
 
@@ -304,9 +272,6 @@ namespace SharpQuake
             return r;
         }
 
-        /// <summary>
-        /// CL_FinishTimeDemo
-        /// </summary>
         private static void FinishTimeDemo()
         {
             cls.timedemo = false;
@@ -319,10 +284,6 @@ namespace SharpQuake
             Con.Print( "{0} frames {1:F5} seconds {2:F2} fps\n", frames, time, frames / time );
         }
 
-        /// <summary>
-        /// CL_WriteDemoMessage
-        /// Dumps the current net message, prefixed by the length and view angles
-        /// </summary>
         private static void WriteDemoMessage()
         {
             int len = Common.LittleLong( Net.Message.Length );

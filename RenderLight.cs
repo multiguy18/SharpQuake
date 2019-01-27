@@ -24,24 +24,19 @@ using System;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-// gr_rlights.c
-
 namespace SharpQuake
 {
-    partial class Render
+    internal partial class Render
     {
-        private static int _DlightFrameCount; // r_dlightframecount
-        private static mplane_t _LightPlane; // lightplane
+        private static int _DlightFrameCount;
+        private static mplane_t _LightPlane;
 
-        /// <summary>
-        /// R_PushDlights
-        /// </summary>
         public static void PushDlights()
         {
             if( _glFlashBlend.Value != 0 )
                 return;
 
-            _DlightFrameCount = _FrameCount + 1;	// because the count hasn't advanced yet for this frame
+            _DlightFrameCount = _FrameCount + 1; // because the count hasn't advanced yet for this frame
 
             for( int i = 0; i < Client.MAX_DLIGHTS; i++ )
             {
@@ -52,9 +47,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_MarkLights
-        /// </summary>
         private static void MarkLights( dlight_t light, int bit, mnodebase_t node )
         {
             if( node.contents < 0 )
@@ -91,18 +83,12 @@ namespace SharpQuake
             MarkLights( light, bit, n.children[1] );
         }
 
-        /// <summary>
-        /// R_RenderDlights
-        /// </summary>
         private static void RenderDlights()
         {
-            //int i;
-            //dlight_t* l;
-
             if( _glFlashBlend.Value == 0 )
                 return;
 
-            _DlightFrameCount = _FrameCount + 1;	// because the count hasn't advanced yet for this frame
+            _DlightFrameCount = _FrameCount + 1; // because the count hasn't advanced yet for this frame
 
             GL.DepthMask( false );
             GL.Disable( EnableCap.Texture2D );
@@ -126,12 +112,8 @@ namespace SharpQuake
             GL.DepthMask( true );
         }
 
-        /// <summary>
-        /// R_AnimateLight
-        /// </summary>
         private static void AnimateLight()
         {
-            //
             // light animations
             // 'm' is normal light, 'a' is no light, 'z' is double bright
             int i = (int)( Client.cl.time * 10 );
@@ -150,9 +132,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_LightPoint
-        /// </summary>
         private static int LightPoint( ref Vector3 p )
         {
             if( Client.cl.worldmodel.lightdata == null )
@@ -171,7 +150,7 @@ namespace SharpQuake
         private static int RecursiveLightPoint( mnodebase_t node, ref Vector3 start, ref Vector3 end )
         {
             if( node.contents < 0 )
-                return -1;		// didn't hit anything
+                return -1;  // didn't hit anything
 
             mnode_t n = (mnode_t)node;
 
@@ -192,10 +171,10 @@ namespace SharpQuake
             // go down front side
             int r = RecursiveLightPoint( n.children[side], ref start, ref mid );
             if( r >= 0 )
-                return r;		// hit something
+                return r;  // hit something
 
             if( ( back < 0 ? 1 : 0 ) == side )
-                return -1;		// didn't hit anuthing
+                return -1;  // didn't hit anuthing
 
             // check for impact on this node
             _LightSpot = mid;
@@ -206,7 +185,7 @@ namespace SharpQuake
             for( int i = 0; i < n.numsurfaces; i++, offset++ )
             {
                 if( ( surf[offset].flags & Surf.SURF_DRAWTILED ) != 0 )
-                    continue;	// no lightmaps
+                    continue; // no lightmaps
 
                 mtexinfo_t tex = surf[offset].texinfo;
 
@@ -253,15 +232,13 @@ namespace SharpQuake
             return RecursiveLightPoint( n.children[side == 0 ? 1 : 0], ref mid, ref end );
         }
 
-        /// <summary>
-        /// R_RenderDlight
-        /// </summary>
         private static void RenderDlight( dlight_t light )
         {
             float rad = light.radius * 0.35f;
             Vector3 v = light.origin - Render.Origin;
             if( v.Length < rad )
-            {	// view is inside the dlight
+            {
+                // view is inside the dlight
                 AddLightBlend( 1, 0.5f, 0, light.radius * 0.0003f );
                 return;
             }
@@ -288,7 +265,7 @@ namespace SharpQuake
 
             a2 = a2 / a;
 
-            View.Blend.R = View.Blend.R * ( 1 - a2 ) + r * a2; // error? - v_blend[0] = v_blend[1] * (1 - a2) + r * a2;
+            View.Blend.R = View.Blend.R * ( 1 - a2 ) + r * a2;
             View.Blend.G = View.Blend.G * ( 1 - a2 ) + g * a2;
             View.Blend.B = View.Blend.B * ( 1 - a2 ) + b * a2;
         }

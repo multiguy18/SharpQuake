@@ -20,12 +20,10 @@
 /// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /// </copyright>
 
-// crc.h
-// crc.c
-
-// this is a 16 bit, non-reflected CRC using the polynomial 0x1021
-// and the initial and final xor values shown below...  in other words, the
-// CCITT standard CRC used by XMODEM
+/* this is a 16 bit, non-reflected CRC using the polynomial 0x1021
+ * and the initial and final xor values shown below...  in other words, the
+ * CCITT standard CRC used by XMODEM
+ */
 
 namespace SharpQuake
 {
@@ -70,21 +68,17 @@ namespace SharpQuake
             0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0
         };
 
-        // CRC_Init(unsigned short *crcvalue);
         public static void Init( out ushort crcvalue )
         {
             crcvalue = CRC_INIT_VALUE;
         }
 
-        // CRC_ProcessByte(unsigned short *crcvalue, byte data);
         public static void ProcessByte( ref ushort crcvalue, byte data )
         {
             int result = ( crcvalue << 8 ) ^ _CrcTable[( crcvalue >> 8 ) ^ data];
             crcvalue = (ushort)result;
-            //*crcvalue = (*crcvalue << 8) ^ crctable[(*crcvalue >> 8) ^ data];
         }
 
-        // unsigned short CRC_Value(unsigned short crcvalue);
         public static ushort Value( ushort crcvalue )
         {
             return (ushort)( crcvalue ^ CRC_XOR_VALUE );

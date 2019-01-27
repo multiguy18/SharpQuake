@@ -23,19 +23,10 @@
 using System;
 using OpenTK;
 
-// mathlib.h
-// mathlib.c
-
 namespace SharpQuake
 {
-    /// <summary>
-    /// Quake math functions
-    /// </summary>
     internal static class Mathlib
     {
-        /// <summary>
-        /// AngleVectors
-        /// </summary>
         public static void AngleVectors( ref Vector3 angles, out Vector3 forward, out Vector3 right, out Vector3 up )
         {
             double angle, sr, sp, sy, cr, cp, cy;
@@ -97,9 +88,6 @@ namespace SharpQuake
             return length;
         }
 
-        /// <summary>
-        /// c = a + b * scale;
-        /// </summary>
         public static void VectorMA( ref v3f a, float scale, ref v3f b, out v3f c )
         {
             c.x = a.x + b.x * scale;
@@ -175,9 +163,6 @@ namespace SharpQuake
             return ( index == 0 ? a.X : ( index == 1 ? a.Y : a.Z ) );
         }
 
-        /// <summary>
-        /// anglemod()
-        /// </summary>
         public static float AngleMod( double a )
         {
             return (float)( ( 360.0 / 65536 ) * ( (int)( a * ( 65536 / 360.0 ) ) & 65535 ) );
@@ -284,8 +269,6 @@ namespace SharpQuake
             dest.Z = src.z;
         }
 
-        //    return p - d * n;
-        //}
         public static void Copy( ref Vector3 src, out v3f dest )
         {
             dest.x = src.X;
@@ -293,7 +276,7 @@ namespace SharpQuake
             dest.z = src.Z;
         }
 
-        //Returns 1, 2, or 1 + 2
+        // Returns 1, 2, or 1 + 2
         private static int _BoxOnPlaneSide( ref Vector3 emins, ref Vector3 emaxs, mplane_t p )
         {
             // general case
@@ -342,7 +325,7 @@ namespace SharpQuake
                     break;
 
                 default:
-                    dist1 = dist2 = 0;		// shut up compiler
+                    dist1 = dist2 = 0;  // shut up compiler
                     Sys.Error( "BoxOnPlaneSide:  Bad signbits" );
                     break;
             }
@@ -360,40 +343,5 @@ namespace SharpQuake
 
             return sides;
         }
-
-        //static Vector3 PerpendicularVector(ref Vector3 src)
-        //{
-        //    float minelem = 1.0f;
-
-        //    // find the smallest magnitude axially aligned vector
-        //    Vector3 tempvec = Vector3.Zero;
-        //    if (Math.Abs(src.X) < minelem)
-        //    {
-        //        minelem = Math.Abs(src.X);
-        //        tempvec.X = 1;
-        //    }
-        //    if (Math.Abs(src.Y) < minelem)
-        //    {
-        //        minelem = Math.Abs(src.Y);
-        //        tempvec = new Vector3(0, 1, 0);
-        //    }
-        //    else if (Math.Abs(src.Z) < minelem)
-        //    {
-        //        tempvec = new Vector3(0, 0, 1);
-        //    }
-
-        //    // project the point onto the plane defined by src
-        //    Vector3 dst = ProjectPointOnPlane(ref tempvec, ref src);
-
-        //    Normalize(ref dst);
-
-        //    return dst;
-        //}
-
-        //static Vector3 ProjectPointOnPlane(ref Vector3 p, ref Vector3 normal)
-        //{
-        //    float inv_denom = 1.0f / normal.LengthSquared;
-        //    float d = Vector3.Dot(normal, p) * inv_denom;
-        //    Vector3 n = normal * inv_denom;
     }
 }

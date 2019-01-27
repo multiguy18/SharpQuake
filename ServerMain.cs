@@ -25,12 +25,11 @@ using OpenTK;
 
 namespace SharpQuake
 {
-    partial class Server
+    internal partial class Server
     {
-        private static int _FatBytes; // fatbytes
-        private static byte[] _FatPvs = new byte[BspFile.MAX_MAP_LEAFS / 8]; // fatpvs
+        private static int _FatBytes;
+        private static byte[] _FatPvs = new byte[BspFile.MAX_MAP_LEAFS / 8];
 
-        // SV_Init
         public static void Init()
         {
             for( int i = 0; i < _BoxClipNodes.Length; i++ )
@@ -65,7 +64,6 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// SV_StartParticle
         /// Make sure the event gets sent to all clients
         /// </summary>
         public static void StartParticle( ref Vector3 org, ref Vector3 dir, int color, int count )
@@ -88,17 +86,22 @@ namespace SharpQuake
             sv.datagram.WriteByte( color );
         }
 
-        /// <summary>
-        /// SV_StartSound
-        /// Each entity can have eight independant sound sources, like voice,
-        /// weapon, feet, etc.
-        ///
-        /// Channel 0 is an auto-allocate channel, the others override anything
-        /// allready running on that entity/channel pair.
-        ///
-        /// An attenuation of 0 will play full volume everywhere in the level.
-        /// Larger attenuations will drop off.  (max 4 attenuation)
-        /// </summary>
+        /**
+         * <summary>
+         * <para>
+         * Each entity can have eight independant sound sources, like voice,
+         * weapon, feet, etc.
+         * </para>
+         * <para>
+         * Channel 0 is an auto-allocate channel, the others override anything
+         * allready running on that entity/channel pair.
+         * </para>
+         *
+         * An attenuation of 0 will play full volume everywhere in the level.
+         * Larger attenuations will drop off.  (max 4 attenuation)
+         * </summary>
+         */
+
         public static void StartSound( edict_t entity, int channel, string sample, int volume, float attenuation )
         {
             if( volume < 0 || volume > 255 )
@@ -152,11 +155,15 @@ namespace SharpQuake
             sv.datagram.WriteCoord( v.z );
         }
 
-        /// <summary>
-        /// SV_DropClient
-        /// Called when the player is getting totally kicked off the host
-        /// if (crash = true), don't bother sending signofs
-        /// </summary>
+        /**
+         * <summary>
+         * Called when the player is getting totally kicked off the host
+         * <para>
+         * if (crash = true), don't bother sending signofs
+         * </para>
+         * </summary>
+         */
+
         public static void DropClient( bool crash )
         {
             client_t client = Host.HostClient;
@@ -213,9 +220,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// SV_SendClientMessages
-        /// </summary>
         public static void SendClientMessages()
         {
             // update frags, names, etc
@@ -236,22 +240,23 @@ namespace SharpQuake
                 }
                 else
                 {
-                    // the player isn't totally in the game yet
-                    // send small keepalive messages if too much time has passed
-                    // send a full message when the next signon stage has been requested
-                    // some other message data (name changes, etc) may accumulate
-                    // between signon stages
+                    /* the player isn't totally in the game yet
+                     * send small keepalive messages if too much time has passed
+                     * send a full message when the next signon stage has been requested
+                     * some other message data (name changes, etc) may accumulate
+                     * between signon stages
+                     */
                     if( !Host.HostClient.sendsignon )
                     {
                         if( Host.RealTime - Host.HostClient.last_message > 5 )
                             SendNop( Host.HostClient );
-                        continue;	// don't send out non-signon messages
+                        continue; // don't send out non-signon messages
                     }
                 }
 
-                // check for an overflowed message.  Should only happen
-                // on a very fucked up connection that backs up a lot, then
-                // changes level
+                /* check for an overflowed message.
+                 * Should only happen on a very fucked up connection that backs up a lot, then changes level
+                 */
                 if( Host.HostClient.message.IsOveflowed )
                 {
                     DropClient( true );
@@ -265,11 +270,11 @@ namespace SharpQuake
                         continue;
 
                     if( Host.HostClient.dropasap )
-                        DropClient( false );	// went to another level
+                        DropClient( false ); // went to another level
                     else
                     {
                         if( Net.SendMessage( Host.HostClient.netconnection, Host.HostClient.message ) == -1 )
-                            DropClient( true );	// if the message couldn't send, kick off
+                            DropClient( true ); // if the message couldn't send, kick off
                         Host.HostClient.message.Clear();
                         Host.HostClient.last_message = Host.RealTime;
                         Host.HostClient.sendsignon = false;
@@ -281,17 +286,11 @@ namespace SharpQuake
             CleanupEnts();
         }
 
-        /// <summary>
-        /// SV_ClearDatagram
-        /// </summary>
         public static void ClearDatagram()
         {
             sv.datagram.Clear();
         }
 
-        /// <summary>
-        /// SV_ModelIndex
-        /// </summary>
         public static int ModelIndex( string name )
         {
             if( String.IsNullOrEmpty( name ) )
@@ -307,11 +306,7 @@ namespace SharpQuake
             return i;
         }
 
-        /// <summary>
-        /// SV_ClientPrintf
-        /// Sends text across to be displayed
-        /// FIXME: make this just a stuffed echo?
-        /// </summary>
+        // FIXME: make this just a stuffed echo?
         public static void ClientPrint( string fmt, params object[] args )
         {
             string tmp = String.Format( fmt, args );
@@ -319,9 +314,6 @@ namespace SharpQuake
             Host.HostClient.message.WriteString( tmp );
         }
 
-        /// <summary>
-        /// SV_BroadcastPrint
-        /// </summary>
         public static void BroadcastPrint( string fmt, params object[] args )
         {
             string tmp = args.Length > 0 ? String.Format( fmt, args ) : fmt;
@@ -334,14 +326,9 @@ namespace SharpQuake
                 }
         }
 
-        /// <summary>
-        /// SV_WriteClientdataToMessage
-        /// </summary>
         public static void WriteClientDataToMessage( edict_t ent, MsgWriter msg )
         {
-            //
             // send a damage message
-            //
             if( ent.v.dmg_take != 0 || ent.v.dmg_save != 0 )
             {
                 edict_t other = ProgToEdict( ent.v.dmg_inflictor );
@@ -356,10 +343,7 @@ namespace SharpQuake
                 ent.v.dmg_save = 0;
             }
 
-            //
-            // send the current viewpos offset from the view entity
-            //
-            SetIdealPitch();		// how much to look up / down ideally
+            SetIdealPitch();  // how much to look up / down ideally
 
             // a fixangle might get lost in a dropped packet.  Oh well.
             if( ent.v.fixangle != 0 )
@@ -379,8 +363,7 @@ namespace SharpQuake
             if( ent.v.idealpitch != 0 )
                 bits |= Protocol.SU_IDEALPITCH;
 
-            // stuff the sigil bits into the high bits of items for sbar, or else
-            // mix in items2
+            // stuff the sigil bits into the high bits of items for sbar, or else mix in items2
             float val = Progs.GetEdictFieldFloat( ent, "items2", 0 );
             int items;
             if( val != 0 )
@@ -416,7 +399,6 @@ namespace SharpQuake
             if( ent.v.armorvalue != 0 )
                 bits |= Protocol.SU_ARMOR;
 
-            //	if (ent.v.weapon)
             bits |= Protocol.SU_WEAPON;
 
             // send the data
@@ -479,27 +461,23 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// SV_CheckForNewClients
-        /// </summary>
         public static void CheckForNewClients()
         {
-            //
             // check for new connections
-            //
             while( true )
             {
                 qsocket_t ret = Net.CheckNewConnections();
                 if( ret == null )
                     break;
 
-                //
                 // init a new client structure
-                //
                 int i;
                 for( i = 0; i < svs.maxclients; i++ )
+                {
                     if( !svs.clients[i].active )
                         break;
+                }
+
                 if( i == svs.maxclients )
                     Sys.Error( "Host_CheckForNewClients: no free clients" );
 
@@ -511,7 +489,6 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// SV_SaveSpawnparms
         /// Grabs the current state of each client for saving across the
         /// transition to another level
         /// </summary>
@@ -532,9 +509,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// SV_SpawnServer
-        /// </summary>
         public static void SpawnServer( string server )
         {
             // let's not have any servers with no name
@@ -544,19 +518,15 @@ namespace SharpQuake
             Scr.CenterTimeOff = 0;
 
             Con.DPrint( "SpawnServer: {0}\n", server );
-            svs.changelevel_issued = false;		// now safe to issue another
+            svs.changelevel_issued = false;  // now safe to issue another
 
-            //
             // tell all connected clients that we are going to a new level
-            //
             if( sv.active )
             {
                 SendReconnect();
             }
 
-            //
             // make cvars consistant
-            //
             if( Host.IsCoop )
                 Cvar.Set( "deathmatch", 0 );
 
@@ -568,9 +538,7 @@ namespace SharpQuake
 
             Cvar.Set( "skill", (float)Host.CurrentSkill );
 
-            //
             // set up the new server
-            //
             Host.ClearMemory();
 
             sv.Clear();
@@ -611,9 +579,7 @@ namespace SharpQuake
             }
             sv.models[1] = sv.worldmodel;
 
-            //
             // clear world interaction links
-            //
             ClearWorld();
 
             sv.sound_precache[0] = String.Empty;
@@ -626,9 +592,7 @@ namespace SharpQuake
                 sv.models[i + 1] = Mod.ForName( _LocalModels[i], false );
             }
 
-            //
             // load the rest of the entities
-            //
             ent = EdictNum( 0 );
             ent.Clear();
             ent.v.model = Progs.StringOffset( sv.worldmodel.name );
@@ -636,7 +600,7 @@ namespace SharpQuake
             {
                 ent.v.model = Progs.NewString( sv.worldmodel.name );
             }
-            ent.v.modelindex = 1;		// world model
+            ent.v.modelindex = 1; // world model
             ent.v.solid = Solids.SOLID_BSP;
             ent.v.movetype = Movetypes.MOVETYPE_PUSH;
 
@@ -678,9 +642,6 @@ namespace SharpQuake
             Con.DPrint( "Server spawned.\n" );
         }
 
-        /// <summary>
-        /// SV_CleanupEnts
-        /// </summary>
         private static void CleanupEnts()
         {
             for( int i = 1; i < sv.num_edicts; i++ )
@@ -691,9 +652,7 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// SV_SendNop
-        /// Send a nop message without trashing or sending the accumulated client
-        /// message buffer
+        /// Send a nop message without trashing or sending the accumulated client message buffer
         /// </summary>
         private static void SendNop( client_t client )
         {
@@ -701,13 +660,10 @@ namespace SharpQuake
             msg.WriteChar( Protocol.svc_nop );
 
             if( Net.SendUnreliableMessage( client.netconnection, msg ) == -1 )
-                DropClient( true );	// if the message couldn't send, kick off
+                DropClient( true ); // if the message couldn't send, kick off
             client.last_message = Host.RealTime;
         }
 
-        /// <summary>
-        /// SV_SendClientDatagram
-        /// </summary>
         private static bool SendClientDatagram( client_t client )
         {
             MsgWriter msg = new MsgWriter( QDef.MAX_DATAGRAM ); // Uze todo: make static?
@@ -727,16 +683,13 @@ namespace SharpQuake
             // send the datagram
             if( Net.SendUnreliableMessage( client.netconnection, msg ) == -1 )
             {
-                DropClient( true );// if the message couldn't send, kick off
+                DropClient( true ); // if the message couldn't send, kick off
                 return false;
             }
 
             return true;
         }
 
-        /// <summary>
-        /// SV_WriteEntitiesToClient
-        /// </summary>
         private static void WriteEntitiesToClient( edict_t clent, MsgWriter msg )
         {
             // find the client's PVS
@@ -748,7 +701,7 @@ namespace SharpQuake
             {
                 edict_t ent = sv.edicts[e];
                 // ignore if not touching a PV leaf
-                if( ent != clent )	// clent is ALLWAYS sent
+                if( ent != clent ) // clent is ALLWAYS sent
                 {
                     // ignore ents without visible models
                     string mname = Progs.GetString( ent.v.model );
@@ -761,7 +714,7 @@ namespace SharpQuake
                             break;
 
                     if( i == ent.num_leafs )
-                        continue;		// not visible
+                        continue; // not visible
                 }
 
                 if( msg.Capacity - msg.Length < 16 )
@@ -791,7 +744,7 @@ namespace SharpQuake
                     bits |= Protocol.U_ANGLE3;
 
                 if( ent.v.movetype == Movetypes.MOVETYPE_STEP )
-                    bits |= Protocol.U_NOLERP;	// don't mess up the step animation
+                    bits |= Protocol.U_NOLERP; // don't mess up the step animation
 
                 if( ent.baseline.colormap != ent.v.colormap )
                     bits |= Protocol.U_COLORMAP;
@@ -814,9 +767,7 @@ namespace SharpQuake
                 if( bits >= 256 )
                     bits |= Protocol.U_MOREBITS;
 
-                //
                 // write the message
-                //
                 msg.WriteByte( bits | Protocol.U_SIGNAL );
 
                 if( ( bits & Protocol.U_MOREBITS ) != 0 )
@@ -852,9 +803,7 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// SV_FatPVS
-        /// Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
-        /// given point.
+        /// Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the given point.
         /// </summary>
         private static byte[] FatPVS( ref Vector3 org )
         {
@@ -864,13 +813,12 @@ namespace SharpQuake
             return _FatPvs;
         }
 
-        /// <summary>
-        /// SV_AddToFatPVS
-        /// The PVS must include a small area around the client to allow head bobbing
-        /// or other small motion on the client side.  Otherwise, a bob might cause an
-        /// entity that should be visible to not show up, especially when the bob
-        /// crosses a waterline.
-        /// </summary>
+        /* The PVS must include a small area around the client to allow head bobbing
+         * or other small motion on the client side.  Otherwise, a bob might cause an
+         * entity that should be visible to not show up, especially when the bob
+         * crosses a waterline.
+         */
+
         private static void AddToFatPVS( ref Vector3 org, mnodebase_t node )
         {
             while( true )
@@ -895,16 +843,14 @@ namespace SharpQuake
                 else if( d < -8 )
                     node = n.children[1];
                 else
-                {	// go down both
+                {
+                    // go down both
                     AddToFatPVS( ref org, n.children[0] );
                     node = n.children[1];
                 }
             }
         }
 
-        /// <summary>
-        /// SV_UpdateToReliableMessages
-        /// </summary>
         private static void UpdateToReliableMessages()
         {
             // check for changes to be sent over the reliable streams
@@ -939,11 +885,10 @@ namespace SharpQuake
             sv.reliable_datagram.Clear();
         }
 
-        /// <summary>
-        /// SV_ConnectClient
-        /// Initializes a client_t for a new net connection.  This will only be called
-        /// once for a player each game, not once for each level change.
-        /// </summary>
+        /* Initializes a client_t for a new net connection.  This will only be called
+         * once for a player each game, not once for each level change.
+         */
+
         private static void ConnectClient( int clientnum )
         {
             client_t client = svs.clients[clientnum];
@@ -1009,11 +954,10 @@ namespace SharpQuake
             client.spawn_parms[15] = Progs.GlobalStruct.parm16;
         }
 
-        /// <summary>
-        /// SV_SendServerinfo
-        /// Sends the first message from the server to a connected client.
-        /// This will be sent on the initial connection and upon each server load.
-        /// </summary>
+        /* Sends the first message from the server to a connected client.
+         * This will be sent on the initial connection and upon each server load.
+         */
+
         private static void SendServerInfo( client_t client )
         {
             MsgWriter writer = client.message;
@@ -1065,13 +1009,10 @@ namespace SharpQuake
             writer.WriteByte( 1 );
 
             client.sendsignon = true;
-            client.spawned = false;		// need prespawn, spawn, etc
+            client.spawned = false;  // need prespawn, spawn, etc
         }
 
-        /// <summary>
-        /// SV_SendReconnect
-        /// Tell all the clients that the server is changing levels
-        /// </summary>
+        // Tell all the clients that the server is changing levels
         private static void SendReconnect()
         {
             MsgWriter msg = new MsgWriter( 128 );
@@ -1084,9 +1025,6 @@ namespace SharpQuake
                 Cmd.ExecuteString( "reconnect\n", cmd_source_t.src_command );
         }
 
-        /// <summary>
-        /// SV_CreateBaseline
-        /// </summary>
         private static void CreateBaseline()
         {
             for( int entnum = 0; entnum < sv.num_edicts; entnum++ )
@@ -1098,9 +1036,7 @@ namespace SharpQuake
                 if( entnum > svs.maxclients && svent.v.modelindex == 0 )
                     continue;
 
-                //
                 // create entity baseline
-                //
                 svent.baseline.origin = svent.v.origin;
                 svent.baseline.angles = svent.v.angles;
                 svent.baseline.frame = (int)svent.v.frame;
@@ -1116,9 +1052,7 @@ namespace SharpQuake
                     svent.baseline.modelindex = ModelIndex( Progs.GetString( svent.v.model ) );
                 }
 
-                //
                 // add to the message
-                //
                 sv.signon.WriteByte( Protocol.svc_spawnbaseline );
                 sv.signon.WriteShort( entnum );
 

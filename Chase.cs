@@ -23,18 +23,10 @@
 using System;
 using OpenTK;
 
-// chase.c -- chase camera code
-
 namespace SharpQuake
 {
-    /// <summary>
-    /// Chase_functions
-    /// </summary>
     internal static class Chase
     {
-        /// <summary>
-        /// chase_active.value != 0
-        /// </summary>
         public static bool IsActive
         {
             get
@@ -43,13 +35,12 @@ namespace SharpQuake
             }
         }
 
-        private static Cvar _Back;// = { "chase_back", "100" };
-        private static Cvar _Up;// = { "chase_up", "16" };
-        private static Cvar _Right;// = { "chase_right", "0" };
-        private static Cvar _Active;// = { "chase_active", "0" };
+        private static Cvar _Back;
+        private static Cvar _Up;
+        private static Cvar _Right;
+        private static Cvar _Active;
         private static Vector3 _Dest;
 
-        // Chase_Init
         public static void Init()
         {
             if( _Back == null )
@@ -61,14 +52,6 @@ namespace SharpQuake
             }
         }
 
-        // Chase_Reset
-        public static void Reset()
-        {
-            // for respawning and teleporting
-            //	start position 12 units behind head
-        }
-
-        // Chase_Update
         public static void Update()
         {
             // if can't see player, reset
@@ -93,10 +76,9 @@ namespace SharpQuake
                 dist = 1;
 
             Render.RefDef.viewangles.X = (float)( -Math.Atan( stop.Z / dist ) / Math.PI * 180.0 );
-            //r_refdef.viewangles[PITCH] = -atan(stop[2] / dist) / M_PI * 180;
 
             // move towards destination
-            Render.RefDef.vieworg = _Dest; //VectorCopy(chase_dest, r_refdef.vieworg);
+            Render.RefDef.vieworg = _Dest;
         }
 
         private static void TraceLine( ref Vector3 start, ref Vector3 end, out Vector3 impact )
@@ -105,7 +87,7 @@ namespace SharpQuake
 
             Server.RecursiveHullCheck( Client.cl.worldmodel.hulls[0], 0, 0, 1, ref start, ref end, trace );
 
-            impact = trace.endpos; // VectorCopy(trace.endpos, impact);
+            impact = trace.endpos;
         }
     }
 }

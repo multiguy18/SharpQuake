@@ -25,7 +25,7 @@ using OpenTK;
 
 namespace SharpQuake
 {
-    partial class Server
+    internal partial class Server
     {
         public static edict_t Player
         {
@@ -37,26 +37,23 @@ namespace SharpQuake
 
         private const int MAX_FORWARD = 6;
 
-        private static edict_t _Player; // sv_player
-        private static bool _OnGround; // onground
+        private static edict_t _Player;
+        private static bool _OnGround;
 
         // world
-        //static v3f angles - this must be a reference to _Player.v.angles
-        //static v3f origin  - this must be a reference to _Player.v.origin
-        //static Vector3 velocity - this must be a reference to _Player.v.velocity
+        // static v3f angles - this must be a reference to _Player.v.angles
+        // static v3f origin  - this must be a reference to _Player.v.origin
+        // static Vector3 velocity - this must be a reference to _Player.v.velocity
 
-        private static usercmd_t _Cmd; // cmd
+        private static usercmd_t _Cmd;
 
-        private static Vector3 _Forward; // forward
-        private static Vector3 _Right; // right
-        private static Vector3 _Up; // up
+        private static Vector3 _Forward;
+        private static Vector3 _Right;
+        private static Vector3 _Up;
 
-        private static Vector3 _WishDir; // wishdir
-        private static float _WishSpeed; // wishspeed
+        private static Vector3 _WishDir;
+        private static float _WishSpeed;
 
-        /// <summary>
-        /// SV_RunClients
-        /// </summary>
         public static void RunClients()
         {
             for( int i = 0; i < svs.maxclients; i++ )
@@ -69,7 +66,7 @@ namespace SharpQuake
 
                 if( !ReadClientMessage() )
                 {
-                    DropClient( false );	// client misbehaved...
+                    DropClient( false ); // client misbehaved...
                     continue;
                 }
 
@@ -86,9 +83,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// SV_SetIdealPitch
-        /// </summary>
         public static void SetIdealPitch()
         {
             if( ( (int)_Player.v.flags & EdictFlags.FL_ONGROUND ) == 0 )
@@ -110,10 +104,10 @@ namespace SharpQuake
 
                 trace_t tr = Move( ref top, ref Common.ZeroVector3f, ref Common.ZeroVector3f, ref bottom, 1, _Player );
                 if( tr.allsolid )
-                    return;	// looking at a wall, leave ideal the way is was
+                    return; // looking at a wall, leave ideal the way is was
 
                 if( tr.fraction == 1 )
-                    return;	// near a dropoff
+                    return; // near a dropoff
 
                 z[i] = top.z + tr.fraction * ( bottom.z - top.z );
             }
@@ -127,7 +121,7 @@ namespace SharpQuake
                     continue;
 
                 if( dir != 0 && ( step - dir > QDef.ON_EPSILON || step - dir < -QDef.ON_EPSILON ) )
-                    return;		// mixed changes
+                    return;  // mixed changes
 
                 steps++;
                 dir = step;
@@ -144,10 +138,7 @@ namespace SharpQuake
             _Player.v.idealpitch = -dir * _IdealPitchScale.Value;
         }
 
-        /// <summary>
-        /// SV_ReadClientMessage
-        /// Returns false if the client should be killed
-        /// </summary>
+        // Returns false if the client should be killed
         private static bool ReadClientMessage()
         {
             while( true )
@@ -167,7 +158,7 @@ namespace SharpQuake
                 while( flag )
                 {
                     if( !Host.HostClient.active )
-                        return false;	// a command caused an error
+                        return false; // a command caused an error
 
                     if( Net.Reader.IsBadRead )
                     {
@@ -258,9 +249,6 @@ namespace SharpQuake
             return true;
         }
 
-        /// <summary>
-        /// SV_ReadClientMove
-        /// </summary>
         private static void ReadClientMove( ref usercmd_t move )
         {
             client_t client = Host.HostClient;
@@ -288,11 +276,10 @@ namespace SharpQuake
                 client.edict.v.impulse = i;
         }
 
-        /// <summary>
-        /// SV_ClientThink
-        /// the move fields specify an intended velocity in pix/sec
-        /// the angle fields specify an exact angular motion in degrees
-        /// </summary>
+        /* the move fields specify an intended velocity in pix/sec
+         * the angle fields specify an exact angular motion in degrees
+         */
+
         private static void ClientThink()
         {
             if( _Player.v.movetype == Movetypes.MOVETYPE_NONE )
@@ -302,13 +289,10 @@ namespace SharpQuake
 
             DropPunchAngle();
 
-            //
             // if dead, behave differently
-            //
             if( _Player.v.health <= 0 )
                 return;
 
-            //
             // angles
             // show 1/3 the pitch angle and all the roll angle
             _Cmd = Host.HostClient.cmd;
@@ -329,9 +313,8 @@ namespace SharpQuake
                 WaterJump();
                 return;
             }
-            //
+
             // walk
-            //
             if( ( _Player.v.waterlevel >= 2 ) && ( _Player.v.movetype != Movetypes.MOVETYPE_NOCLIP ) )
             {
                 WaterMove();
@@ -351,9 +334,6 @@ namespace SharpQuake
             Mathlib.Copy( ref v, out _Player.v.punchangle );
         }
 
-        /// <summary>
-        /// SV_WaterJump
-        /// </summary>
         private static void WaterJump()
         {
             if( sv.time > _Player.v.teleport_time || _Player.v.waterlevel == 0 )
@@ -365,20 +345,15 @@ namespace SharpQuake
             _Player.v.velocity.y = _Player.v.movedir.y;
         }
 
-        /// <summary>
-        /// SV_WaterMove
-        /// </summary>
         private static void WaterMove()
         {
-            //
             // user intentions
-            //
             Vector3 pangle = Common.ToVector( ref _Player.v.v_angle );
             Mathlib.AngleVectors( ref pangle, out _Forward, out _Right, out _Up );
             Vector3 wishvel = _Forward * _Cmd.forwardmove + _Right * _Cmd.sidemove;
 
             if( _Cmd.forwardmove == 0 && _Cmd.sidemove == 0 && _Cmd.upmove == 0 )
-                wishvel.Z -= 60;		// drift towards bottom
+                wishvel.Z -= 60;  // drift towards bottom
             else
                 wishvel.Z += _Cmd.upmove;
 
@@ -390,9 +365,7 @@ namespace SharpQuake
             }
             wishspeed *= 0.7f;
 
-            //
             // water friction
-            //
             float newspeed, speed = Mathlib.Length( ref _Player.v.velocity );
             if( speed != 0 )
             {
@@ -404,9 +377,7 @@ namespace SharpQuake
             else
                 newspeed = 0;
 
-            //
             // water acceleration
-            //
             if( wishspeed == 0 )
                 return;
 
@@ -425,9 +396,6 @@ namespace SharpQuake
             _Player.v.velocity.z += wishvel.Z;
         }
 
-        /// <summary>
-        /// SV_AirMove
-        /// </summary>
         private static void AirMove()
         {
             Vector3 pangles = Common.ToVector( ref _Player.v.angles );
@@ -466,14 +434,12 @@ namespace SharpQuake
                 Accelerate();
             }
             else
-            {	// not on ground, so little effect on velocity
+            {
+                // not on ground, so little effect on velocity
                 AirAccelerate( wishvel );
             }
         }
 
-        /// <summary>
-        /// SV_UserFriction
-        /// </summary>
         private static void UserFriction()
         {
             float speed = Mathlib.LengthXY( ref _Player.v.velocity );
@@ -503,9 +469,6 @@ namespace SharpQuake
             Mathlib.VectorScale( ref _Player.v.velocity, newspeed, out _Player.v.velocity );
         }
 
-        /// <summary>
-        /// SV_Accelerate
-        /// </summary>
         private static void Accelerate()
         {
             float currentspeed = Vector3.Dot( Common.ToVector( ref _Player.v.velocity ), _WishDir );
@@ -522,9 +485,6 @@ namespace SharpQuake
             _Player.v.velocity.z += _WishDir.Z * accelspeed;
         }
 
-        /// <summary>
-        /// SV_AirAccelerate
-        /// </summary>
         private static void AirAccelerate( Vector3 wishveloc )
         {
             float wishspd = Mathlib.Normalize( ref wishveloc );

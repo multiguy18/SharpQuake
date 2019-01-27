@@ -88,23 +88,12 @@ namespace SharpQuake
         }
 
         private static Cvar _Vars;
-
         private string _Name;
-
-        // char	*name;
         private string _String;
-
-        // char	*string;
         private BitVector32 _Flags;
-
-        // qboolean archive;		// set to true to cause it to be saved to vars.rc
-        // qboolean server;		// notifies players when changed
         private float _Value;
-
-        // float	value;
         private Cvar _Next;
 
-        // Cvar_FindVar()
         public static Cvar Find( string name )
         {
             Cvar var = _Vars;
@@ -124,7 +113,6 @@ namespace SharpQuake
             return ( Find( name ) != null );
         }
 
-        // Cvar_VariableValue()
         public static float GetValue( string name )
         {
             float result = 0;
@@ -136,7 +124,6 @@ namespace SharpQuake
             return result;
         }
 
-        // Cvar_VariableString()
         public static string GetString( string name )
         {
             Cvar var = Find( name );
@@ -147,7 +134,6 @@ namespace SharpQuake
             return String.Empty;
         }
 
-        // Cvar_CompleteVariable()
         public static string[] CompleteName( string partial )
         {
             if( String.IsNullOrEmpty( partial ) )
@@ -165,7 +151,6 @@ namespace SharpQuake
             return ( result.Count > 0 ? result.ToArray() : null );
         }
 
-        // Cvar_Set()
         public static void Set( string name, string value )
         {
             Cvar var = Find( name );
@@ -178,14 +163,11 @@ namespace SharpQuake
             var.Set( value );
         }
 
-        // Cvar_SetValue()
         public static void Set( string name, float value )
         {
             Set( name, value.ToString( CultureInfo.InvariantCulture.NumberFormat ) );
         }
 
-        // Cvar_Command()
-        // Handles variable inspection and changing from the console
         public static bool Command()
         {
             // check variables
@@ -205,11 +187,6 @@ namespace SharpQuake
             return true;
         }
 
-        /// <summary>
-        /// Cvar_WriteVariables
-        /// Writes lines containing "set variable value" for all variables
-        /// with the archive flag set to true.
-        /// </summary>
         public static void WriteVariables( Stream dest )
         {
             StringBuilder sb = new StringBuilder( 4096 );
@@ -250,13 +227,11 @@ namespace SharpQuake
             public const int Server = 2;
         }
 
-        public Cvar( string name, string value )
-                    : this( name, value, false )
+        public Cvar( string name, string value ) : this( name, value, false )
         {
         }
 
-        public Cvar( string name, string value, bool archive )
-                    : this( name, value, archive, false )
+        public Cvar( string name, string value, bool archive ) : this( name, value, archive, false )
         {
         }
 
@@ -270,8 +245,6 @@ namespace SharpQuake
             if( var != null )
             {
                 throw new ArgumentException( String.Format( "Can't register variable {0}, already defined!\n", name ) );
-                //Con_Printf("Can't register variable %s, allready defined\n", variable->name);
-                //return;
             }
             if( Cmd.Exists( name ) )
             {

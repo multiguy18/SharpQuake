@@ -42,11 +42,11 @@ namespace SharpQuake
         private static NetTcpIp _Singletone = new NetTcpIp();
 
         private bool _IsInitialized;
-        private IPAddress _MyAddress; // unsigned long myAddr
-        private Socket _ControlSocket; // int net_controlsocket;
-        private Socket _BroadcastSocket; // net_broadcastsocket
-        private EndPoint _BroadcastAddress; // qsockaddr broadcastaddr
-        private Socket _AcceptSocket; // net_acceptsocket
+        private IPAddress _MyAddress;
+        private Socket _ControlSocket;
+        private Socket _BroadcastSocket;
+        private EndPoint _BroadcastAddress;
+        private Socket _AcceptSocket;
 
         private NetTcpIp()
         {
@@ -78,9 +78,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// UDP_Init
-        /// </summary>
         public bool Init()
         {
             _IsInitialized = false;
@@ -156,9 +153,6 @@ namespace SharpQuake
             CloseSocket( _ControlSocket );
         }
 
-        /// <summary>
-        /// UDP_Listen
-        /// </summary>
         public void Listen( bool state )
         {
             // enable listening

@@ -26,9 +26,6 @@ using System.Text;
 
 namespace SharpQuake
 {
-    /// <summary>
-    /// Con_functions
-    /// </summary>
     internal static class Con
     {
         public static bool IsInitialized
@@ -77,29 +74,28 @@ namespace SharpQuake
         private const int CON_TEXTSIZE = 16384;
         private const int NUM_CON_TIMES = 4;
 
-        private static char[] _Text = new char[CON_TEXTSIZE]; // char		*con_text=0;
-        private static int _VisLines; // con_vislines
-        private static int _TotalLines; // con_totallines   // total lines in console scrollback
+        private static char[] _Text = new char[CON_TEXTSIZE];
+        private static int _VisLines;
+        private static int _TotalLines; // total lines in console scrollback
 
-        // con_backscroll		// lines up from bottom to display
-        private static int _Current; // con_current		// where next message will be printed
+        // lines up from bottom to display
+        private static int _Current; // where next message will be printed
 
-        private static int _X; // con_x		// offset in current line for next print
-        private static int _CR; // from Print()
-        private static double[] _Times = new double[NUM_CON_TIMES]; // con_times	// realtime time the line was generated
+        private static int _X; // offset in current line for next print
+        private static int _CR;
+        private static double[] _Times = new double[NUM_CON_TIMES]; // realtime time the line was generated
 
         // for transparent notify lines
-        private static int _LineWidth; // con_linewidth
+        private static int _LineWidth;
 
-        private static bool _DebugLog; // qboolean	con_debuglog;
-        private static bool _IsInitialized; // qboolean con_initialized;
-        private static bool _ForcedUp; // qboolean con_forcedup		// because no entities to refresh
-        private static int _NotifyLines; // con_notifylines	// scan lines to clear for notify lines
-        private static Cvar _NotifyTime; // con_notifytime = { "con_notifytime", "3" };		//seconds
-        private static float _CursorSpeed = 4; // con_cursorspeed
+        private static bool _DebugLog;
+        private static bool _IsInitialized;
+        private static bool _ForcedUp;// because no entities to refresh
+        private static int _NotifyLines;// scan lines to clear for notify lines
+        private static Cvar _NotifyTime;//seconds
+        private static float _CursorSpeed = 4;
         private static FileStream _Log;
 
-        // Con_CheckResize (void)
         public static void CheckResize()
         {
             int width = ( Scr.vid.width >> 3 ) - 2;
@@ -109,9 +105,9 @@ namespace SharpQuake
             if( width < 1 ) // video hasn't been initialized yet
             {
                 width = 38;
-                _LineWidth = width; // con_linewidth = width;
+                _LineWidth = width;
                 _TotalLines = CON_TEXTSIZE / _LineWidth;
-                Common.FillArray( _Text, ' ' ); // Q_memset (con_text, ' ', CON_TEXTSIZE);
+                Common.FillArray( _Text, ' ' );
             }
             else
             {
@@ -149,7 +145,6 @@ namespace SharpQuake
             _Current = _TotalLines - 1;
         }
 
-        // Con_Init (void)
         public static void Init()
         {
             _DebugLog = ( Common.CheckParm( "-condebug" ) > 0 );
@@ -167,9 +162,7 @@ namespace SharpQuake
 
             Con.Print( "Console initialized.\n" );
 
-            //
             // register our commands
-            //
             if( _NotifyTime == null )
             {
                 _NotifyTime = new Cvar( "con_notifytime", "3" );
@@ -183,10 +176,6 @@ namespace SharpQuake
             _IsInitialized = true;
         }
 
-        // Con_DrawConsole
-        //
-        // Draws the console with the solid background
-        // The typing input line at the bottom should only be drawn if typing is allowed
         public static void Draw( int lines, bool drawinput )
         {
             if( lines <= 0 )
@@ -198,8 +187,8 @@ namespace SharpQuake
             // draw the text
             _VisLines = lines;
 
-            int rows = ( lines - 16 ) >> 3;		// rows of text to draw
-            int y = lines - 16 - ( rows << 3 );	// may start slightly negative
+            int rows = ( lines - 16 ) >> 3; // rows of text to draw
+            int y = lines - 16 - ( rows << 3 ); // may start slightly negative
 
             for( int i = _Current - rows + 1; i <= _Current; i++, y += 8 )
             {
@@ -218,9 +207,6 @@ namespace SharpQuake
                 DrawInput();
         }
 
-        /// <summary>
-        /// Con_Printf
-        /// </summary>
         public static void Print( string fmt, params object[] args )
         {
             string msg = ( args.Length > 0 ? String.Format( fmt, args ) : fmt );
@@ -233,7 +219,7 @@ namespace SharpQuake
                 return;
 
             if( Client.cls.state == cactive_t.ca_dedicated )
-                return;		// no graphics mode
+                return;  // no graphics mode
 
             // write it to the scrollable buffer
             Print( msg );
@@ -253,20 +239,12 @@ namespace SharpQuake
             }
         }
 
-        //
-        // Con_DPrintf
-        //
-        // A Con_Printf that only shows up if the "developer" cvar is set
         public static void DPrint( string fmt, params object[] args )
         {
-            // don't confuse non-developers with techie stuff...
             if( Host.IsDeveloper )
                 Print( fmt, args );
         }
 
-        // Con_SafePrintf (char *fmt, ...)
-        //
-        // Okay to call even when the screen can't be updated
         public static void SafePrint( string fmt, params object[] args )
         {
             bool temp = Scr.IsDisabledForLoading;
@@ -275,9 +253,6 @@ namespace SharpQuake
             Scr.IsDisabledForLoading = temp;
         }
 
-        /// <summary>
-        /// Con_DrawNotify
-        /// </summary>
         public static void DrawNotify()
         {
             int v = 0;
@@ -324,16 +299,12 @@ namespace SharpQuake
                 _NotifyLines = v;
         }
 
-        // Con_ClearNotify (void)
         public static void ClearNotify()
         {
             for( int i = 0; i < NUM_CON_TIMES; i++ )
                 _Times[i] = 0;
         }
 
-        /// <summary>
-        /// Con_ToggleConsole_f
-        /// </summary>
         public static void ToggleConsole_f()
         {
             if( Key.Destination == keydest_t.key_console )
@@ -341,7 +312,7 @@ namespace SharpQuake
                 if( Client.cls.state == cactive_t.ca_connected )
                 {
                     Key.Destination = keydest_t.key_game;
-                    Key.Lines[Key.EditLine][1] = '\0';	// clear any typing
+                    Key.Lines[Key.EditLine][1] = '\0'; // clear any typing
                     Key.LinePos = 1;
                 }
                 else
@@ -356,9 +327,6 @@ namespace SharpQuake
             Array.Clear( _Times, 0, _Times.Length );
         }
 
-        /// <summary>
-        /// Con_DebugLog
-        /// </summary>
         private static void DebugLog( string msg )
         {
             if( _Log != null )
@@ -368,11 +336,6 @@ namespace SharpQuake
             }
         }
 
-        // Con_Print (char *txt)
-        //
-        // Handles cursor positioning, line wrapping, etc
-        // All console printing must go through this in order to be logged to disk
-        // If no console is visible, the notify window will pop up.
         private static void Print( string txt )
         {
             if( String.IsNullOrEmpty( txt ) )
@@ -382,13 +345,13 @@ namespace SharpQuake
 
             BackScroll = 0;
 
-            if( txt.StartsWith( ( (char)1 ).ToString() ) )// [0] == 1)
+            if( txt.StartsWith( ( (char)1 ).ToString() ) )
             {
-                mask = 128;	// go to colored text
+                mask = 128; // go to colored text
                 Sound.LocalSound( "misc/talk.wav" ); // play talk wav
                 offset++;
             }
-            else if( txt.StartsWith( ( (char)2 ).ToString() ) ) //txt[0] == 2)
+            else if( txt.StartsWith( ( (char)2 ).ToString() ) )
             {
                 mask = 128; // go to colored text
                 offset++;
@@ -450,29 +413,23 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// Con_Clear_f
-        /// </summary>
         private static void Clear_f()
         {
             Common.FillArray( _Text, ' ' );
         }
 
-        // Con_MessageMode_f
         private static void MessageMode_f()
         {
             Key.Destination = keydest_t.key_message;
             Key.TeamMessage = false;
         }
 
-        //Con_MessageMode2_f
         private static void MessageMode2_f()
         {
             Key.Destination = keydest_t.key_message;
             Key.TeamMessage = true;
         }
 
-        // Con_Linefeed
         private static void LineFeed()
         {
             _X = 0;
@@ -484,13 +441,10 @@ namespace SharpQuake
             }
         }
 
-        // Con_DrawInput
-        //
-        // The input line scrolls horizontally if typing goes beyond the right edge
         private static void DrawInput()
         {
             if( Key.Destination != keydest_t.key_console && !_ForcedUp )
-                return;		// don't draw anything
+                return;  // don't draw anything
 
             // add the cursor frame
             Key.Lines[Key.EditLine][Key.LinePos] = (char)( 10 + ( (int)( Host.RealTime * _CursorSpeed ) & 1 ) );
@@ -499,11 +453,10 @@ namespace SharpQuake
             for( int i = Key.LinePos + 1; i < _LineWidth; i++ )
                 Key.Lines[Key.EditLine][i] = ' ';
 
-            //	prestep if horizontally scrolling
+            // prestep if horizontally scrolling
             int offset = 0;
             if( Key.LinePos >= _LineWidth )
                 offset = 1 + Key.LinePos - _LineWidth;
-            //text += 1 + key_linepos - con_linewidth;
 
             // draw it
             int y = _VisLines - 16;

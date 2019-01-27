@@ -120,7 +120,7 @@ namespace SharpQuake
             try
             {
                 if( this.WindowState == OpenTK.WindowState.Minimized || Scr.BlockDrawing )
-                    Scr.SkipUpdate = true;	// no point in bothering to draw
+                    Scr.SkipUpdate = true; // no point in bothering to draw
 
                 _Swatch.Stop();
                 double ts = _Swatch.Elapsed.TotalSeconds;
@@ -128,10 +128,7 @@ namespace SharpQuake
                 _Swatch.Start();
                 Host.Frame( ts );
             }
-            catch( EndGameException )
-            {
-                // nothing to do
-            }
+            catch( EndGameException ) { };
         }
 
         private static MainForm CreateInstance( Size size, GraphicsMode mode, bool fullScreen )
@@ -312,7 +309,7 @@ namespace SharpQuake
         }
 
         private MainForm( Size size, GraphicsMode mode, bool fullScreen )
-                                                                                                                            : base( size.Width, size.Height, mode, "SharpQuake", fullScreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default )
+        : base( size.Width, size.Height, mode, "SharpQuake", fullScreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default )
         {
             _Instance = new WeakReference( this );
             _Swatch = new Stopwatch();

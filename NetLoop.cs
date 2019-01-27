@@ -27,9 +27,9 @@ namespace SharpQuake
     internal class NetLoop : INetDriver
     {
         private bool _IsInitialized;
-        private bool _LocalConnectPending; // localconnectpending
-        private qsocket_t _Client; // loop_client
-        private qsocket_t _Server; // loop_server
+        private bool _LocalConnectPending;
+        private qsocket_t _Client;
+        private qsocket_t _Server;
 
         #region INetDriver Members
 
@@ -52,14 +52,13 @@ namespace SharpQuake
         public void Init()
         {
             if( Client.cls.state == cactive_t.ca_dedicated )
-                return;// -1;
+                return;
 
             _IsInitialized = true;
         }
 
         public void Listen( bool state )
         {
-            // nothig to do
         }
 
         public void SearchForHosts( bool xmit )

@@ -182,107 +182,51 @@ namespace SharpQuake
         }
 
         public const int NET_PROTOCOL_VERSION = 3;
-
         public const int HOSTCACHESIZE = 8;
-
         public const int NET_NAMELEN = 64;
-
         public const int NET_MAXMESSAGE = 8192;
-
-        public const int NET_HEADERSIZE = 2 * sizeof(uint);
-
+        public const int NET_HEADERSIZE = 2 * sizeof( uint );
         public const int NET_DATAGRAMSIZE = QDef.MAX_DATAGRAM + NET_HEADERSIZE;
-
         public static int HostPort;
-
         public static int ActiveConnections;
-
         public static MsgWriter Message;
-
-        // sizebuf_t net_message
         public static MsgReader Reader;
-
         public static int HostCacheCount;
-
         public static bool SlistSilent;
-
-        // slistSilent
         public static bool SlistLocal = true;
-
         public static int LanDriverLevel;
 
         private static readonly PollProcedure _SlistSendProcedure = new PollProcedure( null, 0.0, SlistSend, null );
-
         private static readonly PollProcedure _SlistPollProcedure = new PollProcedure( null, 0.0, SlistPoll, null );
 
         private static INetDriver[] _Drivers;
-
-        // net_driver_t net_drivers[MAX_NET_DRIVERS];
         private static INetLanDriver[] _LanDrivers;
-
-        // net_landriver_t	net_landrivers[MAX_NET_DRIVERS]
         private static bool _IsRecording;
-
-        // recording
         private static int _DefHostPort = 26000;
-
-        // int	DEFAULTnet_hostport = 26000;
-        // net_hostport;
         private static bool _IsListening;
-
-        // static qboolean	listening = false;
         private static List<qsocket_t> _FreeSockets;
-
-        // net_freeSockets
         private static List<qsocket_t> _ActiveSockets;
-
-        // net_activeSockets
-        // net_activeconnections
         private static double _Time;
-
         private static string _MyTcpIpAddress;
-
-        // char my_tcpip_address[NET_NAMELEN];
         private static int _MessagesSent = 0;
 
         // reads from net_message
         private static int _MessagesReceived = 0;
 
-        // net_time
         private static int _UnreliableMessagesSent = 0;
-
         private static int _UnreliableMessagesReceived = 0;
-
         private static Cvar _MessageTimeout;
-
-        // = { "net_messagetimeout", "300" };
         private static Cvar _HostName;
-
         private static PollProcedure _PollProcedureList;
-
         private static hostcache_t[] _HostCache = new hostcache_t[HOSTCACHESIZE];
-
         private static bool _SlistInProgress;
-
-        // slistInProgress
-        // slistLocal
         private static int _SlistLastShown;
-
-        // slistLastShown
         private static double _SlistStartTime;
-
         private static int _DriverLevel;
-
         private static VcrRecord _VcrConnect = new VcrRecord();
-
-        // vcrConnect
         private static VcrRecord2 _VcrGetMessage = new VcrRecord2();
-
-        // vcrGetMessage
         private static VcrRecord2 _VcrSendMessage = new VcrRecord2();
 
-        // vcrSendMessage
-        // NET_Init (void)
         public static void Init()
         {
             for( int i2 = 0; i2 < _HostCache.Length; i2++ )
@@ -348,7 +292,7 @@ namespace SharpQuake
             SetNetTime();
 
             // allocate space for network message buffer
-            Message = new MsgWriter( NET_MAXMESSAGE ); // SZ_Alloc (&net_message, NET_MAXMESSAGE);
+            Message = new MsgWriter( NET_MAXMESSAGE );
             Reader = new MsgReader( Net.Message );
 
             if( _MessageTimeout == null )
@@ -374,17 +318,10 @@ namespace SharpQuake
                 _DriverLevel++;
             }
 
-            //if (*my_ipx_address)
-            //    Con_DPrintf("IPX address %s\n", my_ipx_address);
             if( !String.IsNullOrEmpty( _MyTcpIpAddress ) )
                 Con.DPrint( "TCP/IP address {0}\n", _MyTcpIpAddress );
         }
 
-        // net_driverlevel
-        // net_landriverlevel
-        /// <summary>
-        /// NET_Shutdown
-        /// </summary>
         public static void Shutdown()
         {
             SetNetTime();
@@ -396,9 +333,7 @@ namespace SharpQuake
                     Close( sock );
             }
 
-            //
             // shutdown the drivers
-            //
             if( _Drivers != null )
             {
                 for( _DriverLevel = 0; _DriverLevel < _Drivers.Length; _DriverLevel++ )
@@ -409,11 +344,6 @@ namespace SharpQuake
             }
         }
 
-        // slistStartTime
-        /// <summary>
-        /// NET_CheckNewConnections
-        /// </summary>
-        /// <returns></returns>
         public static qsocket_t CheckNewConnections()
         {
             SetNetTime();
@@ -433,7 +363,7 @@ namespace SharpQuake
                     {
                         _VcrConnect.time = Host.Time;
                         _VcrConnect.op = VcrOp.VCR_OP_CONNECT;
-                        _VcrConnect.session = 1; // (long)ret; // Uze: todo: make it work on 64bit systems
+                        _VcrConnect.session = 1; // Uze: todo: make it work on 64bit systems
                         byte[] buf = Sys.StructureToBytes( ref _VcrConnect );
                         Host.VcrWriter.Write( buf, 0, buf.Length );
                         buf = Encoding.ASCII.GetBytes( ret.address );
@@ -459,15 +389,9 @@ namespace SharpQuake
             return null;
         }
 
-        // hostcache
-        // hostCacheCount
-        /// <summary>
-        /// NET_Connect
-        /// called by client to connect to a host.  Returns -1 if not able to connect
-        /// </summary>
         public static qsocket_t Connect( string host )
         {
-            int numdrivers = _Drivers.Length;// net_numdrivers;
+            int numdrivers = _Drivers.Length;
 
             SetNetTime();
 
@@ -543,11 +467,6 @@ JustDoIt:
             return null;
         }
 
-        /// <summary>
-        /// NET_CanSendMessage
-        /// Returns true or false if the given qsocket can currently accept a
-        /// message to be transmitted.
-        /// </summary>
         public static bool CanSendMessage( qsocket_t sock )
         {
             if( sock == null )
@@ -564,7 +483,7 @@ JustDoIt:
             {
                 _VcrSendMessage.time = Host.Time;
                 _VcrSendMessage.op = VcrOp.VCR_OP_CANSENDMESSAGE;
-                _VcrSendMessage.session = 1; // (long)sock; Uze: todo: do something?
+                _VcrSendMessage.session = 1; //Uze: todo: do something?
                 _VcrSendMessage.ret = r ? 1 : 0;
                 byte[] buf = Sys.StructureToBytes( ref _VcrSendMessage );
                 Host.VcrWriter.Write( buf, 0, buf.Length );
@@ -573,18 +492,15 @@ JustDoIt:
             return r;
         }
 
-        /// <summary>
-        /// NET_GetMessage
-        /// returns data in net_message sizebuf
-        /// returns 0 if no data is waiting
-        /// returns 1 if a message was received
-        /// returns 2 if an unreliable message was received
-        /// returns -1 if the connection died
-        /// </summary>
+        /* returns data in net_message sizebuf
+         * returns 0 if no data is waiting
+         * returns 1 if a message was received
+         * returns 2 if an unreliable message was received
+         * returns -1 if the connection died
+         */
+
         public static int GetMessage( qsocket_t sock )
         {
-            //int ret;
-
             if( sock == null )
                 return -1;
 
@@ -623,7 +539,7 @@ JustDoIt:
                 {
                     _VcrGetMessage.time = Host.Time;
                     _VcrGetMessage.op = VcrOp.VCR_OP_GETMESSAGE;
-                    _VcrGetMessage.session = 1;// (long)sock; Uze todo: write somethisng meaningful
+                    _VcrGetMessage.session = 1; // Uze todo: write something meaningful
                     _VcrGetMessage.ret = ret;
                     byte[] buf = Sys.StructureToBytes( ref _VcrGetMessage );
                     Host.VcrWriter.Write( buf, 0, buf.Length );
@@ -637,7 +553,7 @@ JustDoIt:
                 {
                     _VcrGetMessage.time = Host.Time;
                     _VcrGetMessage.op = VcrOp.VCR_OP_GETMESSAGE;
-                    _VcrGetMessage.session = 1; // (long)sock; Uze todo: fix this
+                    _VcrGetMessage.session = 1; // Uze todo: fix this
                     _VcrGetMessage.ret = ret;
                     byte[] buf = Sys.StructureToBytes( ref _VcrGetMessage );
                     Host.VcrWriter.Write( buf, 0, buf.Length );
@@ -647,14 +563,13 @@ JustDoIt:
             return ret;
         }
 
-        /// <summary>
-        /// NET_SendMessage
-        /// Try to send a complete length+message unit over the reliable stream.
-        /// returns 0 if the message cannot be delivered reliably, but the connection
-        /// is still considered valid
-        /// returns 1 if the message was sent properly
-        /// returns -1 if the connection died
-        /// </summary>
+        /* Try to send a complete length+message unit over the reliable stream.
+         * returns 0 if the message cannot be delivered reliably, but the connection
+         * is still considered valid
+         * returns 1 if the message was sent properly
+         * returns -1 if the connection died
+         */
+
         public static int SendMessage( qsocket_t sock, MsgWriter data )
         {
             if( sock == null )
@@ -676,7 +591,7 @@ JustDoIt:
             {
                 _VcrSendMessage.time = Host.Time;
                 _VcrSendMessage.op = VcrOp.VCR_OP_SENDMESSAGE;
-                _VcrSendMessage.session = 1; // (long)sock; Uze: todo: do something?
+                _VcrSendMessage.session = 1; // Uze: todo: do something?
                 _VcrSendMessage.ret = r;
                 byte[] buf = Sys.StructureToBytes( ref _VcrSendMessage );
                 Host.VcrWriter.Write( buf, 0, buf.Length );
@@ -685,13 +600,12 @@ JustDoIt:
             return r;
         }
 
-        /// <summary>
-        /// NET_SendUnreliableMessage
-        /// returns 0 if the message connot be delivered reliably, but the connection
-        ///		is still considered valid
-        /// returns 1 if the message was sent properly
-        /// returns -1 if the connection died
-        /// </summary>
+        /* returns 0 if the message connot be delivered reliably, but the connection
+         * is still considered valid
+         * returns 1 if the message was sent properly
+         * returns -1 if the connection died
+         */
+
         public static int SendUnreliableMessage( qsocket_t sock, MsgWriter data )
         {
             if( sock == null )
@@ -713,7 +627,7 @@ JustDoIt:
             {
                 _VcrSendMessage.time = Host.Time;
                 _VcrSendMessage.op = VcrOp.VCR_OP_SENDMESSAGE;
-                _VcrSendMessage.session = 1;// (long)sock; Uze todo: ???????
+                _VcrSendMessage.session = 1;// Uze todo: ???????
                 _VcrSendMessage.ret = r;
                 byte[] buf = Sys.StructureToBytes( ref _VcrSendMessage );
                 Host.VcrWriter.Write( buf );
@@ -722,10 +636,6 @@ JustDoIt:
             return r;
         }
 
-        /// <summary>
-        /// NET_SendToAll
-        /// This is a reliable *blocking* send to all attached clients.
-        /// </summary>
         public static int SendToAll( MsgWriter data, int blocktime )
         {
             bool[] state1 = new bool[QDef.MAX_SCOREBOARD];
@@ -800,9 +710,6 @@ JustDoIt:
             return count;
         }
 
-        /// <summary>
-        /// NET_Close
-        /// </summary>
         public static void Close( qsocket_t sock )
         {
             if( sock == null )
@@ -819,9 +726,6 @@ JustDoIt:
             FreeSocket( sock );
         }
 
-        /// <summary>
-        /// NET_FreeQSocket
-        /// </summary>
         public static void FreeSocket( qsocket_t sock )
         {
             // remove it from active list
@@ -833,9 +737,6 @@ JustDoIt:
             sock.disconnected = true;
         }
 
-        /// <summary>
-        /// NET_Poll
-        /// </summary>
         public static void Poll()
         {
             SetNetTime();
@@ -850,16 +751,12 @@ JustDoIt:
             }
         }
 
-        // double SetNetTime
         public static double SetNetTime()
         {
             _Time = Sys.GetFloatTime();
             return _Time;
         }
 
-        /// <summary>
-        /// NET_Slist_f
-        /// </summary>
         public static void Slist_f()
         {
             if( _SlistInProgress )
@@ -880,11 +777,6 @@ JustDoIt:
             Net.HostCacheCount = 0;
         }
 
-        /// <summary>
-        /// NET_NewQSocket
-        /// Called by drivers when a new communications endpoint is required
-        /// The sequence and buffer fields will be filled in properly
-        /// </summary>
         public static qsocket_t NewSocket()
         {
             if( _FreeSockets.Count == 0 )
@@ -921,7 +813,6 @@ JustDoIt:
             return sock;
         }
 
-        // pollProcedureList
         private static void PrintSlistHeader()
         {
             Con.Print( "Server          Map             Users\n" );
@@ -929,7 +820,6 @@ JustDoIt:
             _SlistLastShown = 0;
         }
 
-        // = { "hostname", "UNNAMED" };
         private static void PrintSlist()
         {
             int i;
@@ -952,9 +842,6 @@ JustDoIt:
                 Con.Print( "No Quake servers found.\n\n" );
         }
 
-        /// <summary>
-        /// SchedulePollProcedure
-        /// </summary>
         private static void SchedulePollProcedure( PollProcedure proc, double timeOffset )
         {
             proc.nextTime = Sys.GetFloatTime() + timeOffset;
@@ -977,7 +864,6 @@ JustDoIt:
             prev.next = proc;
         }
 
-        // NET_Listen_f
         private static void Listen_f()
         {
             if( Cmd.Argc != 2 )
@@ -997,7 +883,6 @@ JustDoIt:
             }
         }
 
-        // MaxPlayers_f
         private static void MaxPlayers_f()
         {
             if( Cmd.Argc != 2 )
@@ -1034,7 +919,6 @@ JustDoIt:
                 Cvar.Set( "deathmatch", "1" );
         }
 
-        // NET_Port_f
         private static void Port_f()
         {
             if( Cmd.Argc != 2 )
@@ -1061,9 +945,6 @@ JustDoIt:
             }
         }
 
-        /// <summary>
-        /// Slist_Send
-        /// </summary>
         private static void SlistSend( object arg )
         {
             for( _DriverLevel = 0; _DriverLevel < _Drivers.Length; _DriverLevel++ )
@@ -1080,9 +961,6 @@ JustDoIt:
                 SchedulePollProcedure( _SlistSendProcedure, 0.75 );
         }
 
-        /// <summary>
-        /// Slist_Poll
-        /// </summary>
         private static void SlistPoll( object arg )
         {
             for( _DriverLevel = 0; _DriverLevel < _Drivers.Length; _DriverLevel++ )
@@ -1116,13 +994,9 @@ JustDoIt:
         private class VcrRecord2 : VcrRecord
         {
             public int ret;
-            // Uze: int len - removed
-        } //vcrGetMessage;
+        }
     }
 
-    /// <summary>
-    /// NetHeader flags
-    /// </summary>
     internal static class NetFlags
     {
         public const int NETFLAG_LENGTH_MASK = 0x0000ffff;
@@ -1131,7 +1005,7 @@ JustDoIt:
         public const int NETFLAG_NAK = 0x00040000;
         public const int NETFLAG_EOM = 0x00080000;
         public const int NETFLAG_UNRELIABLE = 0x00100000;
-        public const int NETFLAG_CTL = -2147483648;// 0x80000000;
+        public const int NETFLAG_CTL = -2147483648;
     }
 
     internal static class CCReq
@@ -1142,15 +1016,17 @@ JustDoIt:
         public const int CCREQ_RULE_INFO = 0x04;
     }
 
-    //	note:
-    //		There are two address forms used above.  The short form is just a
-    //		port number.  The address that goes along with the port is defined as
-    //		"whatever address you receive this reponse from".  This lets us use
-    //		the host OS to solve the problem of multiple host addresses (possibly
-    //		with no routing between them); the host will use the right address
-    //		when we reply to the inbound connection request.  The long from is
-    //		a full address and port in a string.  It is used for returning the
-    //		address of a server that is not running locally.
+    /* note:
+     *     There are two address forms used above.  The short form is just a
+     *     port number.  The address that goes along with the port is defined as
+     *     "whatever address you receive this reponse from".  This lets us use
+     *     the host OS to solve the problem of multiple host addresses (possibly
+     *     with no routing between them); the host will use the right address
+     *     when we reply to the inbound connection request.  The long from is
+     *     a full address and port in a string.  It is used for returning the
+     *     address of a server that is not running locally.
+     */
+
     internal static class CCRep
     {
         public const int CCREP_ACCEPT = 0x81;
@@ -1160,7 +1036,6 @@ JustDoIt:
         public const int CCREP_RULE_INFO = 0x85;
     }
 
-    // qsocket_t
     internal class qsocket_t
     {
         public INetLanDriver LanDriver
@@ -1181,24 +1056,24 @@ JustDoIt:
 
         public int driver;
         public int landriver;
-        public Socket socket; // int	socket
-        public object driverdata; // void *driverdata
+        public Socket socket;
+        public object driverdata;
 
         public uint ackSequence;
         public uint sendSequence;
         public uint unreliableSendSequence;
 
         public int sendMessageLength;
-        public byte[] sendMessage; // byte sendMessage [NET_MAXMESSAGE]
+        public byte[] sendMessage;
 
         public uint receiveSequence;
         public uint unreliableReceiveSequence;
 
         public int receiveMessageLength;
-        public byte[] receiveMessage; // byte receiveMessage [NET_MAXMESSAGE]
+        public byte[] receiveMessage;
 
-        public EndPoint addr; // qsockaddr	addr
-        public string address; // char address[NET_NAMELEN]
+        public EndPoint addr;
+        public string address;
 
         public void ClearBuffers()
         {
@@ -1228,8 +1103,8 @@ JustDoIt:
     {
         public PollProcedure next;
         public double nextTime;
-        public PollHandler procedure; // void (*procedure)();
-        public object arg; // void *arg
+        public PollHandler procedure;
+        public object arg;
 
         public PollProcedure( PollProcedure next, double nextTime, PollHandler handler, object arg )
         {
@@ -1242,17 +1117,16 @@ JustDoIt:
 
     internal class hostcache_t
     {
-        public string name; //[16];
-        public string map; //[16];
-        public string cname; //[32];
+        public string name;
+        public string map;
+        public string cname;
         public int users;
         public int maxusers;
         public int driver;
         public int ldriver;
-        public EndPoint addr; // qsockaddr ?????
+        public EndPoint addr;
     }
 
-    // struct net_driver_t
     internal interface INetDriver
     {
         string Name
@@ -1288,9 +1162,8 @@ JustDoIt:
         void Close( qsocket_t sock );
 
         void Shutdown();
-    } //net_driver_t;
+    }
 
-    // struct net_landriver_t
     internal interface INetLanDriver
     {
         string Name
@@ -1337,59 +1210,55 @@ JustDoIt:
         int GetSocketPort( EndPoint addr );
 
         int SetSocketPort( EndPoint addr, int port );
-    } //net_landriver_t;
+    }
 
-    // PollProcedure;
-
-    //hostcache_t;
-    // This is the network info/connection protocol.  It is used to find Quake
-    // servers, get info about them, and connect to them.  Once connected, the
-    // Quake game protocol (documented elsewhere) is used.
-    //
-    //
-    // General notes:
-    //	game_name is currently always "QUAKE", but is there so this same protocol
-    //		can be used for future games as well; can you say Quake2?
-    //
-    // CCREQ_CONNECT
-    //		string	game_name				"QUAKE"
-    //		byte	net_protocol_version	NET_PROTOCOL_VERSION
-    //
-    // CCREQ_SERVER_INFO
-    //		string	game_name				"QUAKE"
-    //		byte	net_protocol_version	NET_PROTOCOL_VERSION
-    //
-    // CCREQ_PLAYER_INFO
-    //		byte	player_number
-    //
-    // CCREQ_RULE_INFO
-    //		string	rule
-    //
-    //
-    //
-    // CCREP_ACCEPT
-    //		long	port
-    //
-    // CCREP_REJECT
-    //		string	reason
-    //
-    // CCREP_SERVER_INFO
-    //		string	server_address
-    //		string	host_name
-    //		string	level_name
-    //		byte	current_players
-    //		byte	max_players
-    //		byte	protocol_version	NET_PROTOCOL_VERSION
-    //
-    // CCREP_PLAYER_INFO
-    //		byte	player_number
-    //		string	name
-    //		long	colors
-    //		long	frags
-    //		long	connect_time
-    //		string	address
-    //
-    // CCREP_RULE_INFO
-    //		string	rule
-    //		string	value
+    /* This is the network info/connection protocol.  It is used to find Quake
+     * servers, get info about them, and connect to them.  Once connected, the
+     * Quake game protocol (documented elsewhere) is used.
+     *
+     * General notes:
+     *      game_name is currently always "QUAKE", but is there so this same protocol
+     *      can be used for future games as well; can you say Quake2?
+     *
+     * CCREQ_CONNECT
+     *      string game_name    "QUAKE"
+     *      byte net_protocol_version NET_PROTOCOL_VERSION
+     *
+     * CCREQ_SERVER_INFO
+     *      string game_name    "QUAKE"
+     *      byte net_protocol_version NET_PROTOCOL_VERSION
+     *
+     * CCREQ_PLAYER_INFO
+     *      byte player_number
+     *
+     * CCREQ_RULE_INFO
+     *      string rule
+     *
+     *
+     * CCREP_ACCEPT
+     *      long port
+     *
+     * CCREP_REJECT
+     *      string reason
+     *
+     * CCREP_SERVER_INFO
+     *      string server_address
+     *      string host_name
+     *      string level_name
+     *      byte current_players
+     *      byte max_players
+     *      byte protocol_version NET_PROTOCOL_VERSION
+     *
+     * CCREP_PLAYER_INFO
+     *      byte player_number
+     *      string name
+     *      long colors
+     *      long frags
+     *      long connect_time
+     *      string address
+     *
+     * CCREP_RULE_INFO
+     *      string rule
+     *      string value
+     */
 }

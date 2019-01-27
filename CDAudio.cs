@@ -20,13 +20,8 @@
 /// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /// </copyright>
 
-// cdaudio.h
-
 namespace SharpQuake
 {
-    /// <summary>
-    /// CDAudio_functions
-    /// </summary>
     internal static class CDAudio
     {
 #if _WINDOWS
@@ -35,9 +30,6 @@ namespace SharpQuake
         static ICDAudioController _Controller = new NullCDAudioController();
 #endif
 
-        /// <summary>
-        /// CDAudio_Init
-        /// </summary>
         public static bool Init()
         {
             if( Client.cls.state == cactive_t.ca_dedicated )
@@ -57,37 +49,31 @@ namespace SharpQuake
             return _Controller.IsInitialized;
         }
 
-        // CDAudio_Play(byte track, qboolean looping)
         public static void Play( byte track, bool looping )
         {
             _Controller.Play( track, looping );
         }
 
-        // CDAudio_Stop
         public static void Stop()
         {
             _Controller.Stop();
         }
 
-        // CDAudio_Pause
         public static void Pause()
         {
             _Controller.Pause();
         }
 
-        // CDAudio_Resume
         public static void Resume()
         {
             _Controller.Resume();
         }
 
-        // CDAudio_Shutdown
         public static void Shutdown()
         {
             _Controller.Shutdown();
         }
 
-        // CDAudio_Update
         public static void Update()
         {
             _Controller.Update();

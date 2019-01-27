@@ -22,13 +22,10 @@
 
 using System;
 
-// cl_input.c
-
 namespace SharpQuake
 {
     internal static class ClientInput
     {
-        // kbutton_t in_xxx
         public static kbutton_t MLookBtn;
 
         public static kbutton_t KLookBtn;
@@ -96,10 +93,10 @@ namespace SharpQuake
             if( !String.IsNullOrEmpty( c ) )
                 k = int.Parse( c );
             else
-                k = -1;	// typed manually at the console for continuous down
+                k = -1; // typed manually at the console for continuous down
 
             if( k == b.down0 || k == b.down1 )
-                return;		// repeating key
+                return; // repeating key
 
             if( b.down0 == 0 )
                 b.down0 = k;
@@ -112,7 +109,7 @@ namespace SharpQuake
             }
 
             if( ( b.state & 1 ) != 0 )
-                return;	// still down
+                return; // still down
             b.state |= 1 + 2; // down + impulse down
         }
 
@@ -126,7 +123,7 @@ namespace SharpQuake
             {
                 // typed manually at the console, assume for unsticking, so clear all
                 b.down0 = b.down1 = 0;
-                b.state = 4;	// impulse up
+                b.state = 4; // impulse up
                 return;
             }
 
@@ -135,15 +132,15 @@ namespace SharpQuake
             else if( b.down1 == k )
                 b.down1 = 0;
             else
-                return;	// key up without coresponding down (menu pass through)
+                return; // key up without coresponding down (menu pass through)
 
             if( b.down0 != 0 || b.down1 != 0 )
-                return;	// some other key is still holding it down
+                return; // some other key is still holding it down
 
             if( ( b.state & 1 ) == 0 )
-                return;		// still up (this should not happen)
-            b.state &= ~1;		// now up
-            b.state |= 4; 		// impulse up
+                return; // still up (this should not happen)
+            b.state &= ~1; // now up
+            b.state |= 4; // impulse up
         }
 
         private static void KLookDown()
@@ -327,19 +324,16 @@ namespace SharpQuake
 
     partial class Client
     {
-        // CL_SendMove
         public static void SendMove( ref usercmd_t cmd )
         {
             cl.cmd = cmd; // cl.cmd = *cmd - struct copying!!!
 
             MsgWriter msg = new MsgWriter( 128 );
 
-            //
             // send the movement message
-            //
             msg.WriteByte( Protocol.clc_move );
 
-            msg.WriteFloat( (float)cl.mtime[0] );	// so server can get ping times
+            msg.WriteFloat( (float)cl.mtime[0] ); // so server can get ping times
 
             msg.WriteAngle( cl.viewangles.X );
             msg.WriteAngle( cl.viewangles.Y );
@@ -349,9 +343,7 @@ namespace SharpQuake
             msg.WriteShort( (short)cmd.sidemove );
             msg.WriteShort( (short)cmd.upmove );
 
-            //
             // send button bits
-            //
             int bits = 0;
 
             if( ( ClientInput.AttackBtn.state & 3 ) != 0 )
@@ -367,16 +359,11 @@ namespace SharpQuake
             msg.WriteByte( ClientInput.Impulse );
             ClientInput.Impulse = 0;
 
-            //
             // deliver the message
-            //
             if( cls.demoplayback )
                 return;
 
-            //
-            // allways dump the first two message, because it may contain leftover inputs
-            // from the last level
-            //
+            // allways dump the first two message, because it may contain leftover inputs from the last level
             if( ++cl.movemessages <= 2 )
                 return;
 
@@ -387,16 +374,11 @@ namespace SharpQuake
             }
         }
 
-        // CL_InitInput
         private static void InitInput()
         {
             ClientInput.Init();
         }
 
-        /// <summary>
-        /// CL_BaseMove
-        /// Send the intended movement message to the server
-        /// </summary>
         private static void BaseMove( ref usercmd_t cmd )
         {
             if( cls.signon != SIGNONS )
@@ -424,9 +406,7 @@ namespace SharpQuake
                 cmd.forwardmove -= _BackSpeed.Value * KeyState( ref ClientInput.BackBtn );
             }
 
-            //
             // adjust for speed key
-            //
             if( ClientInput.SpeedBtn.IsDown )
             {
                 cmd.forwardmove *= _MoveSpeedKey.Value;
@@ -435,8 +415,6 @@ namespace SharpQuake
             }
         }
 
-        // CL_AdjustAngles
-        //
         // Moves the local angle positions
         private static void AdjustAngles()
         {
@@ -479,41 +457,41 @@ namespace SharpQuake
                 cl.viewangles.Z = -50;
         }
 
-        // CL_KeyState
-        //
-        // Returns 0.25 if a key was pressed and released during the frame,
-        // 0.5 if it was pressed and held
-        // 0 if held then released, and
-        // 1.0 if held for the entire time
+        /* Returns 0.25 if a key was pressed and released during the frame,
+         * 0.5 if it was pressed and held
+         * 0 if held then released, and
+         * 1.0 if held for the entire time
+         */
+
         private static float KeyState( ref kbutton_t key )
         {
             bool impulsedown = ( key.state & 2 ) != 0;
             bool impulseup = ( key.state & 4 ) != 0;
-            bool down = key.IsDown;// ->state & 1;
+            bool down = key.IsDown;
             float val = 0;
 
             if( impulsedown && !impulseup )
                 if( down )
-                    val = 0.5f;	// pressed and held this frame
+                    val = 0.5f; // pressed and held this frame
                 else
-                    val = 0;	//	I_Error ();
+                    val = 0;
             if( impulseup && !impulsedown )
                 if( down )
-                    val = 0;	//	I_Error ();
+                    val = 0;
                 else
-                    val = 0;	// released this frame
+                    val = 0; // released this frame
             if( !impulsedown && !impulseup )
                 if( down )
-                    val = 1.0f;	// held the entire frame
+                    val = 1.0f; // held the entire frame
                 else
-                    val = 0;	// up the entire frame
+                    val = 0; // up the entire frame
             if( impulsedown && impulseup )
                 if( down )
-                    val = 0.75f;	// released and re-pressed this frame
+                    val = 0.75f; // released and re-pressed this frame
                 else
-                    val = 0.25f;	// pressed and released this frame
+                    val = 0.25f; // pressed and released this frame
 
-            key.state &= 1;		// clear impulses
+            key.state &= 1; // clear impulses
 
             return val;
         }

@@ -20,11 +20,7 @@
 /// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /// </copyright>
 
-//define	PARANOID			// speed sapping error checking
-
 using System;
-
-// quakedef.h
 
 namespace SharpQuake
 {
@@ -42,9 +38,7 @@ namespace SharpQuake
 
     public static class QStats
     {
-        //
         // stats are integers communicated to the client by the server
-        //
         public static int MAX_CL_STATS = 32;
 
         public static int STAT_HEALTH = 0;
@@ -60,15 +54,15 @@ namespace SharpQuake
         public static int STAT_ACTIVEWEAPON = 10;
         public static int STAT_TOTALSECRETS = 11;
         public static int STAT_TOTALMONSTERS = 12;
-        public static int STAT_SECRETS = 13;		// bumped on client side by svc_foundsecret
-        public static int STAT_MONSTERS = 14;		// bumped by svc_killedmonster
+        public static int STAT_SECRETS = 13; // bumped on client side by svc_foundsecret
+        public static int STAT_MONSTERS = 14; // bumped by svc_killedmonster
     }
 
     public static class QItems
     {
         // stock defines
-
         public static int IT_SHOTGUN = 1;
+
         public static int IT_SUPER_SHOTGUN = 2;
         public static int IT_NAILGUN = 4;
         public static int IT_SUPER_NAILGUN = 8;
@@ -91,10 +85,10 @@ namespace SharpQuake
         public static int IT_INVULNERABILITY = 1048576;
         public static int IT_SUIT = 2097152;
         public static int IT_QUAD = 4194304;
-        public static int IT_SIGIL1 = (1<<28);
-        public static int IT_SIGIL2 = (1<<29);
-        public static int IT_SIGIL3 = (1<<30);
-        public static int IT_SIGIL4 = (1<<31);
+        public static int IT_SIGIL1 = ( 1 << 28 );
+        public static int IT_SIGIL2 = ( 1 << 29 );
+        public static int IT_SIGIL3 = ( 1 << 30 );
+        public static int IT_SIGIL4 = ( 1 << 31 );
 
         //===========================================
         //rogue changed and added defines
@@ -117,39 +111,37 @@ namespace SharpQuake
         public static int RIT_MULTI_ROCKETS = 268435456;
         public static int RIT_SHIELD = 536870912;
         public static int RIT_ANTIGRAV = 1073741824;
-        public static int RIT_SUPERHEALTH = -2147483648;// 2147483648;
+        public static int RIT_SUPERHEALTH = -2147483648;
 
-        //MED 01/04/97 added hipnotic defines
-        //===========================================
-        //hipnotic added defines
+        // hypnotic
         public static int HIT_PROXIMITY_GUN_BIT = 16;
 
         public static int HIT_MJOLNIR_BIT = 7;
         public static int HIT_LASER_CANNON_BIT = 23;
-        public static int HIT_PROXIMITY_GUN = (1<<HIT_PROXIMITY_GUN_BIT);
-        public static int HIT_MJOLNIR = (1<<HIT_MJOLNIR_BIT);
-        public static int HIT_LASER_CANNON = (1<<HIT_LASER_CANNON_BIT);
-        public static int HIT_WETSUIT = (1<<(23+2));
-        public static int HIT_EMPATHY_SHIELDS = (1 << (23 + 3));
+        public static int HIT_PROXIMITY_GUN = ( 1 << HIT_PROXIMITY_GUN_BIT );
+        public static int HIT_MJOLNIR = ( 1 << HIT_MJOLNIR_BIT );
+        public static int HIT_LASER_CANNON = ( 1 << HIT_LASER_CANNON_BIT );
+        public static int HIT_WETSUIT = ( 1 << ( 23 + 2 ) );
+        public static int HIT_EMPATHY_SHIELDS = ( 1 << ( 23 + 3 ) );
         //===========================================
     }
 
     internal static class QDef
     {
-        public const float VERSION  = 1.09f;
+        public const float VERSION = 1.09f;
         public const float CSQUAKE_VERSION = 1.20f;
-        public const float GLQUAKE_VERSION  = 1.00f;
+        public const float GLQUAKE_VERSION = 1.00f;
         public const float D3DQUAKE_VERSION = 0.01f;
         public const float WINQUAKE_VERSION = 0.996f;
         public const float LINUX_VERSION = 1.30f;
         public const float X11_VERSION = 1.10f;
 
-        public const string GAMENAME = "id1";		// directory to look in by default
+        public const string GAMENAME = "id1"; // directory to look in by default
 
-        public const int MAX_NUM_ARGVS  = 50;
+        public const int MAX_NUM_ARGVS = 50;
 
         // up / down
-        public const int PITCH  = 0;
+        public const int PITCH = 0;
 
         // left / right
         public const int YAW = 1;
@@ -157,22 +149,20 @@ namespace SharpQuake
         // fall over
         public const int ROLL = 2;
 
-        public const int MAX_QPATH = 64;			// max length of a quake game pathname
-        public const int MAX_OSPATH = 128;			// max length of a filesystem pathname
+        public const int MAX_QPATH = 64; // max length of a quake game pathname
+        public const int MAX_OSPATH = 128; // max length of a filesystem pathname
 
-        public const float ON_EPSILON = 0.1f;		// point on plane side epsilon
+        public const float ON_EPSILON = 0.1f; // point on plane side epsilon
 
-        public const int MAX_MSGLEN = 8000;		// max length of a reliable message
-        public const int MAX_DATAGRAM = 1024;		// max length of unreliable message
+        public const int MAX_MSGLEN = 8000; // max length of a reliable message
+        public const int MAX_DATAGRAM = 1024; // max length of unreliable message
 
-        //
         // per-level limits
-        //
-        public const int MAX_EDICTS = 600;			// FIXME: ouch! ouch! ouch!
+        public const int MAX_EDICTS = 600; // FIXME: ouch! ouch! ouch!
 
         public const int MAX_LIGHTSTYLES = 64;
-        public const int MAX_MODELS = 256;			// these are sent over the net as bytes
-        public const int MAX_SOUNDS = 256;			// so they cannot be blindly increased
+        public const int MAX_MODELS = 256; // these are sent over the net as bytes
+        public const int MAX_SOUNDS = 256; // so they cannot be blindly increased
 
         public const int SAVEGAME_COMMENT_LENGTH = 39;
 
@@ -186,15 +176,15 @@ namespace SharpQuake
         public const double BACKFACE_EPSILON = 0.01;
     }
 
-    // entity_state_t;
+    /*the host system specifies the base of the directory tree, the
+     * command line parms passed to the program, and the amount of memory
+     * available for the program to use
+     */
 
-    // the host system specifies the base of the directory tree, the
-    // command line parms passed to the program, and the amount of memory
-    // available for the program to use
     internal class quakeparms_t
     {
         public string basedir;
-        public string cachedir;		// for development over ISDN lines
+        public string cachedir; // for development over ISDN lines
         public string[] argv;
 
         public quakeparms_t()
@@ -202,5 +192,5 @@ namespace SharpQuake
             this.basedir = String.Empty;
             this.cachedir = String.Empty;
         }
-    }// quakeparms_t;
+    }
 }

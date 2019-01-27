@@ -23,21 +23,18 @@
 using System;
 using OpenTK;
 
-// client.h
-
 namespace SharpQuake
 {
     internal struct lightstyle_t
     {
-        //public int length;
-        public string map; // [MAX_STYLESTRING];
+        public string map;
     }
 
     internal enum cactive_t
     {
-        ca_dedicated, 		// a dedicated server with no ability to start a client
-        ca_disconnected, 	// full screen console with no connection
-        ca_connected		// valid netcon, talking to a server
+        ca_dedicated,   // a dedicated server with no ability to start a client
+        ca_disconnected,  // full screen console with no connection
+        ca_connected  // valid netcon, talking to a server
     }
 
     internal struct usercmd_t
@@ -59,9 +56,6 @@ namespace SharpQuake
         }
     }
 
-    //
-    // cl_input
-    //
     internal struct kbutton_t
     {
         public bool IsDown
@@ -72,8 +66,9 @@ namespace SharpQuake
             }
         }
 
-        public int down0, down1;        // key nums holding it down
-        public int state;			// low bit is down state
+        public int down0; // key nums holding this button down
+        public int down1;
+        public int state; // low bit is down state
     }
 
     static partial class Client
@@ -102,10 +97,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// cl_entities[cl.viewentity]
-        /// Player model (visible when out of body)
-        /// </summary>
         public static entity_t ViewEntity
         {
             get
@@ -114,10 +105,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// cl.viewent
-        /// Weapon model (only visible from inside body)
-        /// </summary>
         public static entity_t ViewEnt
         {
             get
@@ -230,7 +217,7 @@ namespace SharpQuake
             }
         }
 
-        public const int SIGNONS = 4;	// signon messages to receive before connected
+        public const int SIGNONS = 4; // signon messages to receive before connected
         public const int MAX_DLIGHTS = 32;
         public const int MAX_BEAMS = 24;
         public const int MAX_EFRAGS = 640;
@@ -240,43 +227,40 @@ namespace SharpQuake
         public const int MAX_VISEDICTS = 256;
 
         public static int NumVisEdicts;
-        private const int MAX_TEMP_ENTITIES = 64;	// lightning bolts, etc
-        private const int MAX_STATIC_ENTITIES = 128;			// torches, etc
+        private const int MAX_TEMP_ENTITIES = 64; // lightning bolts, etc
+        private const int MAX_STATIC_ENTITIES = 128; // torches, etc
 
         private static client_static_t _Static = new client_static_t();
         private static client_state_t _State = new client_state_t();
 
-        private static efrag_t[] _EFrags = new efrag_t[MAX_EFRAGS]; // cl_efrags
-        private static entity_t[] _Entities = new entity_t[QDef.MAX_EDICTS]; // cl_entities
-        private static entity_t[] _StaticEntities = new entity_t[MAX_STATIC_ENTITIES]; // cl_static_entities
-        private static lightstyle_t[] _LightStyle = new lightstyle_t[QDef.MAX_LIGHTSTYLES]; // cl_lightstyle
-        private static dlight_t[] _DLights = new dlight_t[MAX_DLIGHTS]; // cl_dlights
+        private static efrag_t[] _EFrags = new efrag_t[MAX_EFRAGS];
+        private static entity_t[] _Entities = new entity_t[QDef.MAX_EDICTS];
+        private static entity_t[] _StaticEntities = new entity_t[MAX_STATIC_ENTITIES];
+        private static lightstyle_t[] _LightStyle = new lightstyle_t[QDef.MAX_LIGHTSTYLES];
+        private static dlight_t[] _DLights = new dlight_t[MAX_DLIGHTS];
 
-        private static Cvar _Name;// = { "_cl_name", "player", true };
-        private static Cvar _Color;// = { "_cl_color", "0", true };
-        private static Cvar _ShowNet;// = { "cl_shownet", "0" };	// can be 0, 1, or 2
-        private static Cvar _NoLerp;// = { "cl_nolerp", "0" };
-        private static Cvar _LookSpring;// = { "lookspring", "0", true };
-        private static Cvar _LookStrafe;// = { "lookstrafe", "0", true };
-        private static Cvar _Sensitivity;// = { "sensitivity", "3", true };
-        private static Cvar _MPitch;// = { "m_pitch", "0.022", true };
-        private static Cvar _MYaw;// = { "m_yaw", "0.022", true };
-        private static Cvar _MForward;// = { "m_forward", "1", true };
-        private static Cvar _MSide;// = { "m_side", "0.8", true };
-        private static Cvar _UpSpeed;// = { "cl_upspeed", "200" };
-        private static Cvar _ForwardSpeed;// = { "cl_forwardspeed", "200", true };
-        private static Cvar _BackSpeed;// = { "cl_backspeed", "200", true };
-        private static Cvar _SideSpeed;// = { "cl_sidespeed", "350" };
-        private static Cvar _MoveSpeedKey;// = { "cl_movespeedkey", "2.0" };
-        private static Cvar _YawSpeed;// = { "cl_yawspeed", "140" };
-        private static Cvar _PitchSpeed;// = { "cl_pitchspeed", "150" };
-        private static Cvar _AngleSpeedKey;// = { "cl_anglespeedkey", "1.5" };
+        private static Cvar _Name;
+        private static Cvar _Color;
+        private static Cvar _ShowNet; // can be 0, 1, or 2
+        private static Cvar _NoLerp;
+        private static Cvar _LookSpring;
+        private static Cvar _LookStrafe;
+        private static Cvar _Sensitivity;
+        private static Cvar _MPitch;
+        private static Cvar _MYaw;
+        private static Cvar _MForward;
+        private static Cvar _MSide;
+        private static Cvar _UpSpeed;
+        private static Cvar _ForwardSpeed;
+        private static Cvar _BackSpeed;
+        private static Cvar _SideSpeed;
+        private static Cvar _MoveSpeedKey;
+        private static Cvar _YawSpeed;
+        private static Cvar _PitchSpeed;
+        private static Cvar _AngleSpeedKey;
 
-        // cl_numvisedicts
-        private static entity_t[] _VisEdicts = new entity_t[MAX_VISEDICTS]; // cl_visedicts[MAX_VISEDICTS]
+        private static entity_t[] _VisEdicts = new entity_t[MAX_VISEDICTS];
     }
-
-    // lightstyle_t;
 
     internal static class ColorShift
     {
@@ -289,24 +273,21 @@ namespace SharpQuake
 
     internal class scoreboard_t
     {
-        public string name; //[MAX_SCOREBOARDNAME];
-
-        //public float entertime;
-        public int      frags;
-
-        public int      colors;			// two 4 bit fields
-        public byte[] translations; // [VID_GRADES*256];
+        public string name;
+        public int frags;
+        public int colors; // two 4 bit fields
+        public byte[] translations;
 
         public scoreboard_t()
         {
             this.translations = new byte[Vid.VID_GRADES * 256];
         }
-    } // scoreboard_t;
+    }
 
     internal class cshift_t
     {
-        public int[] destcolor; // [3];
-        public int percent;		// 0-256
+        public int[] destcolor;
+        public int percent; // 0-256
 
         public void Clear()
         {
@@ -330,15 +311,15 @@ namespace SharpQuake
             this.destcolor = destColor;
             this.percent = percent;
         }
-    } // cshift_t;
+    }
 
     internal class dlight_t
     {
         public Vector3 origin;
         public float radius;
-        public float die;				// stop lighting after this time
-        public float decay;				// drop this each second
-        public float minlight;			// don't add when contributing less
+        public float die; // stop lighting after this time
+        public float decay; // drop this each second
+        public float minlight; // don't add when contributing less
         public int key;
 
         public void Clear()
@@ -350,14 +331,15 @@ namespace SharpQuake
             this.minlight = 0;
             this.key = 0;
         }
-    } //dlight_t;
+    }
 
     internal class beam_t
     {
         public int entity;
         public model_t model;
         public float endtime;
-        public Vector3 start, end;
+        public Vector3 start;
+        public Vector3 end;
 
         public void Clear()
         {
@@ -367,27 +349,21 @@ namespace SharpQuake
             this.start = Vector3.Zero;
             this.end = Vector3.Zero;
         }
-    } // beam_t;
+    }
 
-    // cactive_t;
-
-    //
-    // the client_static_t structure is persistant through an arbitrary number
-    // of server connections
-    //
     internal class client_static_t
     {
         public cactive_t state;
 
         // personalization data sent to server
-        public string mapstring; // [MAX_QPATH];
+        public string mapstring;
 
-        public string spawnparms;//[MAX_MAPSTRING];	// to restart a level
+        public string spawnparms; // to restart a level
 
         // demo loop control
-        public int demonum;		// -1 = don't play demos
+        public int demonum; // -1 = don't play demos
 
-        public string[] demos; // [MAX_DEMOS][MAX_DEMONAME];		// when not playing
+        public string[] demos; // when not playing
 
         // demo recording info must be here, because record is started before
         // entering a map (and clearing client_state_t)
@@ -395,63 +371,58 @@ namespace SharpQuake
 
         public bool demoplayback;
         public bool timedemo;
-        public int forcetrack;			// -1 = use normal cd track
-        public IDisposable demofile; // DisposableWrapper<BinaryReader|BinaryWriter> // FILE*
-        public int td_lastframe;		// to meter out one message a frame
-        public int td_startframe;		// host_framecount at start
-        public float td_starttime;		// realtime at second frame of timedemo
+        public int forcetrack; // -1 = use normal cd track
+        public IDisposable demofile;
+        public int td_lastframe; // to meter out one message a frame
+        public int td_startframe; // host_framecount at start
+        public float td_starttime; // realtime at second frame of timedemo
 
         // connection information
-        public int signon;			// 0 to SIGNONS
+        public int signon; // 0 to SIGNONS
 
-        public qsocket_t netcon; // qsocket_t	*netcon;
-        public MsgWriter message; // sizebuf_t	message;		// writing buffer to send to server
+        public qsocket_t netcon;
+        public MsgWriter message; // writing buffer to send to server
 
         public client_static_t()
         {
             this.demos = new string[Client.MAX_DEMOS];
             this.message = new MsgWriter( 1024 ); // like in Client_Init()
         }
-    } // client_static_t;
+    }
 
-    //
-    // the client_state_t structure is wiped completely at every
-    // server signon
-    //
+    /* the client_state_t structure is wiped completely at every server signon
+     */
+
     internal class client_state_t
     {
-        public int movemessages;	// since connecting to this server
-
-        // throw out the first couple, so the player
-        // doesn't accidentally do something the
-        // first frame
-        public usercmd_t cmd;			// last command sent to the server
+        public int movemessages; // since connecting to this server
+        public usercmd_t cmd; // last command sent to the server
 
         // information for local display
-        public int[] stats; //[MAX_CL_STATS];	// health, etc
+        public int[] stats; // health, etc
 
-        public int items;			// inventory bit flags
-        public float[] item_gettime; //[32];	// cl.time of aquiring item, for blinking
-        public float faceanimtime;	// use anim frame if cl.time < this
+        public int items; // inventory bit flags
+        public float[] item_gettime; // cl.time of aquiring item, for blinking
+        public float faceanimtime; // use anim frame if cl.time < this
 
-        public cshift_t[] cshifts; //[NUM_CSHIFTS];	// color shifts for damage, powerups
-        public cshift_t[] prev_cshifts; //[NUM_CSHIFTS];	// and content types
+        public cshift_t[] cshifts; // color shifts for damage, powerups
+        public cshift_t[] prev_cshifts;  // and content types
 
         // the client maintains its own idea of view angles, which are
         // sent to the server each frame.  The server sets punchangle when
         // the view is temporarliy offset, and an angle reset commands at the start
         // of each level and after teleporting.
-        public Vector3[] mviewangles; //[2];	// during demo playback viewangles is lerped
+        public Vector3[] mviewangles; // during demo playback viewangles is lerped
 
-        // between these
+        // ^ between these v
         public Vector3 viewangles;
 
-        public Vector3[] mvelocity; //[2];	// update by server, used for lean+bob
+        public Vector3[] mvelocity; // update by server, used for lean+bob
 
         // (0 is newest)
-        public Vector3 velocity;		// lerped between mvelocity[0] and [1]
+        public Vector3 velocity; // lerped between mvelocity[0] and [1]
 
-        public Vector3 punchangle;		// temporary offset
+        public Vector3 punchangle; // temporary offset
 
         // pitch drifting vars
         public float idealpitch;
@@ -462,50 +433,45 @@ namespace SharpQuake
         public double laststop;
 
         public float viewheight;
-        public float crouch;			// local amount for smoothing stepups
+        public float crouch; // local amount for smoothing stepups
 
-        public bool paused;			// send over by server
+        public bool paused; // send over by server
         public bool onground;
         public bool inwater;
 
-        public int intermission;	// don't change view angle, full screen, etc
-        public int completed_time;	// latched at intermission start
+        public int intermission; // don't change view angle, full screen, etc
+        public int completed_time; // latched at intermission start
 
-        public double[] mtime; //[2];		// the timestamp of last two messages
-        public double time;			// clients view of time, should be between
+        public double[] mtime; // the timestamp of last two messages
+        public double time; // clients view of time, should be between
 
-        // servertime and oldservertime to generate
-        // a lerp point for other data
-        public double oldtime;		// previous cl.time, time-oldtime is used
+        // servertime and oldservertime to generate a lerp point for other data
+        public double oldtime; // previous cl.time, time-oldtime is used to decay light values and smooth step ups
 
-        // to decay light values and smooth step ups
+        public float last_received_message; // (realtime) for net trouble icon
 
-        public float last_received_message;	// (realtime) for net trouble icon
+        /* information that is static for the entire time connected to a server
+        */
+        public model_t[] model_precache;
+        public sfx_t[] sound_precache;
 
-        //
-        // information that is static for the entire time connected to a server
-        //
-        public model_t[] model_precache; // [MAX_MODELS];
-
-        public sfx_t[] sound_precache; // [MAX_SOUNDS];
-
-        public string levelname; // char[40];	// for display on solo scoreboard
-        public int viewentity;		// cl_entitites[cl.viewentity] = player
+        public string levelname; // for display on solo scoreboard
+        public int viewentity;
         public int maxclients;
         public int gametype;
 
         // refresh related state
-        public model_t worldmodel;	// cl_entitites[0].model
+        public model_t worldmodel;
 
         public efrag_t free_efrags; // first free efrag in list
-        public int num_entities;	// held in cl_entities array
-        public int num_statics;	// held in cl_staticentities array
-        public entity_t viewent;			// the gun model
+        public int num_entities; // held in cl_entities array
+        public int num_statics; // held in cl_staticentities array
+        public entity_t viewent; // the gun model
 
-        public int cdtrack, looptrack;	// cd audio
+        public int cdtrack, looptrack; // cd audio
 
         // frag scoreboard
-        public scoreboard_t[] scores;		// [cl.maxclients]
+        public scoreboard_t[] scores;
 
         public bool HasItems( int item )
         {
@@ -579,7 +545,7 @@ namespace SharpQuake
         public client_state_t()
         {
             this.stats = new int[QStats.MAX_CL_STATS];
-            this.item_gettime = new float[32]; // ???????????
+            this.item_gettime = new float[32];
 
             this.cshifts = new cshift_t[ColorShift.NUM_CSHIFTS];
             for( int i = 0; i < ColorShift.NUM_CSHIFTS; i++ )
@@ -589,16 +555,12 @@ namespace SharpQuake
             for( int i = 0; i < ColorShift.NUM_CSHIFTS; i++ )
                 this.prev_cshifts[i] = new cshift_t();
 
-            this.mviewangles = new Vector3[2]; //??????
+            this.mviewangles = new Vector3[2];
             this.mvelocity = new Vector3[2];
             this.mtime = new double[2];
             this.model_precache = new model_t[QDef.MAX_MODELS];
             this.sound_precache = new sfx_t[QDef.MAX_SOUNDS];
             this.viewent = new entity_t();
         }
-    } //client_state_t;
-
-    // usercmd_t;
-
-    // kbutton_t;
+    }
 }

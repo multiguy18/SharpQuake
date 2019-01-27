@@ -24,11 +24,9 @@ using System;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-// gl_warp.c
-
 namespace SharpQuake
 {
-    partial class Render
+    internal partial class Render
     {
         private const double TURBSCALE = ( 256.0 / ( 2 * Math.PI ) );
 
@@ -69,14 +67,12 @@ namespace SharpQuake
             -1.56072f, -1.3677f, -1.17384f, -0.979285f, -0.784137f, -0.588517f, -0.392541f, -0.19633f
         };
 
-        private static int _SolidSkyTexture; // solidskytexture
-        private static int _AlphaSkyTexture; // alphaskytexture
+        private static int _SolidSkyTexture;
+        private static int _AlphaSkyTexture;
 
         private static msurface_t _WarpFace; // used by SubdivideSurface()
 
         /// <summary>
-        /// R_InitSky
-        /// called at level load
         /// A sky texture is 256*128, with the right side being a masked overlay
         /// </summary>
         public static void InitSky( texture_t mt )
@@ -84,8 +80,7 @@ namespace SharpQuake
             byte[] src = mt.pixels;
             int offset = mt.offsets[0];
 
-            // make an average value for the back to avoid
-            // a fringe on the top level
+            // make an average value for the back to avoid a fringe on the top level
             const int size = 128 * 128;
             uint[] trans = new uint[size];
             uint[] v8to24 = Vid.Table8to24;
@@ -135,7 +130,6 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// GL_SubdivideSurface
         /// Breaks a polygon up along axial 64 unit boundaries
         /// so that turbulent and sky warps can be done reasonably.
         /// </summary>
@@ -143,9 +137,7 @@ namespace SharpQuake
         {
             _WarpFace = fa;
 
-            //
             // convert edges back to a normal polygon
-            //
             int numverts = 0;
             Vector3[] verts = new Vector3[fa.numedges + 1]; // + 1 for wrap case
             model_t loadmodel = Mod.Model;
@@ -164,9 +156,6 @@ namespace SharpQuake
             SubdividePolygon( numverts, verts );
         }
 
-        /// <summary>
-        /// SubdividePolygon
-        /// </summary>
         private static void SubdividePolygon( int numverts, Vector3[] verts )
         {
             if( numverts > 60 )
@@ -191,8 +180,6 @@ namespace SharpQuake
 
                 Vector3[] front = new Vector3[64];
                 Vector3[] back = new Vector3[64];
-
-                // cut it
 
                 // wrap cases
                 dist[numverts] = dist[0];
@@ -242,9 +229,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// BoundPoly
-        /// </summary>
         private static void BoundPoly( int numverts, Vector3[] verts, out Vector3 mins, out Vector3 maxs )
         {
             mins = Vector3.One * 9999;
@@ -256,10 +240,7 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// EmitWaterPolys
-        /// Does a water warp on the pre-fragmented glpoly_t chain
-        /// </summary>
+        // Does a water warp on the pre-fragmented glpoly_t chain
         private static void EmitWaterPolys( msurface_t fa )
         {
             for( glpoly_t p = fa.polys; p != null; p = p.next )
@@ -284,9 +265,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// EmitSkyPolys
-        /// </summary>
         private static void EmitSkyPolys( msurface_t fa )
         {
             for( glpoly_t p = fa.polys; p != null; p = p.next )
@@ -311,9 +289,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_DrawSkyChain
-        /// </summary>
         private static void DrawSkyChain( msurface_t s )
         {
             DisableMultitexture();
@@ -337,12 +312,10 @@ namespace SharpQuake
             GL.Disable( EnableCap.Blend );
         }
 
-        /// <summary>
-        /// EmitBothSkyLayers
-        /// Does a sky warp on the pre-fragmented glpoly_t chain
-        /// This will be called for brushmodels, the world
-        /// will have them chained together.
-        /// </summary>
+        /* Does a sky warp on the pre-fragmented glpoly_t chain
+         * This will be called for brushmodels, the world will have them chained together.
+         */
+
         private static void EmitBothSkyLayers( msurface_t fa )
         {
             DisableMultitexture();

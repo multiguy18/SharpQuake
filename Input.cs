@@ -25,13 +25,8 @@ using System.Windows.Forms;
 using OpenTK;
 using OpenTK.Input;
 
-// input.h -- external (non-keyboard) input devices
-
 namespace SharpQuake
 {
-    /// <summary>
-    /// In_functions
-    /// </summary>
     internal static class Input
     {
         public static bool IsMouseActive
@@ -53,17 +48,16 @@ namespace SharpQuake
             }
         }
 
-        private static Cvar _MouseFilter;// = { "m_filter", "0" };
-        private static Vector2 _OldMouse; // old_mouse_x, old_mouse_y
-        private static Vector2 _Mouse; // mouse_x, mouse_y
-        private static Vector2 _MouseAccum; // mx_accum, my_accum
-        private static bool _IsMouseActive; // mouseactive
-        private static int _MouseButtons; // mouse_buttons
-        private static int _MouseOldButtonState; // mouse_oldbuttonstate
-        private static bool _MouseActivateToggle; // mouseactivatetoggle
-        private static bool _MouseShowToggle = true; // mouseshowtoggle
+        private static Cvar _MouseFilter;
+        private static Vector2 _OldMouse;
+        private static Vector2 _Mouse;
+        private static Vector2 _MouseAccum;
+        private static bool _IsMouseActive;
+        private static int _MouseButtons;
+        private static int _MouseOldButtonState;
+        private static bool _MouseActivateToggle;
+        private static bool _MouseShowToggle = true;
 
-        // IN_Init
         public static void Init()
         {
             if( _MouseFilter == null )
@@ -74,63 +68,38 @@ namespace SharpQuake
             _IsMouseActive = ( Mouse.GetState( 0 ).IsConnected != false );
             if( _IsMouseActive )
             {
-                _MouseButtons = 3; //??? TODO: properly upgrade this to 3.0.1
+                _MouseButtons = 3; //TODO: properly upgrade this to 3.0.1
             }
         }
 
-        /// <summary>
-        /// IN_Shutdown
-        /// </summary>
         public static void Shutdown()
         {
             DeactivateMouse();
             ShowMouse();
         }
 
-        // IN_Commands
-        // oportunity for devices to stick commands on the script buffer
         public static void Commands()
         {
-            // joystick not supported
         }
 
-        /// <summary>
-        /// IN_ActivateMouse
-        /// </summary>
         public static void ActivateMouse()
         {
             _MouseActivateToggle = true;
 
             if( Mouse.GetState( 0 ).IsConnected != false )
             {
-                //if (mouseparmsvalid)
-                //    restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
-
                 Cursor.Position = Input.WindowCenter;
-
-                //SetCapture(mainwindow);
-
-                //Cursor.Clip = MainForm.Instance.Bounds;
 
                 _IsMouseActive = true;
             }
         }
 
-        /// <summary>
-        /// IN_DeactivateMouse
-        /// </summary>
         public static void DeactivateMouse()
         {
             _MouseActivateToggle = false;
-
-            //Cursor.Clip = Screen.PrimaryScreen.Bounds;
-
             _IsMouseActive = false;
         }
 
-        /// <summary>
-        /// IN_HideMouse
-        /// </summary>
         public static void HideMouse()
         {
             if( _MouseShowToggle )
@@ -140,9 +109,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// IN_ShowMouse
-        /// </summary>
         public static void ShowMouse()
         {
             if( !_MouseShowToggle )
@@ -155,8 +121,6 @@ namespace SharpQuake
             }
         }
 
-        // IN_Move
-        // add additional movement on top of the keyboard move cmd
         public static void Move( usercmd_t cmd )
         {
             if( !MainForm.Instance.Focused )
@@ -168,8 +132,6 @@ namespace SharpQuake
             MouseMove( cmd );
         }
 
-        // IN_ClearStates
-        // restores all button and position states to defaults
         public static void ClearStates()
         {
             if( _IsMouseActive )
@@ -179,9 +141,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// IN_MouseEvent
-        /// </summary>
         public static void MouseEvent( int mstate )
         {
             if( _IsMouseActive )
@@ -204,9 +163,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// IN_MouseMove
-        /// </summary>
         private static void MouseMove( usercmd_t cmd )
         {
             if( !_IsMouseActive )
@@ -246,8 +202,7 @@ namespace SharpQuake
 
             Client.cl.viewangles.X += Client.MPitch * _Mouse.Y;
 
-            // modernized to always use mouse look
-            Client.cl.viewangles.X = MathHelper.Clamp( Client.cl.viewangles.X, -70, 80 );
+            Client.cl.viewangles.X = MathHelper.Clamp( Client.cl.viewangles.X, -75, 85 );
 
             // if the mouse has moved, force it to the center, so there's room to move
             if( mx != 0 || my != 0 )

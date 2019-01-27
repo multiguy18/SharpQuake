@@ -27,8 +27,6 @@ using System.IO;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-// vid.h -- video driver defs
-
 namespace SharpQuake
 {
     internal struct vrect_t
@@ -36,9 +34,6 @@ namespace SharpQuake
         public int x, y, width, height;
     }
 
-    /// <summary>
-    /// Vid_functions
-    /// </summary>
     internal static class Vid
     {
         public static ushort[] Table8to16
@@ -114,51 +109,50 @@ namespace SharpQuake
         }
 
         public const int VID_CBITS = 6;
-        public const int VID_GRADES = (1 << VID_CBITS);
+        public const int VID_GRADES = ( 1 << VID_CBITS );
         public const int VID_ROW_SIZE = 3;
         private const int WARP_WIDTH = 320;
         private const int WARP_HEIGHT = 200;
-        private static ushort[] _8to16table = new ushort[256]; // d_8to16table[256]
-        private static uint[] _8to24table = new uint[256]; // d_8to24table[256]
-        private static byte[] _15to8table = new byte[65536]; // d_15to8table[65536]
+        private static ushort[] _8to16table = new ushort[256];
+        private static uint[] _8to24table = new uint[256];
+        private static byte[] _15to8table = new byte[65536];
 
         private static mode_t[] _Modes;
-        private static int _ModeNum; // vid_modenum
+        private static int _ModeNum;
 
-        private static Cvar _glZTrick;// = { "gl_ztrick", "1" };
-        private static Cvar _Mode;// = { "vid_mode", "0", false };
+        private static Cvar _glZTrick;
+        private static Cvar _Mode;
 
         // Note that 0 is MODE_WINDOWED
-        private static Cvar _DefaultMode;// = { "_vid_default_mode", "0", true };
+        private static Cvar _DefaultMode;
 
         // Note that 3 is MODE_FULLSCREEN_DEFAULT
-        private static Cvar _DefaultModeWin;// = { "_vid_default_mode_win", "3", true };
+        private static Cvar _DefaultModeWin;
 
-        private static Cvar _Wait;// = { "vid_wait", "0" };
-        private static Cvar _NoPageFlip;// = { "vid_nopageflip", "0", true };
-        private static Cvar _WaitOverride;// = { "_vid_wait_override", "0", true };
-        private static Cvar _ConfigX;// = { "vid_config_x", "800", true };
-        private static Cvar _ConfigY;// = { "vid_config_y", "600", true };
-        private static Cvar _StretchBy2;// = { "vid_stretch_by_2", "1", true };
-        private static Cvar _WindowedMouse;// = { "_windowed_mouse", "1", true };
+        private static Cvar _Wait;
+        private static Cvar _NoPageFlip;
+        private static Cvar _WaitOverride;
+        private static Cvar _ConfigX;
+        private static Cvar _ConfigY;
+        private static Cvar _StretchBy2;
+        private static Cvar _WindowedMouse;
 
-        private static bool _Windowed; // windowed
-
-        //private static bool _IsInitialized; // vid_initialized
-        private static float _Gamma = 1.0f; // vid_gamma
+        private static bool _Windowed;
+        private static float _Gamma = 1.0f;
 
         private static int _DefModeNum;
-        private static bool _glMTexable = false; // gl_mtexable
+        private static bool _glMTexable = false;
 
-        private static string _glVendor; // gl_vendor
-        private static string _glRenderer; // gl_renderer
-        private static string _glVersion; // gl_version
-        private static string _glExtensions; // gl_extensions
+        private static string _glVendor;
+        private static string _glRenderer;
+        private static string _glVersion;
+        private static string _glExtensions;
 
-        // VID_Init (unsigned char *palette)
-        // Called at startup to set up translation tables, takes 256 8 bit RGB values
-        // the palette data will go away after the call, so it must be copied off if
-        // the video driver will need it again
+        /* Called at startup to set up translation tables, takes 256 8 bit RGB values
+         * the palette data will go away after the call, so it must be copied off if
+         * the video driver will need it again
+         */
+
         public static void Init( byte[] palette )
         {
             if( _glZTrick == null )
@@ -316,18 +310,14 @@ namespace SharpQuake
             Directory.CreateDirectory( Path.Combine( Common.GameDir, "glquake" ) );
         }
 
-        /// <summary>
-        /// VID_Shutdown
-        /// Called at shutdown
-        /// </summary>
         public static void Shutdown()
         {
-            //_IsInitialized = false;
         }
 
-        // VID_SetMode (int modenum, unsigned char *palette)
-        // sets the mode; only used by the Quake engine for resetting to mode 0 (the
-        // base mode) on memory allocation failures
+        /* sets the mode. only used by the Quake engine for resetting to mode 0 (the base mode)
+         * on memory allocation failures
+         */
+
         public static void SetMode( int modenum, byte[] palette )
         {
             if( modenum < 0 || modenum >= _Modes.Length )
@@ -403,9 +393,6 @@ namespace SharpQuake
             vid.recalc_refdef = true;
         }
 
-        /// <summary>
-        /// VID_GetModeDescription
-        /// </summary>
         public static string GetModeDescription( int mode )
         {
             if( mode < 0 || mode >= _Modes.Length )
@@ -415,15 +402,10 @@ namespace SharpQuake
             return String.Format( "{0}x{1}x{2} {3}", m.width, m.height, m.bpp, _Windowed ? "windowed" : "fullscreen" );
         }
 
-        /// <summary>
-        /// VID_SetPalette
-        /// called at startup and after any gamma correction
-        /// </summary>
+        // called at startup and after any gamma correction
         public static void SetPalette( byte[] palette )
         {
-            //
             // 8 8 8 encoding
-            //
             int offset = 0;
             byte[] pal = palette;
             uint[] table = _8to24table;
@@ -437,7 +419,7 @@ namespace SharpQuake
                 offset += 3;
             }
 
-            table[255] &= 0xffffff;	// 255 is transparent
+            table[255] &= 0xffffff; // 255 is transparent
 
             // JACK: 3D distance calcs - k is last closest, l is the distance.
             // FIXME: Precalculate this and cache to disk.
@@ -471,9 +453,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// GL_Init
-        /// </summary>
         private static void InitOpenGL()
         {
             _glVendor = GL.GetString( StringName.Vendor );
@@ -512,7 +491,6 @@ namespace SharpQuake
             GL.TexEnv( TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Replace );
         }
 
-        // VID_NumModes_f
         private static void NumModes_f()
         {
             int nummodes = _Modes.Length;
@@ -522,13 +500,11 @@ namespace SharpQuake
                 Con.Print( "{0} video modes are available\n", nummodes );
         }
 
-        // VID_DescribeCurrentMode_f
         private static void DescribeCurrentMode_f()
         {
             Con.Print( "{0}\n", GetExtModeDescription( _ModeNum ) );
         }
 
-        // VID_DescribeMode_f
         private static void DescribeMode_f()
         {
             int modenum = Common.atoi( Cmd.Argv( 1 ) );
@@ -536,7 +512,6 @@ namespace SharpQuake
             Con.Print( "{0}\n", GetExtModeDescription( modenum ) );
         }
 
-        // VID_DescribeModes_f
         private static void DescribeModes_f()
         {
             for( int i = 0; i < _Modes.Length; i++ )
@@ -550,7 +525,6 @@ namespace SharpQuake
             return GetModeDescription( mode );
         }
 
-        // Check_Gamma
         private static void CheckGamma( byte[] pal )
         {
             int i = Common.CheckParm( "-gamma" );
@@ -578,7 +552,6 @@ namespace SharpQuake
             }
         }
 
-        // ClearAllStates
         private static void ClearAllStates()
         {
             // send an up event for each key, to make sure the server clears them all
@@ -591,9 +564,6 @@ namespace SharpQuake
             Input.ClearStates();
         }
 
-        /// <summary>
-        /// CheckTextureExtensions
-        /// </summary>
         private static void CheckTextureExtensions()
         {
             const string TEXTURE_EXT_STRING = "GL_EXT_texture_object";
@@ -602,9 +572,6 @@ namespace SharpQuake
             bool texture_ext = _glExtensions.Contains( TEXTURE_EXT_STRING );
         }
 
-        /// <summary>
-        /// CheckMultiTextureExtensions
-        /// </summary>
         private static void CheckMultiTextureExtensions()
         {
             if( _glExtensions.Contains( "GL_SGIS_multitexture " ) && !Common.HasParam( "-nomtex" ) )
@@ -615,23 +582,21 @@ namespace SharpQuake
         }
     }
 
-    // vrect_t;
-
     internal class viddef_t
     {
-        public byte[] colormap;		// 256 * VID_GRADES size
-        public int fullbright;		// index of first fullbright color
-        public int rowbytes; // unsigned	// may be > width if displayed in a window
-        public int width; // unsigned
-        public int height; // unsigned
-        public float aspect;		// width / height -- < 0 is taller than wide
+        public byte[] colormap; // 256 * VID_GRADES size
+        public int fullbright; // index of first fullbright color
+        public int rowbytes; // may be > width if displayed in a window
+        public int width;
+        public int height;
+        public float aspect;  // width / height -- < 0 is taller than wide
         public int numpages;
-        public bool recalc_refdef;	// if true, recalc vid-based stuff
-        public int conwidth; // unsigned
-        public int conheight; // unsigned
+        public bool recalc_refdef; // if true, recalc vid-based stuff
+        public int conwidth;
+        public int conheight;
         public int maxwarpwidth;
         public int maxwarpheight;
-    } // viddef_t;
+    }
 
     internal class mode_t
     {

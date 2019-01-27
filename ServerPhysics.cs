@@ -25,15 +25,12 @@ using OpenTK;
 
 namespace SharpQuake
 {
-    partial class Server
+    internal partial class Server
     {
         private const float STOP_EPSILON = 0.1f;
         private const int MAX_CLIP_PLANES = 5;
         private const float STEPSIZE = 18;
 
-        /// <summary>
-        /// SV_Physics
-        /// </summary>
         public static void Physics()
         {
             // let the progs know that a new frame has started
@@ -42,9 +39,7 @@ namespace SharpQuake
             Progs.GlobalStruct.time = (float)sv.time;
             Progs.Execute( Progs.GlobalStruct.StartFrame );
 
-            //
             // treat each object in turn
-            //
             for( int i = 0; i < sv.num_edicts; i++ )
             {
                 edict_t ent = sv.edicts[i];
@@ -53,7 +48,7 @@ namespace SharpQuake
 
                 if( Progs.GlobalStruct.force_retouch != 0 )
                 {
-                    LinkEdict( ent, true );	// force retouch even for stationary
+                    LinkEdict( ent, true ); // force retouch even for stationary
                 }
 
                 if( i > 0 && i <= svs.maxclients )
@@ -96,10 +91,7 @@ namespace SharpQuake
             sv.time += Host.FrameTime;
         }
 
-        /// <summary>
-        /// SV_Physics_Toss
-        /// Toss, bounce, and fly movement.  When onground, do nothing.
-        /// </summary>
+        // Toss, bounce, and fly movement.  When on the ground, do nothing.
         private static void Physics_Toss( edict_t ent )
         {
             // regular thinking
@@ -153,18 +145,22 @@ namespace SharpQuake
             CheckWaterTransition( ent );
         }
 
-        /// <summary>
-        /// ClipVelocity
-        /// Slide off of the impacting object
-        /// returns the blocked flags (1 = floor, 2 = step / wall)
-        /// </summary>
+        /**
+         * <summary>
+         * Slide off of the impacting object.
+         * <para>
+         * returns the blocked flags (1 = floor, 2 = step / wall)
+         * </para>
+         * </summary>
+         */
+
         private static int ClipVelocity( ref v3f src, ref Vector3 normal, out v3f dest, float overbounce )
         {
             int blocked = 0;
             if( normal.Z > 0 )
-                blocked |= 1;       // floor
+                blocked |= 1; // floor
             if( normal.Z == 0 )
-                blocked |= 2;       // step
+                blocked |= 2; // step
 
             float backoff = ( src.x * normal.X + src.y * normal.Y + src.z * normal.Z ) * overbounce;
 
@@ -182,10 +178,7 @@ namespace SharpQuake
             return blocked;
         }
 
-        /// <summary>
-        /// PushEntity
-        /// Does not change the entities velocity at all
-        /// </summary>
+        // Does not change the entities velocity at all
         private static trace_t PushEntity( edict_t ent, ref v3f push )
         {
             v3f end;
@@ -209,9 +202,6 @@ namespace SharpQuake
             return trace;
         }
 
-        /// <summary>
-        /// SV_CheckWaterTransition
-        /// </summary>
         private static void CheckWaterTransition( edict_t ent )
         {
             Vector3 org = Common.ToVector( ref ent.v.origin );
@@ -247,9 +237,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// SV_AddGravity
-        /// </summary>
         private static void AddGravity( edict_t ent )
         {
             float val = Progs.GetEdictFieldFloat( ent, "gravity" );
@@ -258,9 +245,6 @@ namespace SharpQuake
             ent.v.velocity.z -= (float)( val * _Gravity.Value * Host.FrameTime );
         }
 
-        /// <summary>
-        /// SV_Physics_Step
-        /// </summary>
         private static void Physics_Step( edict_t ent )
         {
             bool hitsound;
@@ -278,7 +262,7 @@ namespace SharpQuake
                 FlyMove( ent, (float)Host.FrameTime, null );
                 LinkEdict( ent, true );
 
-                if( ( (int)ent.v.flags & EdictFlags.FL_ONGROUND ) != 0 )	// just hit ground
+                if( ( (int)ent.v.flags & EdictFlags.FL_ONGROUND ) != 0 ) // just hit ground
                 {
                     if( hitsound )
                         StartSound( ent, 0, "demon/dland2.wav", 255, 1 );
@@ -291,10 +275,6 @@ namespace SharpQuake
             CheckWaterTransition( ent );
         }
 
-        /// <summary>
-        /// SV_Physics_Noclip
-        /// A moving object that doesn't obey physics
-        /// </summary>
         private static void Physics_Noclip( edict_t ent )
         {
             // regular thinking
@@ -306,19 +286,12 @@ namespace SharpQuake
             LinkEdict( ent, false );
         }
 
-        /// <summary>
-        /// SV_Physics_None
-        /// Non moving objects can only think
-        /// </summary>
         private static void Physics_None( edict_t ent )
         {
             // regular thinking
             RunThink( ent );
         }
 
-        /// <summary>
-        /// SV_Physics_Pusher
-        /// </summary>
         private static void Physics_Pusher( edict_t ent )
         {
             float oldltime = ent.v.ltime;
@@ -335,7 +308,7 @@ namespace SharpQuake
 
             if( movetime != 0 )
             {
-                PushMove( ent, movetime );	// advances ent.v.ltime if not blocked
+                PushMove( ent, movetime ); // advances ent.v.ltime if not blocked
             }
 
             if( thinktime > oldltime && thinktime <= ent.v.ltime )
@@ -350,30 +323,21 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// SV_Physics_Client
-        /// Player character actions
-        /// </summary>
+        // player character actions
         private static void Physics_Client( edict_t ent, int num )
         {
             if( !svs.clients[num - 1].active )
-                return;		// unconnected slot
+                return;  // unconnected slot
 
-            //
             // call standard client pre-think
-            //
             Progs.GlobalStruct.time = (float)sv.time;
             Progs.GlobalStruct.self = EdictToProg( ent );
             Progs.Execute( Progs.GlobalStruct.PlayerPreThink );
 
-            //
             // do a move
-            //
             CheckVelocity( ent );
 
-            //
             // decide which move function to call
-            //
             switch( (int)ent.v.movetype )
             {
                 case Movetypes.MOVETYPE_NONE:
@@ -413,9 +377,7 @@ namespace SharpQuake
                     break;
             }
 
-            //
             // call standard player post-think
-            //
             LinkEdict( ent, true );
 
             Progs.GlobalStruct.time = (float)sv.time;
@@ -423,15 +385,10 @@ namespace SharpQuake
             Progs.Execute( Progs.GlobalStruct.PlayerPostThink );
         }
 
-        /// <summary>
-        /// SV_WalkMove
-        /// Only used by players
-        /// </summary>
+        // Only used by players
         private static void WalkMove( edict_t ent )
         {
-            //
             // do a regular slide move unless it looks like you ran into a step
-            //
             int oldonground = (int)ent.v.flags & EdictFlags.FL_ONGROUND;
             ent.v.flags = (int)ent.v.flags & ~EdictFlags.FL_ONGROUND;
 
@@ -441,13 +398,13 @@ namespace SharpQuake
             int clip = FlyMove( ent, (float)Host.FrameTime, steptrace );
 
             if( ( clip & 2 ) == 0 )
-                return;		// move didn't block on a step
+                return;  // move didn't block on a step
 
             if( oldonground == 0 && ent.v.waterlevel == 0 )
-                return;		// don't stair up while jumping
+                return;  // don't stair up while jumping
 
             if( ent.v.movetype != Movetypes.MOVETYPE_WALK )
-                return;		// gibbed by a trigger
+                return;  // gibbed by a trigger
 
             if( _NoStep.Value != 0 )
                 return;
@@ -458,10 +415,8 @@ namespace SharpQuake
             v3f nosteporg = ent.v.origin;
             v3f nostepvel = ent.v.velocity;
 
-            //
             // try moving up and forward to go up a step
-            //
-            ent.v.origin = oldorg;	// back to start pos
+            ent.v.origin = oldorg; // back to start pos
 
             v3f upmove = Common.ZeroVector3f;
             v3f downmove = upmove;
@@ -469,7 +424,7 @@ namespace SharpQuake
             downmove.z = (float)( -STEPSIZE + oldvel.z * Host.FrameTime );
 
             // move up
-            PushEntity( ent, ref upmove );	// FIXME: don't link?
+            PushEntity( ent, ref upmove ); // FIXME: don't link?
 
             // move forward
             ent.v.velocity.x = oldvel.x;
@@ -477,8 +432,7 @@ namespace SharpQuake
             ent.v.velocity.z = 0;
             clip = FlyMove( ent, (float)Host.FrameTime, steptrace );
 
-            // check for stuckness, possibly due to the limited precision of floats
-            // in the clipping hulls
+            // check for stuckness, possibly due to the limited precision of floats in the clipping hulls
             if( clip != 0 )
             {
                 if( Math.Abs( oldorg.y - ent.v.origin.y ) < 0.03125 && Math.Abs( oldorg.x - ent.v.origin.x ) < 0.03125 )
@@ -493,7 +447,7 @@ namespace SharpQuake
                 WallFriction( ent, steptrace );
 
             // move down
-            trace_t downtrace = PushEntity( ent, ref downmove );	// FIXME: don't link?
+            trace_t downtrace = PushEntity( ent, ref downmove ); // FIXME: don't link?
 
             if( downtrace.plane.normal.Z > 0.7 )
             {
@@ -505,23 +459,28 @@ namespace SharpQuake
             }
             else
             {
-                // if the push down didn't end up on good ground, use the move without
-                // the step up.  This happens near wall / slope combinations, and can
-                // cause the player to hop up higher on a slope too steep to climb
+                /* if the push down didn't end up on good ground, use the move without
+                 * the step up.  This happens near wall / slope combinations, and can
+                 * cause the player to hop up higher on a slope too steep to climb
+                 */
                 ent.v.origin = nosteporg;
                 ent.v.velocity = nostepvel;
             }
         }
 
-        /// <summary>
-        /// SV_TryUnstick
-        /// Player has come to a dead stop, possibly due to the problem with limited
-        /// float precision at some angle joins in the BSP hull.
-        ///
-        /// Try fixing by pushing one pixel in each direction.
-        ///
-        /// This is a hack, but in the interest of good gameplay...
-        /// </summary>
+        /**
+         * <summary>
+         * Player has come to a dead stop, possibly due to the problem with limited
+         * float precision at some angle joins in the BSP hull.
+         *
+         * <para>
+         * Try fixing by pushing one pixel in each direction.
+         * </para>
+         *
+         * This is a hack, but in the interest of good gameplay...
+         * </summary>
+         */
+
         private static int TryUnstick( edict_t ent, ref v3f oldvel )
         {
             v3f oldorg = ent.v.origin;
@@ -592,12 +551,9 @@ namespace SharpQuake
             }
 
             ent.v.velocity = Common.ZeroVector3f;
-            return 7;		// still not moving
+            return 7;  // still not moving
         }
 
-        /// <summary>
-        /// SV_WallFriction
-        /// </summary>
         private static void WallFriction( edict_t ent, trace_t trace )
         {
             Vector3 forward, right, up, vangle = Common.ToVector( ref ent.v.v_angle );
@@ -619,9 +575,7 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// SV_CheckStuck
-        /// This is a big hack to try and fix the rare case of getting stuck in the world
-        /// clipping hull.
+        /// This is a big hack to try and fix the rare case of getting stuck in the world clipping hull.
         /// </summary>
         private static void CheckStuck( edict_t ent )
         {
@@ -659,9 +613,6 @@ namespace SharpQuake
             Con.DPrint( "player is stuck.\n" );
         }
 
-        /// <summary>
-        /// SV_CheckWater
-        /// </summary>
         private static bool CheckWater( edict_t ent )
         {
             Vector3 point;
@@ -691,13 +642,15 @@ namespace SharpQuake
             return ent.v.waterlevel > 1;
         }
 
-        /// <summary>
-        /// SV_RunThink
-        /// Runs thinking code if time.  There is some play in the exact time the think
-        /// function will be called, because it is called before any movement is done
-        /// in a frame.  Not used for pushmove objects, because they must be exact.
-        /// Returns false if the entity removed itself.
-        /// </summary>
+        /**
+         * <summary>
+         * Runs thinking code if time. There is some play in the exact time the think
+         * function will be called, because it is called before any movement is done
+         * in a frame. Not used for pushmove objects, because they must be exact.
+         * Returns false if the entity removed itself.
+         * </summary>
+         */
+
         private static bool RunThink( edict_t ent )
         {
             float thinktime;
@@ -707,10 +660,9 @@ namespace SharpQuake
                 return true;
 
             if( thinktime < sv.time )
-                thinktime = (float)sv.time;	// don't let things stay in the past.
+                thinktime = (float)sv.time; // don't let things stay in the past.
 
-            // it is possible to start that way
-            // by a trigger with a local time.
+            // it is possible to start that way by a trigger with a local time.
             ent.v.nextthink = 0;
             Progs.GlobalStruct.time = thinktime;
             Progs.GlobalStruct.self = EdictToProg( ent );
@@ -720,14 +672,9 @@ namespace SharpQuake
             return !ent.free;
         }
 
-        /// <summary>
-        /// SV_CheckVelocity
-        /// </summary>
         private static void CheckVelocity( edict_t ent )
         {
-            //
             // bound velocity
-            //
             if( Mathlib.CheckNaN( ref ent.v.velocity, 0 ) )
             {
                 Con.Print( "Got a NaN velocity on {0}\n", Progs.GetString( ent.v.classname ) );
@@ -743,15 +690,17 @@ namespace SharpQuake
             Mathlib.Clamp( ref ent.v.velocity, ref min, ref max, out ent.v.velocity );
         }
 
-        /// <summary>
-        /// SV_FlyMove
-        /// The basic solid body movement clip that slides along multiple planes
-        /// Returns the clipflags if the velocity was modified (hit something solid)
-        /// 1 = floor
-        /// 2 = wall / step
-        /// 4 = dead stop
-        /// If steptrace is not NULL, the trace of any vertical wall hit will be stored
-        /// </summary>
+        /*
+         * The basic solid body movement clip that slides along multiple planes
+         * Returns the clipflags if the velocity was modified (hit something solid)
+         *
+         * 1 = floor
+         * 2 = wall / step
+         * 4 = dead stop
+         *
+         * If steptrace is not NULL, the trace of any vertical wall hit will be stored
+         */
+
         private static int FlyMove( edict_t ent, float time, trace_t steptrace )
         {
             v3f original_velocity = ent.v.velocity;
@@ -774,27 +723,29 @@ namespace SharpQuake
                 trace_t trace = Move( ref ent.v.origin, ref ent.v.mins, ref ent.v.maxs, ref end, 0, ent );
 
                 if( trace.allsolid )
-                {	// entity is trapped in another solid
+                {
+                    // entity is trapped in another solid
                     ent.v.velocity = default( v3f );
                     return 3;
                 }
 
                 if( trace.fraction > 0 )
-                {	// actually covered some distance
+                {
+                    // actually covered some distance
                     Mathlib.Copy( ref trace.endpos, out ent.v.origin );
                     original_velocity = ent.v.velocity;
                     numplanes = 0;
                 }
 
                 if( trace.fraction == 1 )
-                    break;		// moved the entire distance
+                    break;  // moved the entire distance
 
                 if( trace.ent == null )
                     Sys.Error( "SV_FlyMove: !trace.ent" );
 
                 if( trace.plane.normal.Z > 0.7 )
                 {
-                    blocked |= 1;		// floor
+                    blocked |= 1;  // floor
                     if( trace.ent.v.solid == Solids.SOLID_BSP )
                     {
                         ent.v.flags = (int)ent.v.flags | EdictFlags.FL_ONGROUND;
@@ -804,17 +755,15 @@ namespace SharpQuake
 
                 if( trace.plane.normal.Z == 0 )
                 {
-                    blocked |= 2;		// step
+                    blocked |= 2;  // step
                     if( steptrace != null )
-                        steptrace.CopyFrom( trace );	// save for player extrafriction
+                        steptrace.CopyFrom( trace ); // save for player extrafriction
                 }
 
-                //
                 // run the impact function
-                //
                 Impact( ent, trace.ent );
                 if( ent.free )
-                    break;		// removed by the impact function
+                    break;  // removed by the impact function
 
                 time_left -= time_left * trace.fraction;
 
@@ -829,9 +778,7 @@ namespace SharpQuake
                 planes[numplanes] = trace.plane.normal;
                 numplanes++;
 
-                //
                 // modify original_velocity so it parallels all of the clip planes
-                //
                 v3f new_velocity = default( v3f );
                 int i, j;
                 for( i = 0; i < numplanes; i++ )
@@ -842,7 +789,7 @@ namespace SharpQuake
                         {
                             float dot = new_velocity.x * planes[j].X + new_velocity.y * planes[j].Y + new_velocity.z * planes[j].Z;
                             if( dot < 0 )
-                                break;	// not ok
+                                break; // not ok
                         }
                     if( j == numplanes )
                         break;
@@ -867,10 +814,9 @@ namespace SharpQuake
                     Mathlib.VectorScale( ref ent.v.velocity, d, out ent.v.velocity );
                 }
 
-                //
-                // if original velocity is against the original velocity, stop dead
-                // to avoid tiny occilations in sloping corners
-                //
+                /* if original velocity is against the original velocity, stop dead
+                 * to avoid tiny occilations in sloping corners
+                 */
                 if( Mathlib.DotProduct( ref ent.v.velocity, ref primal_velocity ) <= 0 )
                 {
                     ent.v.velocity = default( v3f );
@@ -891,10 +837,7 @@ namespace SharpQuake
             return Move( ref vstart, ref vmins, ref vmaxs, ref vend, type, passedict );
         }
 
-        /// <summary>
-        /// SV_Impact
-        /// Two entities have touched, so run their touch functions
-        /// </summary>
+        // Two entities have touched, so run their touch functions
         private static void Impact( edict_t e1, edict_t e2 )
         {
             int old_self = Progs.GlobalStruct.self;
@@ -919,9 +862,6 @@ namespace SharpQuake
             Progs.GlobalStruct.other = old_other;
         }
 
-        /// <summary>
-        /// SV_PushMove
-        /// </summary>
         private static void PushMove( edict_t pusher, float movetime )
         {
             if( pusher.v.velocity.IsEmpty )
@@ -1007,8 +947,9 @@ namespace SharpQuake
                     LinkEdict( pusher, false );
                     pusher.v.ltime -= movetime;
 
-                    // if the pusher has a "blocked" function, call it
-                    // otherwise, just stay in place until the obstacle is gone
+                    /* if the pusher has a "blocked" function, call it
+                     * otherwise, just stay in place until the obstacle is gone
+                     */
                     if( pusher.v.blocked != 0 )
                     {
                         Progs.GlobalStruct.self = EdictToProg( pusher );

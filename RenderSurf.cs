@@ -25,51 +25,44 @@ using System.Runtime.InteropServices;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-// gl_rsurf.c
-
 namespace SharpQuake
 {
     internal struct glRect_t
     {
-        public byte l,t,w,h;
+        public byte l, t, w, h;
     }
 
-    partial class Render
+    internal partial class Render
     {
         private const double COLINEAR_EPSILON = 0.001;
 
-        private static int _LightMapTextures; // lightmap_textures
-        private static int _LightMapBytes; // lightmap_bytes		// 1, 2, or 4
-        private static mvertex_t[] _CurrentVertBase; // r_pcurrentvertbase
-        private static model_t _CurrentModel; // currentmodel
-        private static bool[] _LightMapModified = new bool[MAX_LIGHTMAPS]; // lightmap_modified
-        private static glpoly_t[] _LightMapPolys = new glpoly_t[MAX_LIGHTMAPS]; // lightmap_polys
-        private static glRect_t[] _LightMapRectChange = new glRect_t[MAX_LIGHTMAPS]; // lightmap_rectchange
-        private static uint[] _BlockLights = new uint[18 * 18]; // blocklights
-        private static int _ColinElim; // nColinElim
-        private static msurface_t _SkyChain; // skychain
-        private static msurface_t _WaterChain; // waterchain
-        private static entity_t _TempEnt = new entity_t(); // for DrawWorld
+        private static int _LightMapTextures;
+        private static int _LightMapBytes; // 1, 2, or 4
+        private static mvertex_t[] _CurrentVertBase;
+        private static model_t _CurrentModel;
+        private static bool[] _LightMapModified = new bool[MAX_LIGHTMAPS];
+        private static glpoly_t[] _LightMapPolys = new glpoly_t[MAX_LIGHTMAPS];
+        private static glRect_t[] _LightMapRectChange = new glRect_t[MAX_LIGHTMAPS];
+        private static uint[] _BlockLights = new uint[18 * 18];
+        private static int _ColinElim;
+        private static msurface_t _SkyChain;
+        private static msurface_t _WaterChain;
+        private static entity_t _TempEnt = new entity_t();
 
-        // the lightmap texture data needs to be kept in
-        // main memory so texsubimage can update properly
-        private static byte[] _LightMaps = new byte[4 * MAX_LIGHTMAPS * BLOCK_WIDTH * BLOCK_HEIGHT]; // lightmaps
+        // the lightmap texture data needs to be kept in main memory so texsubimage can update properly
+        private static byte[] _LightMaps = new byte[4 * MAX_LIGHTMAPS * BLOCK_WIDTH * BLOCK_HEIGHT];
 
-        /// <summary>
-        /// GL_BuildLightmaps
-        /// Builds the lightmap texture with all the surfaces from all brush models
-        /// </summary>
+        // Builds the lightmap texture with all the surfaces from all brush models
         private static void BuildLightMaps()
         {
             Array.Clear( _Allocated, 0, _Allocated.Length );
-            //memset (allocated, 0, sizeof(allocated));
 
-            _FrameCount = 1;		// no dlightcache
+            _FrameCount = 1;  // no dlightcache
 
             if( _LightMapTextures == 0 )
                 _LightMapTextures = Drawer.GenerateTextureNumberRange( MAX_LIGHTMAPS );
 
-            Drawer.LightMapFormat = PixelFormat.Luminance;// GL_LUMINANCE;
+            Drawer.LightMapFormat = PixelFormat.Luminance;
 
             // default differently on the Permedia
             if( Scr.IsPermedia )
@@ -81,12 +74,6 @@ namespace SharpQuake
             if( Common.HasParam( "-lm_a" ) )
                 Drawer.LightMapFormat = PixelFormat.Alpha;
 
-            //if (Common.HasParam("-lm_i"))
-            //    Drawer.LightMapFormat = PixelFormat.Intensity;
-
-            //if (Common.HasParam("-lm_2"))
-            //    Drawer.LightMapFormat = PixelFormat.Rgba4;
-
             if( Common.HasParam( "-lm_4" ) )
                 Drawer.LightMapFormat = PixelFormat.Rgba;
 
@@ -96,12 +83,7 @@ namespace SharpQuake
                     _LightMapBytes = 4;
                     break;
 
-                //case PixelFormat.Rgba4:
-                //_LightMapBytes = 2;
-                //break;
-
                 case PixelFormat.Luminance:
-                //case PixelFormat.Intensity:
                 case PixelFormat.Alpha:
                     _LightMapBytes = 1;
                     break;
@@ -134,9 +116,7 @@ namespace SharpQuake
             if( _glTexSort.Value == 0 )
                 Drawer.SelectTexture( MTexTarget.TEXTURE1_SGIS );
 
-            //
             // upload all lightmaps that were filled
-            //
             GCHandle handle = GCHandle.Alloc( _LightMaps, GCHandleType.Pinned );
             try
             {
@@ -146,7 +126,7 @@ namespace SharpQuake
                 for( int i = 0; i < MAX_LIGHTMAPS; i++ )
                 {
                     if( _Allocated[i, 0] == 0 )
-                        break;		// no more used
+                        break;  // no more used
 
                     _LightMapModified[i] = false;
                     _LightMapRectChange[i].l = BLOCK_WIDTH;
@@ -170,9 +150,6 @@ namespace SharpQuake
                 Drawer.SelectTexture( MTexTarget.TEXTURE0_SGIS );
         }
 
-        /// <summary>
-        /// GL_CreateSurfaceLightmap
-        /// </summary>
         private static void CreateSurfaceLightmap( msurface_t surf )
         {
             if( ( surf.flags & ( Surf.SURF_DRAWSKY | Surf.SURF_DRAWTURB ) ) != 0 )
@@ -187,18 +164,13 @@ namespace SharpQuake
             BuildLightMap( surf, new ByteArraySegment( _LightMaps, offset ), BLOCK_WIDTH * _LightMapBytes );
         }
 
-        /// <summary>
-        /// BuildSurfaceDisplayList
-        /// </summary>
         private static void BuildSurfaceDisplayList( msurface_t fa )
         {
             // reconstruct the polygon
             medge_t[] pedges = _CurrentModel.edges;
             int lnumverts = fa.numedges;
 
-            //
             // draw texture
-            //
             glpoly_t poly = new glpoly_t();
             poly.AllocVerts( lnumverts );
             poly.next = fa.polys;
@@ -233,9 +205,7 @@ namespace SharpQuake
                 poly.verts[i][3] = s;
                 poly.verts[i][4] = t;
 
-                //
                 // lightmap texture coordinates
-                //
                 s = Mathlib.DotProduct( ref vec, ref fa.texinfo.vecs[0] ) + fa.texinfo.vecs[0].W;
                 s -= fa.texturemins[0];
                 s += fa.light_s * 16;
@@ -252,9 +222,7 @@ namespace SharpQuake
                 poly.verts[i][6] = t;
             }
 
-            //
             // remove co-linear points - Ed
-            //
             if( _glKeepTJunctions.Value == 0 && ( fa.flags & Surf.SURF_UNDERWATER ) == 0 )
             {
                 for( int i = 0; i < lnumverts; ++i )
@@ -266,7 +234,6 @@ namespace SharpQuake
                         int j;
                         for( j = i + 1; j < lnumverts; ++j )
                         {
-                            //int k;
                             for( int k = 0; k < Mod.VERTEXSIZE; ++k )
                                 poly.verts[j - 1][k] = poly.verts[j][k];
                         }
@@ -331,10 +298,7 @@ namespace SharpQuake
             return 0; // shut up compiler
         }
 
-        /// <summary>
-        /// R_BuildLightMap
-        /// Combine and scale multiple lightmaps into the 8.8 format in blocklights
-        /// </summary>
+        // Combine and scale multiple lightmaps into the 8.8 format in blocklights
         private static void BuildLightMap( msurface_t surf, ByteArraySegment dest, int stride )
         {
             surf.cached_dlight = ( surf.dlightframe == _FrameCount );
@@ -344,7 +308,7 @@ namespace SharpQuake
             int size = smax * tmax;
 
             int srcOffset = surf.sampleofs;
-            byte[] lightmap = surf.sample_base;// surf.samples;
+            byte[] lightmap = surf.sample_base;
 
             // set to full bright if no light data
             if( _FullBright.Value != 0 || Client.cl.worldmodel.lightdata == null )
@@ -363,10 +327,10 @@ namespace SharpQuake
                     for( int maps = 0; maps < BspFile.MAXLIGHTMAPS && surf.styles[maps] != 255; maps++ )
                     {
                         int scale = _LightStyleValue[surf.styles[maps]];
-                        surf.cached_light[maps] = scale;	// 8.8 fraction
+                        surf.cached_light[maps] = scale; // 8.8 fraction
                         for( int i = 0; i < size; i++ )
                             _BlockLights[i] += (uint)( lightmap[srcOffset + i] * scale );
-                        srcOffset += size; // lightmap += size;	// skip to next lightmap
+                        srcOffset += size; // skip to next lightmap
                     }
 
                 // add all the dynamic lights
@@ -374,7 +338,6 @@ namespace SharpQuake
                     AddDynamicLights( surf );
             }
             // bound, invert, and shift
-            //store:
             int blOffset = 0;
             int destOffset = dest.StartIndex;
             byte[] data = dest.Data;
@@ -382,15 +345,15 @@ namespace SharpQuake
             {
                 case PixelFormat.Rgba:
                     stride -= ( smax << 2 );
-                    for( int i = 0; i < tmax; i++, destOffset += stride ) // dest += stride
+                    for( int i = 0; i < tmax; i++, destOffset += stride )
                     {
                         for( int j = 0; j < smax; j++ )
                         {
-                            uint t = _BlockLights[blOffset++];// *bl++;
+                            uint t = _BlockLights[blOffset++];
                             t >>= 7;
                             if( t > 255 )
                                 t = 255;
-                            data[destOffset + 3] = (byte)( 255 - t ); //dest[3] = 255 - t;
+                            data[destOffset + 3] = (byte)( 255 - t );
                             destOffset += 4;
                         }
                     }
@@ -398,16 +361,15 @@ namespace SharpQuake
 
                 case PixelFormat.Alpha:
                 case PixelFormat.Luminance:
-                    //case GL_INTENSITY:
                     for( int i = 0; i < tmax; i++, destOffset += stride )
                     {
                         for( int j = 0; j < smax; j++ )
                         {
-                            uint t = _BlockLights[blOffset++];// *bl++;
+                            uint t = _BlockLights[blOffset++];
                             t >>= 7;
                             if( t > 255 )
                                 t = 255;
-                            data[destOffset + j] = (byte)( 255 - t ); // dest[j] = 255 - t;
+                            data[destOffset + j] = (byte)( 255 - t );
                         }
                     }
                     break;
@@ -418,9 +380,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_AddDynamicLights
-        /// </summary>
         private static void AddDynamicLights( msurface_t surf )
         {
             int smax = ( surf.extents[0] >> 4 ) + 1;
@@ -431,7 +390,7 @@ namespace SharpQuake
             for( int lnum = 0; lnum < Client.MAX_DLIGHTS; lnum++ )
             {
                 if( ( surf.dlightbits & ( 1 << lnum ) ) == 0 )
-                    continue;		// not lit by this light
+                    continue;  // not lit by this light
 
                 float rad = dlights[lnum].radius;
                 float dist = Vector3.Dot( dlights[lnum].origin, surf.plane.normal ) - surf.plane.dist;
@@ -470,17 +429,12 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_DrawWaterSurfaces
-        /// </summary>
         private static void DrawWaterSurfaces()
         {
             if( _WaterAlpha.Value == 1.0f && _glTexSort.Value != 0 )
                 return;
 
-            //
             // go back to the world matrix
-            //
             GL.LoadMatrix( ref _WorldMatrix );
 
             if( _WaterAlpha.Value < 1.0 )
@@ -518,7 +472,6 @@ namespace SharpQuake
                         continue;
 
                     // set modulate mode explicitly
-
                     Drawer.Bind( t.gl_texturenum );
 
                     for( ; s != null; s = s.texturechain )
@@ -536,9 +489,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_MarkLeaves
-        /// </summary>
         private static void MarkLeaves()
         {
             if( _OldViewLeaf == _ViewLeaf && _NoVis.Value == 0 )
@@ -555,7 +505,6 @@ namespace SharpQuake
             {
                 vis = new byte[4096];
                 Common.FillArray<Byte>( vis, 0xff ); // todo: add count parameter?
-                //memset(solid, 0xff, (cl.worldmodel->numleafs + 7) >> 3);
             }
             else
                 vis = Mod.LeafPVS( _ViewLeaf, Client.cl.worldmodel );
@@ -577,9 +526,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_DrawWorld
-        /// </summary>
         private static void DrawWorld()
         {
             _TempEnt.Clear();
@@ -600,9 +546,6 @@ namespace SharpQuake
             BlendLightmaps();
         }
 
-        /// <summary>
-        /// R_BlendLightmaps
-        /// </summary>
         private static void BlendLightmaps()
         {
             if( _FullBright.Value != 0 )
@@ -614,13 +557,14 @@ namespace SharpQuake
 
             if( Drawer.LightMapFormat == PixelFormat.Luminance )
                 GL.BlendFunc( BlendingFactor.Zero, BlendingFactor.OneMinusSrcColor );
-            //else if (gl_lightmap_format == GL_INTENSITY)
-            //{
-            //    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            //    glColor4f(0, 0, 0, 1);
-            //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            //}
-
+            /*
+            else if (gl_lightmap_format == GL_INTENSITY)
+            {
+                glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+                glColor4f(0, 0, 0, 1);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
+            */
             if( _LightMap.Value == 0 )
             {
                 GL.Enable( EnableCap.Blend );
@@ -657,12 +601,13 @@ namespace SharpQuake
             GL.Disable( EnableCap.Blend );
             if( Drawer.LightMapFormat == PixelFormat.Luminance )
                 GL.BlendFunc( BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha );
-            //else if (gl_lightmap_format == GL_INTENSITY)
-            //{
-            //    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-            //    glColor4f(1, 1, 1, 1);
-            //}
-
+            /*
+            else if( gl_lightmap_format == GL_INTENSITY )
+            {
+                glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+                glColor4f( 1, 1, 1, 1 );
+            }
+            */
             GL.DepthMask( true ); // back to normal Z buffering
         }
 
@@ -700,7 +645,7 @@ namespace SharpQuake
                 else
                 {
                     if( ( s.flags & Surf.SURF_DRAWTURB ) != 0 && _WaterAlpha.Value != 1.0f )
-                        continue;	// draw translucent water later
+                        continue; // draw translucent water later
                     for( ; s != null; s = s.texturechain )
                         RenderBrushPoly( s );
                 }
@@ -709,15 +654,12 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_RenderBrushPoly
-        /// </summary>
         private static void RenderBrushPoly( msurface_t fa )
         {
             _BrushPolys++;
 
             if( ( fa.flags & Surf.SURF_DRAWSKY ) != 0 )
-            {	// warp texture, no lightmaps
+            { // warp texture, no lightmaps
                 EmitBothSkyLayers( fa );
                 return;
             }
@@ -726,7 +668,7 @@ namespace SharpQuake
             Drawer.Bind( t.gl_texturenum );
 
             if( ( fa.flags & Surf.SURF_DRAWTURB ) != 0 )
-            {	// warp texture, no lightmaps
+            { // warp texture, no lightmaps
                 EmitWaterPolys( fa );
                 return;
             }
@@ -751,8 +693,8 @@ namespace SharpQuake
                 }
 
             if( modified ||
-                fa.dlightframe == _FrameCount ||	// dynamic this frame
-                fa.cached_dlight )			// dynamic previously
+                fa.dlightframe == _FrameCount || // dynamic this frame
+                fa.cached_dlight )   // dynamic previously
             {
                 if( _Dynamic.Value != 0 )
                 {
@@ -799,9 +741,6 @@ namespace SharpQuake
             GL.End();
         }
 
-        /// <summary>
-        /// R_MirrorChain
-        /// </summary>
         private static void MirrorChain( msurface_t s )
         {
             if( _IsMirror )
@@ -810,13 +749,10 @@ namespace SharpQuake
             _MirrorPlane = s.plane;
         }
 
-        /// <summary>
-        /// R_RecursiveWorldNode
-        /// </summary>
         private static void RecursiveWorldNode( mnodebase_t node )
         {
             if( node.contents == Contents.CONTENTS_SOLID )
-                return;		// solid
+                return;  // solid
 
             if( node.visframe != _VisFrameCount )
                 return;
@@ -901,7 +837,7 @@ namespace SharpQuake
 
                     // don't backface underwater surfaces, because they warp
                     if( ( surf[offset].flags & Surf.SURF_UNDERWATER ) == 0 && ( ( dot < 0 ) ^ ( ( surf[offset].flags & Surf.SURF_PLANEBACK ) != 0 ) ) )
-                        continue;		// wrong side
+                        continue;  // wrong side
 
                     // if sorting by texture, just store it out
                     if( _glTexSort.Value != 0 )
@@ -931,16 +867,10 @@ namespace SharpQuake
             RecursiveWorldNode( n.children[side == 0 ? 1 : 0] );
         }
 
-        /// <summary>
-        /// R_DrawSequentialPoly
-        /// Systems that have fast state and texture changes can
-        /// just do everything as it passes with no need to sort
-        /// </summary>
+        // Systems that have fast state and texture changes can just do everything as it passes with no need to sort
         private static void DrawSequentialPoly( msurface_t s )
         {
-            //
             // normal lightmaped poly
-            //
             if( ( s.flags & ( Surf.SURF_DRAWSKY | Surf.SURF_DRAWTURB | Surf.SURF_UNDERWATER ) ) == 0 )
             {
                 RenderDynamicLightmaps( s );
@@ -1001,10 +931,7 @@ namespace SharpQuake
                 return;
             }
 
-            //
             // subdivided water surface warp
-            //
-
             if( ( s.flags & Surf.SURF_DRAWTURB ) != 0 )
             {
                 DisableMultitexture();
@@ -1013,9 +940,7 @@ namespace SharpQuake
                 return;
             }
 
-            //
             // subdivided sky warp
-            //
             if( ( s.flags & Surf.SURF_DRAWSKY ) != 0 )
             {
                 DisableMultitexture();
@@ -1036,9 +961,7 @@ namespace SharpQuake
                 return;
             }
 
-            //
             // underwater warped with lightmap
-            //
             RenderDynamicLightmaps( s );
             if( Vid.glMTexable )
             {
@@ -1151,10 +1074,7 @@ namespace SharpQuake
             _LightMapRectChange[i] = theRect;
         }
 
-        /// <summary>
-        /// R_TextureAnimation
-        /// Returns the proper texture for a given time and base texture
-        /// </summary>
+        // Returns the proper texture for a given time and base texture
         private static texture_t TextureAnimation( texture_t t )
         {
             if( _CurrentEntity.frame != 0 )
@@ -1180,10 +1100,6 @@ namespace SharpQuake
             return t;
         }
 
-        /// <summary>
-        /// R_RenderDynamicLightmaps
-        /// Multitexture
-        /// </summary>
         private static void RenderDynamicLightmaps( msurface_t fa )
         {
             _BrushPolys++;
@@ -1205,7 +1121,7 @@ namespace SharpQuake
 
             if( flag ||
                 fa.dlightframe == _FrameCount || // dynamic this frame
-                fa.cached_dlight )	// dynamic previously
+                fa.cached_dlight ) // dynamic previously
             {
                 if( _Dynamic.Value != 0 )
                 {
@@ -1218,9 +1134,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// R_DrawBrushModel
-        /// </summary>
         private static void DrawBrushModel( entity_t e )
         {
             _CurrentEntity = e;
@@ -1263,8 +1176,7 @@ namespace SharpQuake
                 _ModelOrg.Z = Vector3.Dot( temp, up );
             }
 
-            // calculate dynamic lighting for bmodel if it's not an
-            // instanced model
+            // calculate dynamic lighting for bmodel if it's not an instanced model
             if( clmodel.firstmodelsurface != 0 && _glFlashBlend.Value == 0 )
             {
                 for( int k = 0; k < Client.MAX_DLIGHTS; k++ )
@@ -1277,16 +1189,14 @@ namespace SharpQuake
             }
 
             GL.PushMatrix();
-            e.angles.X = -e.angles.X;	// stupid quake bug
+            e.angles.X = -e.angles.X; // stupid quake bug
             RotateForEntity( e );
-            e.angles.X = -e.angles.X;	// stupid quake bug
+            e.angles.X = -e.angles.X; // stupid quake bug
 
             int surfOffset = clmodel.firstmodelsurface;
-            msurface_t[] psurf = clmodel.surfaces; //[clmodel.firstmodelsurface];
+            msurface_t[] psurf = clmodel.surfaces;
 
-            //
             // draw texture
-            //
             for( int i = 0; i < clmodel.nummodelsurfaces; i++, surfOffset++ )
             {
                 // find which side of the node we are on
@@ -1310,6 +1220,4 @@ namespace SharpQuake
             GL.PopMatrix();
         }
     }
-
-    //glRect_t;
 }

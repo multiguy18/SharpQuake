@@ -27,7 +27,6 @@ namespace SharpQuake
 {
     partial class Client
     {
-        // CL_Init
         public static void Init()
         {
             InitInput();
@@ -37,7 +36,7 @@ namespace SharpQuake
             {
                 _Name = new Cvar( "_cl_name", "player", true );
                 _Color = new Cvar( "_cl_color", "0", true );
-                _ShowNet = new Cvar( "cl_shownet", "0" );	// can be 0, 1, or 2
+                _ShowNet = new Cvar( "cl_shownet", "0" ); // can be 0, 1, or 2
                 _NoLerp = new Cvar( "cl_nolerp", "0" );
                 _LookSpring = new Cvar( "lookspring", "0", true );
                 _LookStrafe = new Cvar( "lookstrafe", "0", true );
@@ -68,9 +67,7 @@ namespace SharpQuake
             for( int i = 0; i < _DLights.Length; i++ )
                 _DLights[i] = new dlight_t();
 
-            //
             // register our commands
-            //
             Cmd.Add( "entities", PrintEntities_f );
             Cmd.Add( "disconnect", Disconnect_f );
             Cmd.Add( "record", Record_f );
@@ -79,9 +76,6 @@ namespace SharpQuake
             Cmd.Add( "timedemo", TimeDemo_f );
         }
 
-        /// <summary>
-        /// CL_EstablishConnection
-        /// </summary>
         public static void EstablishConnection( string host )
         {
             if( cls.state == cactive_t.ca_dedicated )
@@ -98,20 +92,15 @@ namespace SharpQuake
 
             Con.DPrint( "CL_EstablishConnection: connected to {0}\n", host );
 
-            cls.demonum = -1;			// not in the demo loop now
+            cls.demonum = -1; // not in the demo loop now
             cls.state = cactive_t.ca_connected;
-            cls.signon = 0;				// need all the signon messages before playing
+            cls.signon = 0; // need all the signon messages before playing
         }
 
-        /// <summary>
-        /// CL_NextDemo
-        ///
-        /// Called to play the next demo in the demo loop
-        /// </summary>
         public static void NextDemo()
         {
             if( cls.demonum == -1 )
-                return;		// don't play demos
+                return; // don't play demos
 
             Scr.BeginLoadingPlaque();
 
@@ -130,9 +119,6 @@ namespace SharpQuake
             cls.demonum++;
         }
 
-        /// <summary>
-        /// CL_AllocDlight
-        /// </summary>
         public static dlight_t AllocDlight( int key )
         {
             dlight_t dl;
@@ -153,7 +139,6 @@ namespace SharpQuake
             }
 
             // then look for anything else
-            //dl = cl_dlights;
             for( int i = 0; i < MAX_DLIGHTS; i++ )
             {
                 dl = _DLights[i];
@@ -171,9 +156,6 @@ namespace SharpQuake
             return dl;
         }
 
-        /// <summary>
-        /// CL_DecayLights
-        /// </summary>
         public static void DecayLights()
         {
             float time = (float)( cl.time - cl.oldtime );
@@ -190,7 +172,6 @@ namespace SharpQuake
             }
         }
 
-        // CL_Disconnect_f
         public static void Disconnect_f()
         {
             Disconnect();
@@ -198,7 +179,6 @@ namespace SharpQuake
                 Host.ShutdownServer( false );
         }
 
-        // CL_SendCmd
         public static void SendCmd()
         {
             if( cls.state != cactive_t.ca_connected )
@@ -220,13 +200,13 @@ namespace SharpQuake
 
             if( cls.demoplayback )
             {
-                cls.message.Clear();//    SZ_Clear (cls.message);
+                cls.message.Clear();
                 return;
             }
 
             // send the reliable message
             if( cls.message.IsEmpty )
-                return;		// no message at all
+                return; // no message at all
 
             if( !Net.CanSendMessage( cls.netcon ) )
             {
@@ -240,9 +220,6 @@ namespace SharpQuake
             cls.message.Clear();
         }
 
-        // CL_ReadFromServer
-        //
-        // Read all incoming data from the server
         public static int ReadFromServer()
         {
             cl.oldtime = cl.time;
@@ -264,28 +241,19 @@ namespace SharpQuake
             if( _ShowNet.Value != 0 )
                 Con.Print( "\n" );
 
-            //
             // bring the links up to date
-            //
             RelinkEntities();
             UpdateTempEntities();
 
             return 0;
         }
 
-        /// <summary>
-        /// CL_Disconnect
-        ///
-        /// Sends a disconnect message to the server
-        /// This is also called on Host_Error, so it shouldn't cause any errors
-        /// </summary>
         public static void Disconnect()
         {
             // stop sounds (especially looping!)
             Sound.StopAllSounds( true );
 
             // bring the console down and fade the colors back to normal
-            //	SCR_BringDownConsole ();
 
             // if running a local server, shut it down
             if( cls.demoplayback )
@@ -311,7 +279,6 @@ namespace SharpQuake
             cls.signon = 0;
         }
 
-        // CL_PrintEntities_f
         private static void PrintEntities_f()
         {
             for( int i = 0; i < _State.num_entities; i++ )
@@ -327,9 +294,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// CL_RelinkEntities
-        /// </summary>
         private static void RelinkEntities()
         {
             // determine partial update time
@@ -337,9 +301,7 @@ namespace SharpQuake
 
             NumVisEdicts = 0;
 
-            //
             // interpolate player info
-            //
             cl.velocity = cl.mvelocity[1] + frac * ( cl.mvelocity[0] - cl.mvelocity[1] );
 
             if( cls.demoplayback )
@@ -360,7 +322,7 @@ namespace SharpQuake
                 {
                     // empty slot
                     if( ent.forcelink )
-                        Render.RemoveEfrags( ent );	// just became empty
+                        Render.RemoveEfrags( ent ); // just became empty
                     continue;
                 }
 
@@ -464,11 +426,7 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// CL_SignonReply
-        ///
-        /// An svc_signonnum has been received, perform a client side setup
-        /// </summary>
+        // An svc_signonnum has been received, perform client side setup
         private static void SignonReply()
         {
             Con.DPrint( "CL_SignonReply: {0}\n", cls.signon );
@@ -494,18 +452,15 @@ namespace SharpQuake
                 case 3:
                     cls.message.WriteByte( Protocol.clc_stringcmd );
                     cls.message.WriteString( "begin" );
-                    Cache.Report();	// print remaining memory
+                    Cache.Report(); // print remaining memory
                     break;
 
                 case 4:
-                    Scr.EndLoadingPlaque();		// allow normal screen updates
+                    Scr.EndLoadingPlaque(); // allow normal screen updates
                     break;
             }
         }
 
-        /// <summary>
-        /// CL_ClearState
-        /// </summary>
         private static void ClearState()
         {
             if( !Server.sv.active )
@@ -533,20 +488,13 @@ namespace SharpQuake
             foreach( beam_t b in _Beams )
                 b.Clear();
 
-            //
             // allocate the efrags and chain together into a free list
-            //
             cl.free_efrags = _EFrags[0];// cl_efrags;
             for( int i = 0; i < MAX_EFRAGS - 1; i++ )
                 _EFrags[i].entnext = _EFrags[i + 1];
             _EFrags[MAX_EFRAGS - 1].entnext = null;
         }
 
-        /// <summary>
-        /// CL_LerpPoint
-        /// Determines the fraction between the last two messages that the objects
-        /// should be put at.
-        /// </summary>
         private static float LerpPoint()
         {
             double f = cl.mtime[0] - cl.mtime[1];
@@ -557,7 +505,8 @@ namespace SharpQuake
             }
 
             if( f > 0.1 )
-            {	// dropped packet, or start of demo
+            {
+                // dropped packet, or start of demo
                 cl.mtime[1] = cl.mtime[0] - 0.1;
                 f = 0.1;
             }

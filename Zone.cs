@@ -20,16 +20,8 @@
 /// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /// </copyright>
 
-// zone.h
-// zone.c
-
-// Used only to emulate Chache_xxx functions
-
 namespace SharpQuake
 {
-    /// <summary>
-    /// Cache_functions
-    /// </summary>
     internal static class Cache
     {
         private static CacheEntry _Head;
@@ -48,9 +40,7 @@ namespace SharpQuake
             Cmd.Add( "flush", Flush );
         }
 
-        // Cache_Check
         /// <summary>
-        /// Cache_Check
         /// Returns value of c.data if still cached or null
         /// </summary>
         public static object Check( cache_user_t c )
@@ -67,7 +57,6 @@ namespace SharpQuake
             return cs.data;
         }
 
-        // Cache_Alloc
         public static cache_user_t Alloc( int size, string name )
         {
             if( size <= 0 )
@@ -85,8 +74,9 @@ namespace SharpQuake
                     break;
 
                 // free the least recently used cahedat
-                if( _Head.LruPrev == _Head )// cache_head.lru_prev == &cache_head)
+                if( _Head.LruPrev == _Head )
                     Sys.Error( "Cache_Alloc: out of memory" );
+
                 // not enough memory at all
                 Free( _Head.LruPrev );
             }
@@ -95,17 +85,12 @@ namespace SharpQuake
             return entry;
         }
 
-        /// <summary>
-        /// Cache_Report
-        /// </summary>
         public static void Report()
         {
             Con.DPrint( "{0,4:F1} megabyte data cache, used {1,4:F1} megabyte\n",
                 _Capacity / (float)( 1024 * 1024 ), _BytesAllocated / (float)( 1024 * 1024 ) );
         }
 
-        //Cache_Flush
-        //
         //Throw everything out, so new data will be demand cached
         private static void Flush()
         {
@@ -113,8 +98,6 @@ namespace SharpQuake
                 Free( _Head.Next ); // reclaim the space
         }
 
-        // Cache_Free
-        //
         // Frees the memory and removes it from the LRU list
         private static void Free( cache_user_t c )
         {
@@ -125,7 +108,6 @@ namespace SharpQuake
             entry.Remove();
         }
 
-        // Cache_TryAlloc
         private static CacheEntry TryAlloc( int size )
         {
             if( _BytesAllocated + size > _Capacity )
@@ -177,7 +159,6 @@ namespace SharpQuake
             private CacheEntry _LruNext;
             private int _Size;
 
-            // Cache_UnlinkLRU
             public void RemoveFromLRU()
             {
                 if( _LruNext == null || _LruPrev == null )

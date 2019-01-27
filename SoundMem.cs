@@ -23,13 +23,10 @@
 using System;
 using System.Text;
 
-// snd_mem.c
-
 namespace SharpQuake
 {
-    partial class Sound
+    internal partial class Sound
     {
-        // GetWavinfo
         private static wavinfo_t GetWavInfo( string name, byte[] wav )
         {
             wavinfo_t info = new wavinfo_t();
@@ -37,11 +34,6 @@ namespace SharpQuake
             if( wav == null )
                 return info;
 
-            // debug
-            //using (FileStream fs = new FileStream(Path.GetFileName(name), FileMode.Create, FileAccess.Write, FileShare.Read))
-            //{
-            //    fs.Write(wav, 0, wav.Length);
-            //}
             WavHelper helper = new WavHelper( wav );
 
             int offset = 0;
@@ -62,7 +54,7 @@ namespace SharpQuake
             }
 
             // get "fmt " chunk
-            offset += 12; //iff_data = data_p + 12;
+            offset += 12;
 
             int fmt = helper.FindChunk( "fmt ", offset );
             if( fmt == -1 )
@@ -133,7 +125,7 @@ namespace SharpQuake
             if( sc == null )
                 return;
 
-            float stepscale = (float)inrate / _shm.speed;	// this is usually 0.5, 1, or 2
+            float stepscale = (float)inrate / _shm.speed; // this is usually 0.5, 1, or 2
 
             int outcount = (int)( sc.length / stepscale );
             sc.length = outcount;
@@ -157,7 +149,7 @@ namespace SharpQuake
                 for( int i = 0; i < outcount; i++ )
                 {
                     int v = src[data.StartIndex + i] - 128;
-                    sc.data[i] = (byte)( (sbyte)v ); //((signed char *)sc.data)[i] = (int)( (unsigned char)(data[i]) - 128);
+                    sc.data[i] = (byte)( (sbyte)v );
                 }
             }
             else
@@ -174,22 +166,21 @@ namespace SharpQuake
                     if( inwidth == 2 )
                     {
                         Buffer.BlockCopy( src, data.StartIndex + srcsample * 2, sa, 0, 2 );
-                        sample = Common.LittleShort( sa[0] );//  ((short *)data)[srcsample] );
+                        sample = Common.LittleShort( sa[0] );
                     }
                     else
                     {
                         sample = (int)( src[data.StartIndex + srcsample] - 128 ) << 8;
-                        //sample = (int)( (unsigned char)(data[srcsample]) - 128) << 8;
                     }
 
                     if( sc.width == 2 )
                     {
                         sa[0] = (short)sample;
-                        Buffer.BlockCopy( sa, 0, sc.data, i * 2, 2 ); //((short *)sc->data)[i] = sample;
+                        Buffer.BlockCopy( sa, 0, sc.data, i * 2, 2 );
                     }
                     else
                     {
-                        sc.data[i] = (byte)(sbyte)( sample >> 8 ); //((signed char *)sc->data)[i] = sample >> 8;
+                        sc.data[i] = (byte)(sbyte)( sample >> 8 );
                     }
                 }
             }
@@ -206,18 +197,15 @@ namespace SharpQuake
             int lastChunk = offset;
             while( true )
             {
-                offset = lastChunk; //data_p = last_chunk;
-                if( offset >= _Wav.Length ) // data_p >= iff_end)
+                offset = lastChunk;
+                if( offset >= _Wav.Length )
                     break; // didn't find the chunk
 
-                //offset += 4; // data_p += 4;
                 int iff_chunk_len = GetLittleLong( offset + 4 );
                 if( iff_chunk_len < 0 )
                     break;
 
-                //data_p -= 8;
                 lastChunk = offset + 8 + ( ( iff_chunk_len + 1 ) & ~1 );
-                //last_chunk = data_p + 8 + ((iff_chunk_len + 1) & ~1);
                 string chunkName = Encoding.ASCII.GetString( _Wav, offset, 4 );
                 if( chunkName == name )
                     return offset;

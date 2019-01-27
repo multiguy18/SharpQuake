@@ -24,13 +24,13 @@ using System;
 
 namespace SharpQuake
 {
-    partial class Progs
+    internal partial class Progs
     {
         private struct prstack_t
         {
             public int s;
             public dfunction_t f;
-        } // prstack_t;
+        }
 
         public static int Argc
         {
@@ -137,23 +137,14 @@ namespace SharpQuake
             "BITOR"
         };
 
-        // pr_trace
-        private static prstack_t[] _Stack = new prstack_t[MAX_STACK_DEPTH]; // pr_stack
+        private static prstack_t[] _Stack = new prstack_t[MAX_STACK_DEPTH];
+        private static int _Depth;
+        private static int[] _LocalStack = new int[LOCALSTACK_SIZE];
+        private static int _LocalStackUsed;
+        private static int _xStatement;
+        private static int _Argc;
 
-        private static int _Depth; // pr_depth
-
-        private static int[] _LocalStack = new int[LOCALSTACK_SIZE]; // localstack
-        private static int _LocalStackUsed; // localstack_used
-
-        // pr_xfunction
-        private static int _xStatement; // pr_xstatement
-
-        private static int _Argc; // pr_argc
-
-        /// <summary>
-        /// PR_ExecuteProgram
-        /// </summary>
-        public unsafe static void Execute( int fnum )
+        public static unsafe void Execute( int fnum )
         {
             if( fnum < 1 || fnum >= _Functions.Length )
             {
@@ -176,7 +167,7 @@ namespace SharpQuake
 
             while( true )
             {
-                s++;	// next statement
+                s++; // next statement
 
                 eval_t* a = (eval_t*)Get( _Statements[s].a );
                 eval_t* b = (eval_t*)Get( _Statements[s].b );
@@ -302,7 +293,7 @@ namespace SharpQuake
                         break;
 
                     case OP.OP_EQ_S:
-                        c->_float = ( GetString( a->_string ) == GetString( b->_string ) ) ? 1 : 0; //!strcmp(pr_strings + a->_string, pr_strings + b->_string);
+                        c->_float = ( GetString( a->_string ) == GetString( b->_string ) ) ? 1 : 0;
                         break;
 
                     case OP.OP_EQ_E:
@@ -323,7 +314,7 @@ namespace SharpQuake
                         break;
 
                     case OP.OP_NE_S:
-                        c->_float = ( GetString( a->_string ) != GetString( b->_string ) ) ? 1 : 0; //strcmp(pr_strings + a->_string, pr_strings + b->_string);
+                        c->_float = ( GetString( a->_string ) != GetString( b->_string ) ) ? 1 : 0;
                         break;
 
                     case OP.OP_NE_E:
@@ -336,9 +327,9 @@ namespace SharpQuake
 
                     case OP.OP_STORE_F:
                     case OP.OP_STORE_ENT:
-                    case OP.OP_STORE_FLD:		// integers
+                    case OP.OP_STORE_FLD:  // integers
                     case OP.OP_STORE_S:
-                    case OP.OP_STORE_FNC:		// pointers
+                    case OP.OP_STORE_FNC:  // pointers
                         b->_int = a->_int;
                         break;
 
@@ -350,9 +341,9 @@ namespace SharpQuake
 
                     case OP.OP_STOREP_F:
                     case OP.OP_STOREP_ENT:
-                    case OP.OP_STOREP_FLD:		// integers
+                    case OP.OP_STOREP_FLD:  // integers
                     case OP.OP_STOREP_S:
-                    case OP.OP_STOREP_FNC:		// pointers
+                    case OP.OP_STOREP_FNC:  // pointers
                         ed = EdictFromAddr( b->_int, out ofs );
                         ed.StoreInt( ofs, a );
                         break;
@@ -385,16 +376,16 @@ namespace SharpQuake
 
                     case OP.OP_IFNOT:
                         if( a->_int == 0 )
-                            s += _Statements[s].b - 1;	// offset the s++
+                            s += _Statements[s].b - 1; // offset the s++
                         break;
 
                     case OP.OP_IF:
                         if( a->_int != 0 )
-                            s += _Statements[s].b - 1;	// offset the s++
+                            s += _Statements[s].b - 1; // offset the s++
                         break;
 
                     case OP.OP_GOTO:
-                        s += _Statements[s].a - 1;	// offset the s++
+                        s += _Statements[s].a - 1; // offset the s++
                         break;
 
                     case OP.OP_CALL0:
@@ -435,7 +426,7 @@ namespace SharpQuake
 
                         s = LeaveFunction();
                         if( _Depth == exitdepth )
-                            return;		// all done
+                            return;  // all done
                         break;
 
                     case OP.OP_STATE:
@@ -459,17 +450,13 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// PR_RunError
-        /// Aborts the currently executing function
-        /// </summary>
         public static void RunError( string fmt, params object[] args )
         {
             PrintStatement( ref _Statements[_xStatement] );
             StackTrace();
             Con.Print( fmt, args );
 
-            _Depth = 0;		// dump the stack so host_error can shutdown functions
+            _Depth = 0;  // dump the stack so host_error can shutdown functions
 
             Host.Error( "Program error" );
         }
@@ -481,7 +468,6 @@ namespace SharpQuake
             return Server.ProgToEdict( prog );
         }
 
-        // PR_Profile_f
         private static void Profile_f()
         {
             if( _Functions == null )
@@ -512,10 +498,6 @@ namespace SharpQuake
             } while( best != null );
         }
 
-        /// <summary>
-        /// PR_EnterFunction
-        /// Returns the new program statement counter
-        /// </summary>
         private static unsafe int EnterFunction( dfunction_t f )
         {
             _Stack[_Depth].s = _xStatement;
@@ -545,12 +527,9 @@ namespace SharpQuake
             }
 
             xFunction = f;
-            return f.first_statement - 1;	// offset the s++
+            return f.first_statement - 1; // offset the s++
         }
 
-        /// <summary>
-        /// PR_StackTrace
-        /// </summary>
         private static void StackTrace()
         {
             if( _Depth == 0 )
@@ -573,9 +552,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// PR_PrintStatement
-        /// </summary>
         private static void PrintStatement( ref dstatement_t s )
         {
             if( s.op < OpNames.Length )
@@ -607,9 +583,6 @@ namespace SharpQuake
             Con.Print( "\n" );
         }
 
-        /// <summary>
-        /// PR_LeaveFunction
-        /// </summary>
         private static int LeaveFunction()
         {
             if( _Depth <= 0 )
@@ -624,7 +597,6 @@ namespace SharpQuake
             for( int i = 0; i < c; i++ )
             {
                 Set( xFunction.parm_start + i, _LocalStack[_LocalStackUsed + i] );
-                //((int*)pr_globals)[pr_xfunction->parm_start + i] = localstack[localstack_used + i];
             }
 
             // up stack

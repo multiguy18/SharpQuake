@@ -29,12 +29,12 @@ using System.Text;
 
 namespace SharpQuake
 {
-    partial class Progs
+    internal partial class Progs
     {
         private struct gefv_cache
         {
             public ddef_t pcache;
-            public string field;// char	field[MAX_FIELD_LEN];
+            public string field;
         }
 
         public static int EdictSize
@@ -45,7 +45,6 @@ namespace SharpQuake
             }
         }
 
-        //static StringBuilder _AddedStrings = new StringBuilder(4096);
         public static long GlobalStructAddr
         {
             get
@@ -66,47 +65,42 @@ namespace SharpQuake
         private const int MAX_FIELD_LEN = 64;
         private const int GEFV_CACHESIZE = 2;
 
-        //gefv_cache;
-
-        private static gefv_cache[] _gefvCache = new gefv_cache[GEFV_CACHESIZE]; // gefvCache
+        private static gefv_cache[] _gefvCache = new gefv_cache[GEFV_CACHESIZE];
         private static int _gefvPos;
 
-        private static int[] _TypeSize = new int[8] // type_size
+        private static int[] _TypeSize = new int[8]
         {
             1, sizeof(int)/4, 1, 3, 1, 1, sizeof(int)/4, IntPtr.Size/4
         };
 
-        private static Cvar _NoMonsters;// = { "nomonsters", "0" };
-        private static Cvar _GameCfg;// = { "gamecfg", "0" };
-        private static Cvar _Scratch1;// = { "scratch1", "0" };
-        private static Cvar _Scratch2;// = { "scratch2", "0" };
-        private static Cvar _Scratch3;// = { "scratch3", "0" };
-        private static Cvar _Scratch4;// = { "scratch4", "0" };
-        private static Cvar _SavedGameCfg;// = { "savedgamecfg", "0", true };
-        private static Cvar _Saved1;// = { "saved1", "0", true };
-        private static Cvar _Saved2;// = { "saved2", "0", true };
-        private static Cvar _Saved3;// = { "saved3", "0", true };
-        private static Cvar _Saved4;// = { "saved4", "0", true };
+        private static Cvar _NoMonsters;
+        private static Cvar _GameCfg;
+        private static Cvar _Scratch1;
+        private static Cvar _Scratch2;
+        private static Cvar _Scratch3;
+        private static Cvar _Scratch4;
+        private static Cvar _SavedGameCfg;
+        private static Cvar _Saved1;
+        private static Cvar _Saved2;
+        private static Cvar _Saved3;
+        private static Cvar _Saved4;
 
-        private static dprograms_t _Progs; // progs
-        private static dfunction_t[] _Functions; // pr_functions
-        private static string _Strings; // pr_strings
-        private static ddef_t[] _FieldDefs; // pr_fielddefs
-        private static ddef_t[] _GlobalDefs; // pr_globaldefs
-        private static dstatement_t[] _Statements; // pr_statements
-
-        // pr_global_struct
+        private static dprograms_t _Progs;
+        private static dfunction_t[] _Functions;
+        private static string _Strings;
+        private static ddef_t[] _FieldDefs;
+        private static ddef_t[] _GlobalDefs;
+        private static dstatement_t[] _Statements;
         private static float[] _Globals; // Added by Uze: all data after globalvars_t (numglobals * 4 - globalvars_t.SizeInBytes)
 
-        private static int _EdictSize; // pr_edict_size	// in bytes
-        private static ushort _Crc; // pr_crc
+        private static int _EdictSize;
+        private static ushort _Crc;
         private static GCHandle _HGlobalStruct;
         private static GCHandle _HGlobals;
         private static long _GlobalStructAddr;
         private static long _GlobalsAddr;
         private static List<string> _DynamicStrings = new List<string>( 512 );
 
-        // PR_Init
         public static void Init()
         {
             Cmd.Add( "edict", PrintEdict_f );
@@ -131,9 +125,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// PR_LoadProgs
-        /// </summary>
         public static void LoadProgs()
         {
             FreeHandles();
@@ -237,8 +228,6 @@ namespace SharpQuake
             _GlobalStructAddr = _HGlobalStruct.AddrOfPinnedObject().ToInt64();
         }
 
-        // ED_PrintEdicts
-        //
         // For debugging, prints all the entities in the current server
         public static void PrintEdicts()
         {
@@ -266,18 +255,20 @@ namespace SharpQuake
             return -1;
         }
 
-        /// <summary>
-        /// ED_LoadFromFile
-        /// The entities are directly placed in the array, rather than allocated with
-        /// ED_Alloc, because otherwise an error loading the map would have entity
-        /// number references out of order.
-        ///
-        /// Creates a server's entity / program execution context by
-        /// parsing textual entity definitions out of an ent file.
-        ///
-        /// Used for both fresh maps and savegame loads.  A fresh map would also need
-        /// to call ED_CallSpawnFunctions () to let the objects initialize themselves.
-        /// </summary>
+        /**
+         * <summary>
+         * The entities are directly placed in the array, rather than allocated with
+         * ED_Alloc, because otherwise an error loading the map would have entity
+         * number references out of order.
+         *
+         * Creates a server's entity / program execution context by
+         * parsing textual entity definitions out of an ent file.
+         *
+         * Used for both fresh maps and savegame loads.  A fresh map would also need
+         * to call ED_CallSpawnFunctions () to let the objects initialize themselves.
+         * </summary>
+         */
+
         public static void LoadFromFile( string data )
         {
             edict_t ent = null;
@@ -320,9 +311,7 @@ namespace SharpQuake
                     continue;
                 }
 
-                //
                 // immediately call spawn function
-                //
                 if( ent.v.classname == 0 )
                 {
                     Con.Print( "No classname for:\n" );
@@ -348,18 +337,12 @@ namespace SharpQuake
             Con.DPrint( "{0} entities inhibited\n", inhibit );
         }
 
-        /// <summary>
-        /// ED_ParseEdict
-        /// Parses an edict out of the given string, returning the new position
-        /// ed should be a properly initialized empty edict.
-        /// Used for initial level load and for savegames.
-        /// </summary>
         public static string ParseEdict( string data, edict_t ent )
         {
             bool init = false;
 
             // clear it
-            if( ent != Server.sv.edicts[0] )	// hack
+            if( ent != Server.sv.edicts[0] ) // hack
                 ent.Clear();
 
             // go through all the dictionary pairs
@@ -376,8 +359,9 @@ namespace SharpQuake
 
                 string token = Common.Token;
 
-                // anglehack is to allow QuakeEd to write single scalar angles
-                // and allow them to be turned into vectors. (FIXME...)
+                /* anglehack is to allow QuakeEd to write single scalar angles
+                 * and allow them to be turned into vectors. (FIXME...)
+                 */
                 if( token == "angle" )
                 {
                     token = "angles";
@@ -388,7 +372,7 @@ namespace SharpQuake
 
                 // FIXME: change light to _light to get rid of this hack
                 if( token == "light" )
-                    token = "light_lev";	// hack for single light def
+                    token = "light_lev"; // hack for single light def
 
                 string keyname = token.TrimEnd();
 
@@ -402,8 +386,9 @@ namespace SharpQuake
 
                 init = true;
 
-                // keynames with a leading underscore are used for utility comments,
-                // and are immediately discarded by quake
+                /* keynames with a leading underscore are used for utility comments,
+                 * and are immediately discarded by quake
+                 */
                 if( keyname[0] == '_' )
                     continue;
 
@@ -430,11 +415,7 @@ namespace SharpQuake
             return data;
         }
 
-        /// <summary>
-        /// ED_Print
-        /// For debugging
-        /// </summary>
-        public unsafe static void Print( edict_t ed )
+        public static unsafe void Print( edict_t ed )
         {
             if( ed.free )
             {
@@ -449,7 +430,7 @@ namespace SharpQuake
                 string name = GetString( d.s_name );
 
                 if( name.Length > 2 && name[name.Length - 2] == '_' )
-                    continue; // skip _x, _y, _z vars
+                    continue;
 
                 int type = d.type & ~DEF_SAVEGLOBAL;
                 int offset;
@@ -521,9 +502,6 @@ namespace SharpQuake
             return true;
         }
 
-        /// <summary>
-        /// Like ED_NewString but returns string id (string_t)
-        /// </summary>
         public static int NewString( string s )
         {
             int id = AllocString();
@@ -587,10 +565,7 @@ namespace SharpQuake
             _DynamicStrings[offset] = value;
         }
 
-        /// <summary>
-        /// ED_WriteGlobals
-        /// </summary>
-        public unsafe static void WriteGlobals( StreamWriter writer )
+        public static unsafe void WriteGlobals( StreamWriter writer )
         {
             writer.WriteLine( "{" );
             for( int i = 0; i < _Progs.numglobaldefs; i++ )
@@ -614,10 +589,7 @@ namespace SharpQuake
             writer.WriteLine( "}" );
         }
 
-        /// <summary>
-        /// ED_Write
-        /// </summary>
-        public unsafe static void WriteEdict( StreamWriter writer, edict_t ed )
+        public static unsafe void WriteEdict( StreamWriter writer, edict_t ed )
         {
             writer.WriteLine( "{" );
 
@@ -631,8 +603,8 @@ namespace SharpQuake
             {
                 ddef_t d = _FieldDefs[i];
                 string name = GetString( d.s_name );
-                if( name != null && name.Length > 2 && name[name.Length - 2] == '_' )// [strlen(name) - 2] == '_')
-                    continue;	// skip _x, _y, _z vars
+                if( name != null && name.Length > 2 && name[name.Length - 2] == '_' )
+                    continue;
 
                 int type = d.type & ~DEF_SAVEGLOBAL;
                 int offset1;
@@ -663,9 +635,6 @@ namespace SharpQuake
             writer.WriteLine( "}" );
         }
 
-        /// <summary>
-        /// ED_ParseGlobals
-        /// </summary>
         public static void ParseGlobals( string data )
         {
             while( true )
@@ -700,9 +669,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// ED_PrintNum
-        /// </summary>
         public static void PrintNum( int ent )
         {
             Print( Server.EdictNum( ent ) );
@@ -749,10 +715,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// ED_PrintEdict_f
-        /// For debugging, prints a single edict
-        /// </summary>
         private static void PrintEdict_f()
         {
             int i = Common.atoi( Cmd.Argv( 1 ) );
@@ -764,9 +726,6 @@ namespace SharpQuake
             Progs.PrintNum( i );
         }
 
-        // ED_Count
-        //
-        // For debugging
         private static void EdictCount()
         {
             int active = 0, models = 0, solid = 0, step = 0;
@@ -792,9 +751,6 @@ namespace SharpQuake
             Con.Print( "step      :{0}\n", step );
         }
 
-        /// <summary>
-        /// ED_FindFunction
-        /// </summary>
         private static dfunction_t FindFunction( string name )
         {
             int i = IndexOfFunction( name );
@@ -814,12 +770,13 @@ namespace SharpQuake
             return -1;
         }
 
-        /// <summary>
-        /// Since memory block containing original edict_t plus additional data
-        /// is split into two fiels - edict_t.v and edict_t.fields we must check key.ofs
-        /// to choose between thistwo parts.
-        /// Warning: Key offset is in integers not bytes!
-        /// </summary>
+        /* Since memory block containing original edict_t plus additional data
+         * is split into two fiels - edict_t.v and edict_t.fields we must check key.ofs
+         * to choose between thistwo parts.
+         *
+         * Warning: Key offset is in integers not bytes!
+         */
+
         private static unsafe bool ParsePair( edict_t ent, ddef_t key, string s )
         {
             int offset1;
@@ -837,19 +794,19 @@ namespace SharpQuake
                 }
         }
 
-        /// <summary>
-        /// ED_ParseEpair
-        /// Can parse either fields or globals returns false if error
-        /// Uze: Warning! value pointer is already with correct offset (value = base + key.ofs)!
-        /// </summary>
+        /* Can parse either fields or globals returns false if error
+         *
+         * Uze: Warning! value pointer is already with correct offset (value = base + key.ofs)!
+         */
+
         private static unsafe bool ParsePair( void* value, ddef_t key, string s )
         {
-            void* d = value;// (void *)((int *)base + key->ofs);
+            void* d = value;
 
             switch( (etype_t)( key.type & ~DEF_SAVEGLOBAL ) )
             {
                 case etype_t.ev_string:
-                    *(int*)d = NewString( s );// - pr_strings;
+                    *(int*)d = NewString( s );
                     break;
 
                 case etype_t.ev_float:
@@ -884,7 +841,7 @@ namespace SharpQuake
                         Con.Print( "Can't find function {0}\n", s );
                         return false;
                     }
-                    *(int*)d = func;// - pr_functions;
+                    *(int*)d = func;
                     break;
 
                 default:
@@ -903,10 +860,10 @@ namespace SharpQuake
             return -1;
         }
 
-        /// <summary>
-        /// Returns true if ofs is inside GlobalStruct or false if ofs is in _Globals
-        /// Out parameter offset is set to correct offset inside either GlobalStruct or _Globals
-        /// </summary>
+        /* Returns true if ofs is inside GlobalStruct or false if ofs is in _Globals
+         * Out parameter offset is set to correct offset inside either GlobalStruct or _Globals
+         */
+
         private static bool IsGlobalStruct( int ofs, out int offset )
         {
             if( ofs < globalvars_t.SizeInBytes >> 2 )
@@ -918,11 +875,11 @@ namespace SharpQuake
             return false;
         }
 
-        /// <summary>
-        /// Mimics G_xxx macros
-        /// But globals are split too, so we must check offset and choose
-        /// GlobalStruct or _Globals
-        /// </summary>
+        /* Mimics G_xxx macros
+         * globals are split too, so we must check offset and choose
+         * GlobalStruct or _Globals
+         */
+
         private static unsafe void* Get( int offset )
         {
             int offset1;
@@ -950,9 +907,6 @@ namespace SharpQuake
             return *( (int*)Get( offset ) );
         }
 
-        /// <summary>
-        /// ED_FindField
-        /// </summary>
         private static ddef_t FindField( string name )
         {
             int i = IndexOfField( name );
@@ -962,9 +916,6 @@ namespace SharpQuake
             return null;
         }
 
-        /// <summary>
-        /// PR_ValueString
-        /// </summary>
         private static unsafe string ValueString( etype_t type, void* val )
         {
             string result;
@@ -1025,9 +976,6 @@ namespace SharpQuake
             return -1;
         }
 
-        /// <summary>
-        /// ED_FieldAtOfs
-        /// </summary>
         private static ddef_t FindField( int ofs )
         {
             int i = IndexOfField( ofs );
@@ -1069,11 +1017,10 @@ namespace SharpQuake
             return ( ( stringId >> 24 ) & 1 ) == 0;
         }
 
-        /// <summary>
-        /// PR_UglyValueString
-        /// Returns a string describing *data in a type specific manner
-        /// Easier to parse than PR_ValueString
-        /// </summary>
+        /* Returns a string describing *data in a type specific manner
+         * Easier to parse than PR_ValueString
+         */
+
         private static unsafe string UglyValueString( etype_t type, eval_t* val )
         {
             type &= (etype_t)~DEF_SAVEGLOBAL;
@@ -1129,9 +1076,6 @@ namespace SharpQuake
             return true;
         }
 
-        /// <summary>
-        /// ED_FindGlobal
-        /// </summary>
         private static ddef_t FindGlobal( string name )
         {
             for( int i = 0; i < _GlobalDefs.Length; i++ )
@@ -1153,15 +1097,14 @@ namespace SharpQuake
             return ParsePair( (float*)_GlobalsAddr + offset, key, value );
         }
 
-        /// <summary>
-        /// PR_GlobalString
-        /// Returns a string with a description and the contents of a global,
-        /// padded to 20 field width
-        /// </summary>
+        /* Returns a string with a description and the contents of a global,
+         * padded to 20 field width
+         */
+
         private static unsafe string GlobalString( int ofs )
         {
             string line = String.Empty;
-            void* val = Get( ofs );// (void*)&pr_globals[ofs];
+            void* val = Get( ofs );
             ddef_t def = GlobalAtOfs( ofs );
             if( def == null )
                 line = String.Format( "{0}(???)", ofs );
@@ -1176,9 +1119,6 @@ namespace SharpQuake
             return line;
         }
 
-        /// <summary>
-        /// PR_GlobalStringNoContents
-        /// </summary>
         private static string GlobalStringNoContents( int ofs )
         {
             string line = String.Empty;
@@ -1193,9 +1133,6 @@ namespace SharpQuake
             return line;
         }
 
-        /// <summary>
-        /// ED_GlobalAtOfs
-        /// </summary>
         private static ddef_t GlobalAtOfs( int ofs )
         {
             for( int i = 0; i < _GlobalDefs.Length; i++ )

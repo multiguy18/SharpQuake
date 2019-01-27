@@ -22,15 +22,13 @@
 
 using OpenTK;
 
-// world.h
-
 namespace SharpQuake
 {
     internal struct plane_t
     {
         public Vector3 normal;
         public float dist;
-    } // plane_t;
+    }
 
     internal static class Move
     {
@@ -41,13 +39,13 @@ namespace SharpQuake
 
     internal class trace_t
     {
-        public bool allsolid;	// if true, plane is not valid
+        public bool allsolid; // if true, plane is not valid
         public bool startsolid;	// if true, the initial point was in a solid area
         public bool inopen, inwater;
-        public float fraction;		// time completed, 1.0 = didn't hit anything
-        public Vector3 endpos;			// final position
-        public plane_t plane;			// surface normal at impact
-        public edict_t ent;			// entity the surface is on
+        public float fraction; // time completed, 1.0 = didn't hit anything
+        public Vector3 endpos; // final position
+        public plane_t plane; // surface normal at impact
+        public edict_t ent; // entity the surface is on
 
         public void CopyFrom( trace_t src )
         {
@@ -60,5 +58,5 @@ namespace SharpQuake
             this.plane = src.plane;
             this.ent = src.ent;
         }
-    } // trace_t;
+    }
 }

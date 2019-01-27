@@ -22,14 +22,10 @@
 
 using OpenTK.Graphics.OpenGL;
 
-// gl_draw.c
-
 namespace SharpQuake
 {
     partial class Scr
     {
-        // GL_Set2D
-        //
         // Setup as if the screen was 320*200
         private static void Set2D()
         {

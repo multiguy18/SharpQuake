@@ -24,8 +24,6 @@ using System;
 using System.IO;
 using System.Text;
 
-// gl_mesh.c
-
 namespace SharpQuake
 {
     internal static class Mesh
@@ -33,41 +31,35 @@ namespace SharpQuake
         private const int MAX_COMMANDS = 8192;
         private const int MAX_STRIP = 128;
 
-        private static model_t _AliasModel; // aliasmodel
-        private static aliashdr_t _AliasHdr; // paliashdr
+        private static model_t _AliasModel;
+        private static aliashdr_t _AliasHdr;
 
-        private static byte[] _Used = new byte[MAX_COMMANDS]; // qboolean used. changed to vyte because can have values 0, 1, 2...
+        private static byte[] _Used = new byte[MAX_COMMANDS];
 
-        // the command list holds counts and s/t values that are valid for
-        // every frame
-        private static int[] _Commands = new int[MAX_COMMANDS]; // commands
+        // the command list holds counts and s/t values that are valid for every frame
+        private static int[] _Commands = new int[MAX_COMMANDS];
 
-        private static int _NumCommands; // numcommands
+        private static int _NumCommands;
 
-        // all frames will have their vertexes rearranged and expanded
-        // so they are in the order expected by the command list
-        private static int[] _VertexOrder = new int[MAX_COMMANDS]; // vertexorder
+        /* all frames will have their vertexes rearranged and expanded
+         * so they are in the order expected by the command list
+         */
+        private static int[] _VertexOrder = new int[MAX_COMMANDS];
 
-        private static int _NumOrder; // numorder
+        private static int _NumOrder;
+        private static int _AllVerts;
+        private static int _AllTris;
 
-        private static int _AllVerts; // allverts
-        private static int _AllTris; // alltris
+        private static int[] _StripVerts = new int[MAX_STRIP];
+        private static int[] _StripTris = new int[MAX_STRIP];
+        private static int _StripCount;
 
-        private static int[] _StripVerts = new int[MAX_STRIP]; // stripverts
-        private static int[] _StripTris = new int[MAX_STRIP]; // striptris
-        private static int _StripCount; // stripcount
-
-        /// <summary>
-        /// GL_MakeAliasModelDisplayLists
-        /// </summary>
         public static void MakeAliasModelDisplayLists( model_t m, aliashdr_t hdr )
         {
             _AliasModel = m;
             _AliasHdr = hdr;
 
-            //
             // look for a cached version
-            //
             string path = Path.ChangeExtension( "glquake/" + Path.GetFileNameWithoutExtension( m.name ), ".ms2" );
 
             DisposableWrapper<BinaryReader> file;
@@ -87,16 +79,12 @@ namespace SharpQuake
             }
             else
             {
-                //
                 // build it from scratch
-                //
                 Con.Print( "meshing {0}...\n", m.name );
 
-                BuildTris();		// trifans or lists
+                BuildTris();  // trifans or lists
 
-                //
                 // save out the cached version
-                //
                 string fullpath = Path.Combine( Common.GameDir, path );
                 Stream fs = Sys.FileOpenWrite( fullpath, true );
                 if( fs != null )
@@ -111,46 +99,35 @@ namespace SharpQuake
                     }
             }
 
-            //
             // save the data out
-            //
             _AliasHdr.poseverts = _NumOrder;
 
-            int[] cmds = new int[_NumCommands]; //Hunk_Alloc (numcommands * 4);
-            _AliasHdr.commands = cmds; // in bytes??? // (byte*)cmds - (byte*)paliashdr;
-            Buffer.BlockCopy( _Commands, 0, cmds, 0, _NumCommands * 4 ); //memcpy (cmds, commands, numcommands * 4);
+            int[] cmds = new int[_NumCommands];
+            _AliasHdr.commands = cmds;
+            Buffer.BlockCopy( _Commands, 0, cmds, 0, _NumCommands * 4 );
 
             trivertx_t[][] poseverts = Mod.PoseVerts;
-            trivertx_t[] verts = new trivertx_t[_AliasHdr.numposes * _AliasHdr.poseverts]; // Hunk_Alloc (paliashdr->numposes * paliashdr->poseverts * sizeof(trivertx_t) );
-            _AliasHdr.posedata = verts; // (byte*)verts - (byte*)paliashdr;
+            trivertx_t[] verts = new trivertx_t[_AliasHdr.numposes * _AliasHdr.poseverts];
+            _AliasHdr.posedata = verts;
             int offset = 0;
             for( int i = 0; i < _AliasHdr.numposes; i++ )
                 for( int j = 0; j < _NumOrder; j++ )
                 {
-                    verts[offset++] = poseverts[i][_VertexOrder[j]];  // *verts++ = poseverts[i][vertexorder[j]];
+                    verts[offset++] = poseverts[i][_VertexOrder[j]];
                 }
         }
 
-        /// <summary>
-        /// BuildTris
-        /// Generate a list of trifans or strips for the model, which holds for all frames
-        /// </summary>
         private static void BuildTris()
         {
             int[] bestverts = new int[1024];
             int[] besttris = new int[1024];
 
-            // Uze
-            // All references to pheader from model.c changed to _AliasHdr (former paliashdr)
-
-            //
             // build tristrips
-            //
             stvert_t[] stverts = Mod.STVerts;
             dtriangle_t[] triangles = Mod.Triangles;
             _NumOrder = 0;
             _NumCommands = 0;
-            Array.Clear( _Used, 0, _Used.Length ); // memset (used, 0, sizeof(used));
+            Array.Clear( _Used, 0, _Used.Length );
             int besttype = 0, len;
             for( int i = 0; i < _AliasHdr.numtris; i++ )
             {
@@ -199,7 +176,7 @@ namespace SharpQuake
                     float s = stverts[k].s;
                     float t = stverts[k].t;
                     if( triangles[besttris[0]].facesfront == 0 && stverts[k].onseam != 0 )
-                        s += _AliasHdr.skinwidth / 2;	// on back side
+                        s += _AliasHdr.skinwidth / 2; // on back side
                     s = ( s + 0.5f ) / _AliasHdr.skinwidth;
                     t = ( t + 0.5f ) / _AliasHdr.skinheight;
 
@@ -210,7 +187,7 @@ namespace SharpQuake
                 }
             }
 
-            _Commands[_NumCommands++] = 0;		// end of list marker
+            _Commands[_NumCommands++] = 0;  // end of list marker
 
             Con.DPrint( "{0,3} tri {1,3} vert {2,3} cmd\n", _AliasHdr.numtris, _NumOrder, _NumCommands );
 
@@ -224,7 +201,7 @@ namespace SharpQuake
 
             dtriangle_t[] triangles = Mod.Triangles;
 
-            int[] vidx = triangles[starttri].vertindex; //last = &triangles[starttri];
+            int[] vidx = triangles[starttri].vertindex;
             _StripVerts[0] = vidx[( startv ) % 3];
             _StripVerts[1] = vidx[( startv + 1 ) % 3];
             _StripVerts[2] = vidx[( startv + 2 ) % 3];
@@ -232,8 +209,8 @@ namespace SharpQuake
             _StripTris[0] = starttri;
             _StripCount = 1;
 
-            int m1 = _StripVerts[2]; // last->vertindex[(startv + 2) % 3];
-            int m2 = _StripVerts[1]; // last->vertindex[(startv + 1) % 3];
+            int m1 = _StripVerts[2];
+            int m2 = _StripVerts[1];
             int lastfacesfront = triangles[starttri].facesfront;
 
 // look for a matching triangle
@@ -287,7 +264,6 @@ done:
             _Used[starttri] = 2;
 
             dtriangle_t[] triangles = Mod.Triangles;
-            //last = &triangles[starttri];
 
             int[] vidx = triangles[starttri].vertindex;
 
@@ -304,7 +280,7 @@ done:
 
 // look for a matching triangle
 nexttri:
-            for( int j = starttri + 1; j < _AliasHdr.numtris; j++ )//, check++)
+            for( int j = starttri + 1; j < _AliasHdr.numtris; j++ )
             {
                 vidx = triangles[j].vertindex;
                 if( triangles[j].facesfront != lastfacesfront )

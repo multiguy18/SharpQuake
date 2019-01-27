@@ -23,15 +23,13 @@
 using System;
 using OpenTK;
 
-// world.c -- world query functions
-
 // entities never clip against themselves, or their owner
-//
+
 // line of sight checks trace->crosscontent, but bullets don't
 
 namespace SharpQuake
 {
-    partial class Server
+    internal partial class Server
     {
         // 1/32 epsilon to keep floating point happy
         private const float DIST_EPSILON = 0.03125f;
@@ -41,7 +39,6 @@ namespace SharpQuake
         private const int MOVE_MISSILE = 2;
 
         private const int AREA_DEPTH = 4;
-
         private const int AREA_NODES = 32;
 
         private static areanode_t[] _AreaNodes = new areanode_t[AREA_NODES];
@@ -58,7 +55,6 @@ namespace SharpQuake
         private static mplane_t[] _BoxPlanes = new mplane_t[6];
 
         /// <summary>
-        /// SV_ClearWorld
         /// called after the world model has been loaded, before linking any entities
         /// </summary>
         public static void ClearWorld()
@@ -73,35 +69,31 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// SV_UnlinkEdict
-        /// call before removing an entity, and before trying to move one,
-        /// so it doesn't clip against itself
-        /// flags ent->v.modified
+        /// call before removing an entity, and before trying to move one, so it doesn't clip against itself
         /// </summary>
         public static void UnlinkEdict( edict_t ent )
         {
             if( ent.area.Prev == null )
-                return;		// not linked in anywhere
+                return;  // not linked in anywhere
 
-            ent.area.Remove();  //RemoveLink(&ent->area);
-            //ent->area.prev = ent->area.next = NULL;
+            ent.area.Remove();
         }
 
-        /// <summary>
-        /// SV_LinkEdict
-        ///
-        /// Needs to be called any time an entity changes origin, mins, maxs, or solid
-        /// flags ent->v.modified
-        /// sets ent->v.absmin and ent->v.absmax
-        /// if touchtriggers, calls prog functions for the intersected triggers
-        /// </summary>
+        /**
+         * <summary>
+         * Needs to be called any time an entity changes origin, mins, maxs, or solid flags.
+         *
+         * If touchtriggers, calls prog functions for the intersected triggers
+         * </summary>
+         */
+
         public static void LinkEdict( edict_t ent, bool touch_triggers )
         {
             if( ent.area.Prev != null )
-                UnlinkEdict( ent );	// unlink from old position
+                UnlinkEdict( ent ); // unlink from old position
 
             if( ent == sv.edicts[0] )
-                return;		// don't add the world
+                return;  // don't add the world
 
             if( ent.free )
                 return;
@@ -110,10 +102,9 @@ namespace SharpQuake
             Mathlib.VectorAdd( ref ent.v.origin, ref ent.v.mins, out ent.v.absmin );
             Mathlib.VectorAdd( ref ent.v.origin, ref ent.v.maxs, out ent.v.absmax );
 
-            //
-            // to make items easier to pick up and allow them to be grabbed off
-            // of shelves, the abs sizes are expanded
-            //
+            /* to make items easier to pick up and allow them to be grabbed off
+             * of shelves, the abs sizes are expanded
+             */
             if( ( (int)ent.v.flags & EdictFlags.FL_ITEM ) != 0 )
             {
                 ent.v.absmin.x -= 15;
@@ -122,8 +113,10 @@ namespace SharpQuake
                 ent.v.absmax.y += 15;
             }
             else
-            {	// because movement is clipped an epsilon away from an actual edge,
-                // we must fully check even when bounding boxes don't quite touch
+            {
+                /* because movement is clipped an epsilon away from an actual edge,
+                 * we must fully check even when bounding boxes don't quite touch
+                 */
                 ent.v.absmin.x -= 1;
                 ent.v.absmin.y -= 1;
                 ent.v.absmin.z -= 1;
@@ -151,7 +144,7 @@ namespace SharpQuake
                 else if( Mathlib.Comp( ref ent.v.absmax, node.axis ) < node.dist )
                     node = node.children[1];
                 else
-                    break;		// crosses the node
+                    break;  // crosses the node
             }
 
             // link it in
@@ -166,9 +159,6 @@ namespace SharpQuake
                 TouchLinks( ent, _AreaNodes[0] );
         }
 
-        /// <summary>
-        /// SV_PointContents
-        /// </summary>
         public static int PointContents( ref Vector3 p )
         {
             int cont = HullPointContents( sv.worldmodel.hulls[0], 0, ref p );
@@ -177,15 +167,19 @@ namespace SharpQuake
             return cont;
         }
 
-        /// <summary>
-        /// SV_Move
-        /// mins and maxs are relative
-        /// if the entire move stays in a solid volume, trace.allsolid will be set
-        /// if the starting point is in a solid, it will be allowed to move out to an open area
-        /// nomonsters is used for line of sight or edge testing, where mosnters
-        /// shouldn't be considered solid objects
-        /// passedict is explicitly excluded from clipping checks (normally NULL)
-        /// </summary>
+        /**
+         * <summary>
+         * mins and maxs are relative.
+         *
+         * if the entire move stays in a solid volume, trace.allsolid will be set.
+         * if the starting point is in a solid, it will be allowed to move out to an open area.
+         *
+         * nomonsters is used for line of sight or edge testing, where mosnters shouldn't be considered solid objects
+         *
+         *passedict is explicitly excluded from clipping checks (normally NULL)
+         * </summary>
+         */
+
         public static trace_t Move( ref Vector3 start, ref Vector3 mins, ref Vector3 maxs, ref Vector3 end, int type, edict_t passedict )
         {
             moveclip_t clip = new moveclip_t();
@@ -220,9 +214,6 @@ namespace SharpQuake
             return clip.trace;
         }
 
-        /// <summary>
-        /// SV_RecursiveHullCheck
-        /// </summary>
         public static bool RecursiveHullCheck( hull_t hull, int num, float p1f, float p2f, ref Vector3 p1, ref Vector3 p2, trace_t trace )
         {
             // check for empty
@@ -238,15 +229,13 @@ namespace SharpQuake
                 }
                 else
                     trace.startsolid = true;
-                return true;		// empty
+                return true; // empty
             }
 
             if( num < hull.firstclipnode || num > hull.lastclipnode )
                 Sys.Error( "SV_RecursiveHullCheck: bad node number" );
 
-            //
             // find the point distances
-            //
             short[] node_children = hull.clipnodes[num].children;
             mplane_t plane = hull.planes[hull.clipnodes[num].planenum];
             float t1, t2;
@@ -292,11 +281,9 @@ namespace SharpQuake
                 return RecursiveHullCheck( hull, node_children[side ^ 1], midf, p2f, ref mid, ref p2, trace );
 
             if( trace.allsolid )
-                return false;		// never got out of the solid area
+                return false;  // never got out of the solid area
 
-            //==================
             // the other side of the node is solid, this is the impact point
-            //==================
             if( side == 0 )
             {
                 trace.plane.normal = plane.normal;
@@ -329,9 +316,6 @@ namespace SharpQuake
             return false;
         }
 
-        /// <summary>
-        /// SV_CreateAreaNode
-        /// </summary>
         private static areanode_t CreateAreaNode( int depth, ref Vector3 mins, ref Vector3 maxs )
         {
             areanode_t anode = _AreaNodes[_NumAreaNodes];
@@ -372,10 +356,7 @@ namespace SharpQuake
             return anode;
         }
 
-        /// <summary>
-        /// SV_TestEntityPosition
-        /// This could be a lot more efficient...
-        /// </summary>
+        // TODO: This could be a lot more efficient...
         private static edict_t TestEntityPosition( edict_t ent )
         {
             trace_t trace = Move( ref ent.v.origin, ref ent.v.mins, ref ent.v.maxs, ref ent.v.origin, 0, ent );
@@ -386,11 +367,10 @@ namespace SharpQuake
             return null;
         }
 
-        /// <summary>
-        /// SV_InitBoxHull
-        /// Set up the planes and clipnodes so that the six floats of a bounding box
-        /// can just be stored out and get a proper hull_t structure.
-        /// </summary>
+        /* Set up the planes and clipnodes so that the six floats of a bounding box
+         * can just be stored out and get a proper hull_t structure.
+         */
+
         private static void InitBoxHull()
         {
             _BoxHull.clipnodes = _BoxClipNodes;
@@ -425,14 +405,13 @@ namespace SharpQuake
                         _BoxPlanes[i].normal.Z = 1;
                         break;
                 }
-                //_BoxPlanes[i].normal[i>>1] = 1;
             }
         }
 
-        // SV_HullForBox
-        //
-        // To keep everything totally uniform, bounding boxes are turned into small
-        // BSP trees instead of being compared directly.
+        /* To keep everything totally uniform, bounding boxes are turned into small
+         * BSP trees instead of being compared directly.
+         */
+
         private static hull_t HullForBox( ref Vector3 mins, ref Vector3 maxs )
         {
             _BoxPlanes[0].dist = maxs.X;
@@ -445,19 +424,19 @@ namespace SharpQuake
             return _BoxHull;
         }
 
-        /// <summary>
-        /// SV_HullForEntity
-        /// Returns a hull that can be used for testing or clipping an object of mins/maxs size.
-        /// Offset is filled in to contain the adjustment that must be added to the
-        /// testing object's origin to get a point to use with the returned hull.
-        /// </summary>
+        /* Returns a hull that can be used for testing or clipping an object of mins/maxs size.
+         *
+         * Offset is filled in to contain the adjustment that must be added to the
+         * testing object's origin to get a point to use with the returned hull.
+         */
+
         private static hull_t HullForEntity( edict_t ent, ref Vector3 mins, ref Vector3 maxs, out Vector3 offset )
         {
             hull_t hull = null;
 
             // decide which clipping hull to use, based on the size
             if( ent.v.solid == Solids.SOLID_BSP )
-            {	// explicit hulls in the BSP model
+            { // explicit hulls in the BSP model
                 if( ent.v.movetype != Movetypes.MOVETYPE_PUSH )
                     Sys.Error( "SOLID_BSP without MOVETYPE_PUSH" );
 
@@ -491,9 +470,6 @@ namespace SharpQuake
             return hull;
         }
 
-        /// <summary>
-        /// SV_FindTouchedLeafs
-        /// </summary>
         private static void FindTouchedLeafs( edict_t ent, mnodebase_t node )
         {
             if( node.contents == Contents.CONTENTS_SOLID )
@@ -527,9 +503,6 @@ namespace SharpQuake
                 FindTouchedLeafs( ent, n.children[1] );
         }
 
-        /// <summary>
-        /// SV_TouchLinks
-        /// </summary>
         private static void TouchLinks( edict_t ent, areanode_t node )
         {
             // touch linked edicts
@@ -537,7 +510,7 @@ namespace SharpQuake
             for( link_t l = node.trigger_edicts.Next; l != node.trigger_edicts; l = next )
             {
                 next = l.Next;
-                edict_t touch = (edict_t)l.Owner;// EDICT_FROM_AREA(l);
+                edict_t touch = (edict_t)l.Owner;
                 if( touch == ent )
                     continue;
                 if( touch.v.touch == 0 || touch.v.solid != Solids.SOLID_TRIGGER )
@@ -569,11 +542,10 @@ namespace SharpQuake
                 TouchLinks( ent, node.children[1] );
         }
 
-        /// <summary>
-        /// SV_ClipMoveToEntity
-        /// Handles selection or creation of a clipping hull, and offseting (and
-        /// eventually rotation) of the end points
-        /// </summary>
+        /* Handles selection or creation of a clipping hull, and offseting (and eventually rotation)
+         * of the end points
+         */
+
         private static trace_t ClipMoveToEntity( edict_t ent, ref Vector3 start, ref Vector3 mins, ref Vector3 maxs, ref Vector3 end )
         {
             trace_t trace = new trace_t();
@@ -603,19 +575,13 @@ namespace SharpQuake
             return trace;
         }
 
-        /// <summary>
-        /// SV_MoveBounds
-        /// </summary>
         private static void MoveBounds( ref Vector3 start, ref Vector3 mins, ref Vector3 maxs, ref Vector3 end, out Vector3 boxmins, out Vector3 boxmaxs )
         {
             boxmins = Vector3.ComponentMin( start, end ) + mins - Vector3.One;
             boxmaxs = Vector3.ComponentMax( start, end ) + maxs + Vector3.One;
         }
 
-        /// <summary>
-        /// SV_ClipToLinks
-        /// Mins and maxs enclose the entire area swept by the move
-        /// </summary>
+        // Mins and maxs enclose the entire area swept by the move
         private static void ClipToLinks( areanode_t node, moveclip_t clip )
         {
             link_t next;
@@ -625,7 +591,7 @@ namespace SharpQuake
             for( link_t l = node.solid_edicts.Next; l != node.solid_edicts; l = next )
             {
                 next = l.Next;
-                edict_t touch = (edict_t)l.Owner;// EDICT_FROM_AREA(l);
+                edict_t touch = (edict_t)l.Owner;
                 if( touch.v.solid == Solids.SOLID_NOT )
                     continue;
                 if( touch == clip.passedict )
@@ -642,7 +608,7 @@ namespace SharpQuake
                     continue;
 
                 if( clip.passedict != null && clip.passedict.v.size.x != 0 && touch.v.size.x == 0 )
-                    continue;	// points never interact
+                    continue; // points never interact
 
                 // might intersect, so do an exact clip
                 if( clip.trace.allsolid )
@@ -650,9 +616,9 @@ namespace SharpQuake
                 if( clip.passedict != null )
                 {
                     if( ProgToEdict( touch.v.owner ) == clip.passedict )
-                        continue;	// don't clip against own missiles
+                        continue; // don't clip against own missiles
                     if( ProgToEdict( clip.passedict.v.owner ) == touch )
-                        continue;	// don't clip against owner
+                        continue; // don't clip against owner
                 }
 
                 if( ( (int)touch.v.flags & EdictFlags.FL_MONSTER ) != 0 )
@@ -685,9 +651,6 @@ namespace SharpQuake
                 ClipToLinks( node.children[1], clip );
         }
 
-        /// <summary>
-        /// SV_HullPointContents
-        /// </summary>
         private static int HullPointContents( hull_t hull, int num, ref Vector3 p )
         {
             while( num >= 0 )
@@ -714,12 +677,12 @@ namespace SharpQuake
         private class moveclip_t
         {
             public Vector3 boxmins, boxmaxs;// enclose the test object along entire move
-            public Vector3 mins, maxs;	// size of the moving object
-            public Vector3 mins2, maxs2;	// size when clipping against mosnters
+            public Vector3 mins, maxs; // size of the moving object
+            public Vector3 mins2, maxs2; // size when clipping against mosnters
             public Vector3 start, end;
             public trace_t trace;
             public int type;
             public edict_t passedict;
-        } //moveclip_t;
+        }
     }
 }

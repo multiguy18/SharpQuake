@@ -23,16 +23,12 @@
 using System;
 using System.Text;
 
-// sbar.h
-
-// the status bar is only redrawn if something has changed, but if anything
-// does, the entire thing will be redrawn for the next vid.numpages frames.
+/* the status bar is only redrawn if something has changed, but if anything
+ * does, the entire thing will be redrawn for the next vid.numpages frames
+ */
 
 namespace SharpQuake
 {
-    /// <summary>
-    /// Sbar_functions
-    /// </summary>
     internal static class Sbar
     {
         public static int Lines
@@ -43,49 +39,39 @@ namespace SharpQuake
         public const int SBAR_HEIGHT = 24;
 
         private const int STAT_MINUS = 10;
-        private static int _Updates; // sb_updates		// if >= vid.numpages, no update needed
-        private static bool _ShowScores; // sb_showscores
+        private static int _Updates; // if >= vid.numpages, no update needed
+        private static bool _ShowScores;
 
         // num frame for '-' stats digit
-
         private static glpic_t[,] _Nums = new glpic_t[2, 11];
+
         private static glpic_t _Colon;
         private static glpic_t _Slash;
         private static glpic_t _IBar;
         private static glpic_t _SBar;
         private static glpic_t _ScoreBar;
-
-        private static glpic_t[,] _Weapons = new glpic_t[7, 8];   // 0 is active, 1 is owned, 2-5 are flashes
+        private static glpic_t[,] _Weapons = new glpic_t[7, 8]; // 0 is active, 1 is owned, 2-5 are flashes
         private static glpic_t[] _Ammo = new glpic_t[4];
         private static glpic_t[] _Sigil = new glpic_t[4];
         private static glpic_t[] _Armor = new glpic_t[3];
         private static glpic_t[] _Items = new glpic_t[32];
-
-        private static glpic_t[,] _Faces = new glpic_t[7, 2];        // 0 is gibbed, 1 is dead, 2-6 are alive
-
-        // 0 is static, 1 is temporary animation
-        private static glpic_t _FaceInvis;
-
+        private static glpic_t[,] _Faces = new glpic_t[7, 2]; // 0 is gibbed, 1 is dead, 2-6 are alive
+        private static glpic_t _FaceInvis; // 0 is static, 1 is temporary animation
         private static glpic_t _FaceQuad;
         private static glpic_t _FaceInvuln;
         private static glpic_t _FaceInvisInvuln;
-
         private static glpic_t[] _RInvBar = new glpic_t[2];
         private static glpic_t[] _RWeapons = new glpic_t[5];
         private static glpic_t[] _RItems = new glpic_t[2];
         private static glpic_t[] _RAmmo = new glpic_t[3];
-        private static glpic_t _RTeamBord;		// PGM 01/19/97 - team color border
+        private static glpic_t _RTeamBord; // team color border
+        private static glpic_t[,] _HWeapons = new glpic_t[7, 5]; // 0 is active, 1 is owned, 2-5 are flashes
 
-        //MED 01/04/97 added two more weapons + 3 alternates for grenade launcher
-        private static glpic_t[,] _HWeapons = new glpic_t[7, 5];   // 0 is active, 1 is owned, 2-5 are flashes
-
-        //MED 01/04/97 added array to simplify weapon parsing
         private static int[] _HipWeapons = new int[]
         {
             QItems.HIT_LASER_CANNON_BIT, QItems.HIT_MJOLNIR_BIT, 4, QItems.HIT_PROXIMITY_GUN_BIT
         };
 
-        //MED 01/04/97 added hipnotic items array
         private static glpic_t[] _HItems = new glpic_t[2];
 
         private static int[] _FragSort = new int[QDef.MAX_SCOREBOARD];
@@ -95,9 +81,6 @@ namespace SharpQuake
         private static int[] _ScoreBoardCount = new int[QDef.MAX_SCOREBOARD];
         private static int _ScoreBoardLines;
 
-        // sb_lines scan lines to draw
-
-        // Sbar_Init
         public static void Init()
         {
             for( int i = 0; i < 10; i++ )
@@ -185,7 +168,6 @@ namespace SharpQuake
             _IBar = Drawer.PicFromWad( "ibar" );
             _ScoreBar = Drawer.PicFromWad( "scorebar" );
 
-            //MED 01/04/97 added new hipnotic weapons
             if( Common.GameKind == GameKind.Hipnotic )
             {
                 _HWeapons[0, 0] = Drawer.PicFromWad( "inv_laser" );
@@ -228,9 +210,7 @@ namespace SharpQuake
                 _RItems[0] = Drawer.PicFromWad( "r_shield1" );
                 _RItems[1] = Drawer.PicFromWad( "r_agrav1" );
 
-                // PGM 01/19/97 - team color border
                 _RTeamBord = Drawer.PicFromWad( "r_teambord" );
-                // PGM 01/19/97 - team color border
 
                 _RAmmo[0] = Drawer.PicFromWad( "r_ammolava" );
                 _RAmmo[1] = Drawer.PicFromWad( "r_ammomulti" );
@@ -238,20 +218,18 @@ namespace SharpQuake
             }
         }
 
-        // Sbar_Changed
         // call whenever any of the client stats represented on the sbar changes
         public static void Changed()
         {
-            _Updates = 0;	// update next frame
+            _Updates = 0; // update next frame
         }
 
-        // Sbar_Draw
         // called every frame by screen
         public static void Draw()
         {
             viddef_t vid = Scr.vid;
             if( Scr.ConCurrent == vid.height )
-                return;		// console is full screen
+                return;  // console is full screen
 
             if( _Updates >= vid.numpages )
                 return;
@@ -290,6 +268,7 @@ namespace SharpQuake
                     if( cl.HasItems( QItems.IT_KEY2 ) )
                         DrawPic( 209, 12, _Items[1] );
                 }
+
                 // armor
                 if( cl.HasItems( QItems.IT_INVULNERABILITY ) )
                 {
@@ -367,7 +346,6 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// Sbar_IntermissionOverlay
         /// called each frame after the level has been completed
         /// </summary>
         public static void IntermissionOverlay()
@@ -404,9 +382,6 @@ namespace SharpQuake
             IntermissionNumber( 240, 144, Client.cl.stats[QStats.STAT_TOTALMONSTERS], 3, 0 );
         }
 
-        /// <summary>
-        /// Sbar_FinaleOverlay
-        /// </summary>
         public static void FinaleOverlay()
         {
             Scr.CopyEverithing = true;
@@ -415,9 +390,6 @@ namespace SharpQuake
             Drawer.DrawTransPic( ( Scr.vid.width - pic.width ) / 2, 16, pic );
         }
 
-        /// <summary>
-        /// Sbar_IntermissionNumber
-        /// </summary>
         private static void IntermissionNumber( int x, int y, int num, int digits, int color )
         {
             string str = num.ToString();
@@ -437,7 +409,6 @@ namespace SharpQuake
             }
         }
 
-        // Sbar_DrawInventory
         private static void DrawInventory()
         {
             int flashon;
@@ -477,8 +448,6 @@ namespace SharpQuake
                 }
             }
 
-            // MED 01/04/97
-            // hipnotic weapons
             if( Common.GameKind == GameKind.Hipnotic )
             {
                 int grenadeflashing = 0;
@@ -538,9 +507,15 @@ namespace SharpQuake
             {
                 // check for powered up weapon.
                 if( cl.stats[QStats.STAT_ACTIVEWEAPON] >= QItems.RIT_LAVA_NAILGUN )
+                {
                     for( int i = 0; i < 5; i++ )
+                    {
                         if( cl.stats[QStats.STAT_ACTIVEWEAPON] == ( QItems.RIT_LAVA_NAILGUN << i ) )
+                        {
                             DrawPic( ( i + 2 ) * 24, -16, _RWeapons[i] );
+                        }
+                    }
+                }
             }
 
             // ammo counts
@@ -550,8 +525,10 @@ namespace SharpQuake
                 //sprintf(num, "%3i", cl.stats[QStats.STAT_SHELLS + i]);
                 if( num[0] != ' ' )
                     DrawCharacter( ( 6 * i + 1 ) * 8 - 2, -24, 18 + num[0] - '0' );
+
                 if( num[1] != ' ' )
                     DrawCharacter( ( 6 * i + 2 ) * 8 - 2, -24, 18 + num[1] - '0' );
+
                 if( num[2] != ' ' )
                     DrawCharacter( ( 6 * i + 3 ) * 8 - 2, -24, 18 + num[2] - '0' );
             }
@@ -569,7 +546,6 @@ namespace SharpQuake
                     }
                     else
                     {
-                        //MED 01/04/97 changed keys
                         if( Common.GameKind != GameKind.Hipnotic || ( i > 1 ) )
                         {
                             DrawPic( 192 + i * 16, -16, _Items[i] );
@@ -580,7 +556,6 @@ namespace SharpQuake
                 }
             }
 
-            //MED 01/04/97 added hipnotic items
             // hipnotic items
             if( Common.GameKind == GameKind.Hipnotic )
             {
@@ -590,7 +565,8 @@ namespace SharpQuake
                     {
                         float time = cl.item_gettime[24 + i];
                         if( time > 0 && time > cl.time - 2 && flashon > 0 )
-                        {  // flash frame
+                        {
+                            // flash frame
                             _Updates = 0;
                         }
                         else
@@ -613,7 +589,8 @@ namespace SharpQuake
                         float time = cl.item_gettime[29 + i];
 
                         if( time > 0 && time > cl.time - 2 && flashon > 0 )
-                        {	// flash frame
+                        {
+                            // flash frame
                             _Updates = 0;
                         }
                         else
@@ -635,7 +612,8 @@ namespace SharpQuake
                     {
                         float time = cl.item_gettime[28 + i];
                         if( time > 0 && time > cl.time - 2 && flashon > 0 )
-                        {	// flash frame
+                        {
+                            // flash frame
                             _Updates = 0;
                         }
                         else
@@ -647,7 +625,6 @@ namespace SharpQuake
             }
         }
 
-        // Sbar_DrawFrags
         private static void DrawFrags()
         {
             SortFrags();
@@ -683,7 +660,6 @@ namespace SharpQuake
                 // draw number
                 int f = s.frags;
                 string num = f.ToString().PadLeft( 3 );
-                //sprintf(num, "%3i", f);
 
                 DrawCharacter( ( x + 1 ) * 8, -24, num[0] );
                 DrawCharacter( ( x + 2 ) * 8, -24, num[1] );
@@ -698,7 +674,6 @@ namespace SharpQuake
             }
         }
 
-        // Sbar_DrawPic
         private static void DrawPic( int x, int y, glpic_t pic )
         {
             if( Client.cl.gametype == Protocol.GAME_DEATHMATCH )
@@ -707,7 +682,6 @@ namespace SharpQuake
                 Drawer.DrawPic( x + ( ( Scr.vid.width - 320 ) >> 1 ), y + ( Scr.vid.height - SBAR_HEIGHT ), pic );
         }
 
-        // Sbar_DrawScoreboard
         private static void DrawScoreboard()
         {
             SoloScoreboard();
@@ -715,10 +689,9 @@ namespace SharpQuake
                 DeathmatchOverlay();
         }
 
-        // Sbar_DrawNum
         private static void DrawNum( int x, int y, int num, int digits, int color )
         {
-            string str = num.ToString();// int l = Sbar_itoa(num, str);
+            string str = num.ToString();
 
             if( str.Length > digits )
                 str = str.Remove( str.Length - digits );
@@ -737,13 +710,11 @@ namespace SharpQuake
             }
         }
 
-        // Sbar_DrawFace
         private static void DrawFace()
         {
             client_state_t cl = Client.cl;
 
-            // PGM 01/19/97 - team color drawing
-            // PGM 03/02/97 - fixed so color swatch only appears in CTF modes
+            // team color drawing
             if( Common.GameKind == GameKind.Rogue &&
                 ( Client.cl.maxclients != 1 ) &&
                 ( Host.TeamPlay > 3 ) &&
@@ -787,7 +758,6 @@ namespace SharpQuake
 
                 return;
             }
-            // PGM 01/19/97 - team color drawing
 
             int f, anim;
 
@@ -828,7 +798,6 @@ namespace SharpQuake
             DrawPic( 112, 0, _Faces[f, anim] );
         }
 
-        // Sbar_DeathmatchOverlay
         private static void MiniDeathmatchOverlay()
         {
             if( Scr.vid.width < 512 || Sbar.Lines == 0 )
@@ -899,7 +868,6 @@ namespace SharpQuake
             }
         }
 
-        // Sbar_SortFrags
         private static void SortFrags()
         {
             client_state_t cl = Client.cl;
@@ -927,8 +895,6 @@ namespace SharpQuake
             }
         }
 
-        // Sbar_DrawCharacter
-        //
         // Draws one solid graphics character
         private static void DrawCharacter( int x, int y, int num )
         {
@@ -971,7 +937,6 @@ namespace SharpQuake
             DrawString( 232 - l * 4, 12, cl.levelname );
         }
 
-        // Sbar_DeathmatchOverlay
         private static void DeathmatchOverlay()
         {
             Scr.CopyEverithing = true;
@@ -1021,7 +986,6 @@ namespace SharpQuake
             }
         }
 
-        // Sbar_DrawTransPic
         private static void DrawTransPic( int x, int y, glpic_t pic )
         {
             if( Client.cl.gametype == Protocol.GAME_DEATHMATCH )
@@ -1030,7 +994,6 @@ namespace SharpQuake
                 Drawer.DrawTransPic( x + ( ( Scr.vid.width - 320 ) >> 1 ), y + ( Scr.vid.height - SBAR_HEIGHT ), pic );
         }
 
-        // Sbar_DrawString
         private static void DrawString( int x, int y, string str )
         {
             if( Client.cl.gametype == Protocol.GAME_DEATHMATCH )
@@ -1039,8 +1002,6 @@ namespace SharpQuake
                 Drawer.DrawString( x + ( ( Scr.vid.width - 320 ) >> 1 ), y + Scr.vid.height - SBAR_HEIGHT, str );
         }
 
-        // Sbar_ShowScores
-        //
         // Tab key down
         private static void ShowScores()
         {
@@ -1050,8 +1011,6 @@ namespace SharpQuake
             _Updates = 0;
         }
 
-        // Sbar_DontShowScores
-        //
         // Tab key up
         private static void DontShowScores()
         {

@@ -43,7 +43,6 @@ namespace SharpQuake
         private static Random _Random = new Random();
 
         /// <summary>
-        /// Sys_Error
         /// an error will cause the entire program to exit
         /// </summary>
         public static void Error( string fmt, params object[] args )
@@ -51,7 +50,6 @@ namespace SharpQuake
             throw new QuakeSystemError( args.Length > 0 ? String.Format( fmt, args ) : fmt );
         }
 
-        // Sys_FileOpenRead
         public static FileStream FileOpenRead( string path )
         {
             try
@@ -64,9 +62,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// Sys_FileOpenWrite
-        /// </summary>
         public static FileStream FileOpenWrite( string path, bool allowFail = false )
         {
             try
@@ -84,9 +79,6 @@ namespace SharpQuake
             return null;
         }
 
-        /// <summary>
-        /// Sys_FloatTime
-        /// </summary>
         public static double GetFloatTime()
         {
             if( _StopWatch == null )
@@ -116,7 +108,6 @@ namespace SharpQuake
             return Encoding.ASCII.GetString( buf );
         }
 
-        // Sys_FileTime()
         public static DateTime GetFileTime( string path )
         {
             if( String.IsNullOrEmpty( path ) || path.LastIndexOf( '*' ) != -1 )
@@ -204,26 +195,17 @@ namespace SharpQuake
             return _Random.Next( maxValue );
         }
 
-        /// <summary>
-        /// Sys_SendKeyEvents
-        /// </summary>
         public static void SendKeyEvents()
         {
             Scr.SkipUpdate = false;
             MainForm.Instance.ProcessEvents();
         }
 
-        /// <summary>
-        /// Sys_ConsoleInput
-        /// </summary>
         public static string ConsoleInput()
         {
             return null; // this is needed only for dedicated servers
         }
 
-        /// <summary>
-        /// Sys_Quit
-        /// </summary>
         public static void Quit()
         {
             if( MainForm.Instance != null )

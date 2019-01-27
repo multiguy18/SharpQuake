@@ -22,34 +22,24 @@
 
 using OpenTK;
 
-// gl_refrag.c
-
 namespace SharpQuake
 {
-    partial class Render
+    internal partial class Render
     {
-        private static entity_t _AddEnt; // r_addent
-        private static mnode_t _EfragTopNode; // r_pefragtopnode
-        private static Vector3 _EMins; // r_emins
-        private static Vector3 _EMaxs; // r_emaxs
+        private static entity_t _AddEnt;
+        private static mnode_t _EfragTopNode;
+        private static Vector3 _EMins;
+        private static Vector3 _EMaxs;
 
-        /// <summary>
-        /// efrag_t **lastlink changed to object _LastObj
-        /// and may be a reference to entity_t, in wich case assign *lastlink to ((entity_t)_LastObj).efrag
-        /// or to efrag_t in wich case assign *lastlink value to ((efrag_t)_LastObj).entnext
-        /// </summary>
-        private static object _LastObj; // see comments
+        private static object _LastObj;
 
-        /// <summary>
-        /// R_AddEfrags
-        /// </summary>
         public static void AddEfrags( entity_t ent )
         {
             if( ent.model == null )
                 return;
 
             _AddEnt = ent;
-            _LastObj = ent; //  lastlink = &ent->efrag;
+            _LastObj = ent;
             _EfragTopNode = null;
 
             model_t entmodel = ent.model;
@@ -60,9 +50,6 @@ namespace SharpQuake
             ent.topnode = _EfragTopNode;
         }
 
-        /// <summary>
-        /// R_SplitEntityOnNode
-        /// </summary>
         private static void SplitEntityOnNode( mnodebase_t node )
         {
             if( node.contents == Contents.CONTENTS_SOLID )
@@ -81,14 +68,13 @@ namespace SharpQuake
                 if( ef == null )
                 {
                     Con.Print( "Too many efrags!\n" );
-                    return;	// no free fragments...
+                    return; // no free fragments...
                 }
                 Client.cl.free_efrags = Client.cl.free_efrags.entnext;
 
                 ef.entity = _AddEnt;
 
                 // add the entity link
-                // *lastlink = ef;
                 if( _LastObj is entity_t )
                 {
                     ( (entity_t)_LastObj ).efrag = ef;
@@ -97,7 +83,7 @@ namespace SharpQuake
                 {
                     ( (efrag_t)_LastObj ).entnext = ef;
                 }
-                _LastObj = ef; // lastlink = &ef->entnext;
+                _LastObj = ef;
                 ef.entnext = null;
 
                 // set the leaf links
@@ -118,8 +104,7 @@ namespace SharpQuake
 
             if( sides == 3 )
             {
-                // split on this plane
-                // if this is the first splitter of this bmodel, remember it
+                // split on this plane. if this is the first splitter of this bmodel, remember it
                 if( _EfragTopNode == null )
                     _EfragTopNode = n;
             }
@@ -132,10 +117,7 @@ namespace SharpQuake
                 SplitEntityOnNode( n.children[1] );
         }
 
-        /// <summary>
-        /// R_StoreEfrags
-        /// FIXME: a lot of this goes away with edge-based
-        /// </summary>
+        // FIXME: a lot of this goes away with edge-based
         private static void StoreEfrags( efrag_t ef )
         {
             while( ef != null )

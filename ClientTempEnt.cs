@@ -23,25 +23,22 @@
 using System;
 using OpenTK;
 
-// cl_tent.c
-
 namespace SharpQuake
 {
     partial class Client
     {
-        private static int _NumTempEntities; // num_temp_entities
-        private static entity_t[] _TempEntities = new entity_t[MAX_TEMP_ENTITIES]; // cl_temp_entities[MAX_TEMP_ENTITIES]
-        private static beam_t[] _Beams = new beam_t[MAX_BEAMS]; // cl_beams[MAX_BEAMS]
+        private static int _NumTempEntities;
+        private static entity_t[] _TempEntities = new entity_t[MAX_TEMP_ENTITIES];
+        private static beam_t[] _Beams = new beam_t[MAX_BEAMS];
 
-        private static sfx_t _SfxWizHit; // cl_sfx_wizhit
-        private static sfx_t _SfxKnigtHit; // cl_sfx_knighthit
-        private static sfx_t _SfxTink1; // cl_sfx_tink1
-        private static sfx_t _SfxRic1; // cl_sfx_ric1
-        private static sfx_t _SfxRic2; // cl_sfx_ric2
-        private static sfx_t _SfxRic3; // cl_sfx_ric3
-        private static sfx_t _SfxRExp3; // cl_sfx_r_exp3
+        private static sfx_t _SfxWizHit;
+        private static sfx_t _SfxKnigtHit;
+        private static sfx_t _SfxTink1;
+        private static sfx_t _SfxRic1;
+        private static sfx_t _SfxRic2;
+        private static sfx_t _SfxRic3;
+        private static sfx_t _SfxRExp3;
 
-        // CL_InitTEnts
         private static void InitTempEntities()
         {
             _SfxWizHit = Sound.PrecacheSound( "wizard/hit.wav" );
@@ -59,7 +56,6 @@ namespace SharpQuake
                 _Beams[i] = new beam_t();
         }
 
-        // CL_UpdateTEnts
         private static void UpdateTempEntities()
         {
             _NumTempEntities = 0;
@@ -117,17 +113,11 @@ namespace SharpQuake
                     ent.angles.Z = Sys.Random() % 360;
 
                     org += dist * 30;
-                    // Uze: is this code bug (i is outer loop variable!!!) or what??????????????
-                    //for (i=0 ; i<3 ; i++)
-                    //    org[i] += dist[i]*30;
                     d -= 30;
                 }
             }
         }
 
-        /// <summary>
-        /// CL_NewTempEntity
-        /// </summary>
         private static entity_t NewTempEntity()
         {
             if( NumVisEdicts == MAX_VISEDICTS )
@@ -145,9 +135,6 @@ namespace SharpQuake
             return ent;
         }
 
-        /// <summary>
-        /// CL_ParseTEnt
-        /// </summary>
         private static void ParseTempEntity()
         {
             Vector3 pos;
@@ -155,19 +142,19 @@ namespace SharpQuake
             int type = Net.Reader.ReadByte();
             switch( type )
             {
-                case Protocol.TE_WIZSPIKE:			// spike hitting wall
+                case Protocol.TE_WIZSPIKE: // spike hitting wall
                     pos = Net.Reader.ReadCoords();
                     Render.RunParticleEffect( ref pos, ref Common.ZeroVector, 20, 30 );
                     Sound.StartSound( -1, 0, _SfxWizHit, ref pos, 1, 1 );
                     break;
 
-                case Protocol.TE_KNIGHTSPIKE:			// spike hitting wall
+                case Protocol.TE_KNIGHTSPIKE: // spike hitting wall
                     pos = Net.Reader.ReadCoords();
                     Render.RunParticleEffect( ref pos, ref Common.ZeroVector, 226, 20 );
                     Sound.StartSound( -1, 0, _SfxKnigtHit, ref pos, 1, 1 );
                     break;
 
-                case Protocol.TE_SPIKE:			// spike hitting wall
+                case Protocol.TE_SPIKE: // spike hitting wall
                     pos = Net.Reader.ReadCoords();
 #if GLTEST
                     Test_Spawn (pos);
@@ -188,7 +175,7 @@ namespace SharpQuake
                     }
                     break;
 
-                case Protocol.TE_SUPERSPIKE:			// super spike hitting wall
+                case Protocol.TE_SUPERSPIKE: // super spike hitting wall
                     pos = Net.Reader.ReadCoords();
                     Render.RunParticleEffect( ref pos, ref Common.ZeroVector, 0, 20 );
 
@@ -206,12 +193,12 @@ namespace SharpQuake
                     }
                     break;
 
-                case Protocol.TE_GUNSHOT:			// bullet hitting wall
+                case Protocol.TE_GUNSHOT: // bullet hitting wall
                     pos = Net.Reader.ReadCoords();
                     Render.RunParticleEffect( ref pos, ref Common.ZeroVector, 0, 20 );
                     break;
 
-                case Protocol.TE_EXPLOSION:			// rocket explosion
+                case Protocol.TE_EXPLOSION: // rocket explosion
                     pos = Net.Reader.ReadCoords();
                     Render.ParticleExplosion( ref pos );
                     dl = AllocDlight( 0 );
@@ -222,29 +209,27 @@ namespace SharpQuake
                     Sound.StartSound( -1, 0, _SfxRExp3, ref pos, 1, 1 );
                     break;
 
-                case Protocol.TE_TAREXPLOSION:			// tarbaby explosion
+                case Protocol.TE_TAREXPLOSION: // tarbaby explosion
                     pos = Net.Reader.ReadCoords();
                     Render.BlobExplosion( ref pos );
                     Sound.StartSound( -1, 0, _SfxRExp3, ref pos, 1, 1 );
                     break;
 
-                case Protocol.TE_LIGHTNING1:				// lightning bolts
+                case Protocol.TE_LIGHTNING1: // lightning bolts
                     ParseBeam( Mod.ForName( "progs/bolt.mdl", true ) );
                     break;
 
-                case Protocol.TE_LIGHTNING2:				// lightning bolts
+                case Protocol.TE_LIGHTNING2: // lightning bolts
                     ParseBeam( Mod.ForName( "progs/bolt2.mdl", true ) );
                     break;
 
-                case Protocol.TE_LIGHTNING3:				// lightning bolts
+                case Protocol.TE_LIGHTNING3: // lightning bolts
                     ParseBeam( Mod.ForName( "progs/bolt3.mdl", true ) );
                     break;
 
-                // PGM 01/21/97
-                case Protocol.TE_BEAM:				// grappling hook beam
+                case Protocol.TE_BEAM: // grappling hook beam
                     ParseBeam( Mod.ForName( "progs/beam.mdl", true ) );
                     break;
-                // PGM 01/21/97
 
                 case Protocol.TE_LAVASPLASH:
                     pos = Net.Reader.ReadCoords();
@@ -256,7 +241,7 @@ namespace SharpQuake
                     Render.TeleportSplash( ref pos );
                     break;
 
-                case Protocol.TE_EXPLOSION2:				// color mapped explosion
+                case Protocol.TE_EXPLOSION2: // color mapped explosion
                     pos = Net.Reader.ReadCoords();
                     int colorStart = Net.Reader.ReadByte();
                     int colorLength = Net.Reader.ReadByte();
@@ -275,9 +260,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// CL_ParseBeam
-        /// </summary>
         private static void ParseBeam( model_t m )
         {
             int ent = Net.Reader.ReadShort();

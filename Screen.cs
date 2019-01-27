@@ -26,15 +26,9 @@ using System.IO;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-// screen.h
-// gl_screen.c
-
 namespace SharpQuake
 {
-    /// <summary>
-    /// SCR_functions
-    /// </summary>
-    static partial class Scr
+    internal static partial class Scr
     {
         public static viddef_t vid
         {
@@ -75,11 +69,7 @@ namespace SharpQuake
         public static bool IsDisabledForLoading;
         public static bool BlockDrawing = false;
         public static bool SkipUpdate;
-
-        // scr_skipupdate
         public static bool FullSbarDraw;
-
-        // fullsbardraw = false
         public static bool IsPermedia;
 
         // only the refresh window will be updated unless these variables are flagged
@@ -92,20 +82,12 @@ namespace SharpQuake
         public static int glHeight;
         public static float CenterTimeOff;
         public static int FullUpdate;
-        private static viddef_t _VidDef = new viddef_t();	// viddef_t vid (global video state)
-        private static vrect_t _VRect; // scr_vrect
-
-        // scr_disabled_for_loading
-        private static bool _DrawLoading; // scr_drawloading
-
-        private static double _DisabledTime; // float scr_disabled_time
-
-        // qboolean block_drawing
-        private static bool _DrawDialog; // scr_drawdialog
-
-        // isPermedia
+        private static viddef_t _VidDef = new viddef_t();
+        private static vrect_t _VRect;
+        private static bool _DrawLoading;
+        private static double _DisabledTime;
+        private static bool _DrawDialog;
         private static bool _IsInitialized;
-
         private static bool _InUpdate;
         private static glpic_t _Ram;
         private static glpic_t _Net;
@@ -113,43 +95,35 @@ namespace SharpQuake
         private static int _TurtleCount; // static count from SCR_DrawTurtle()
         private static bool _CopyEverything;
 
-        private static float _ConCurrent; // scr_con_current
-        private static float _ConLines;		// lines of console to display
-        private static int _ClearConsole; // clearconsole
-                                          // clearnotify
+        private static float _ConCurrent;
+        private static float _ConLines;  // lines of console to display
+        private static int _ClearConsole;
+        private static float _OldScreenSize;
+        private static float _OldFov;
+        private static int _CenterLines;
+        private static int _EraseLines;
+        private static float _CenterTimeStart; // for slow victory printing
+        private static string _CenterString;
 
-        private static float _OldScreenSize; // float oldscreensize
-        private static float _OldFov; // float oldfov
-        private static int _CenterLines; // scr_center_lines
-        private static int _EraseLines; // scr_erase_lines
+        private static Cvar _ViewSize;
+        private static Cvar _Fov;
+        private static Cvar _ConSpeed;
+        private static Cvar _CenterTime;
+        private static Cvar _ShowRam;
+        private static Cvar _ShowTurtle;
+        private static Cvar _ShowPause;
+        private static Cvar _PrintSpeed;
+        private static Cvar _glTripleBuffer;
 
-        //static int _EraseCenter; // scr_erase_center
-        private static float _CenterTimeStart; // scr_centertime_start	// for slow victory printing
-
-        // scr_centertime_off
-        private static string _CenterString; // char	scr_centerstring[1024]
-
-        private static Cvar _ViewSize; // = { "viewsize", "100", true };
-        private static Cvar _Fov;// = { "fov", "90" };	// 10 - 170
-        private static Cvar _ConSpeed;// = { "scr_conspeed", "300" };
-        private static Cvar _CenterTime;// = { "scr_centertime", "2" };
-        private static Cvar _ShowRam;// = { "showram", "1" };
-        private static Cvar _ShowTurtle;// = { "showturtle", "0" };
-        private static Cvar _ShowPause;// = { "showpause", "1" };
-        private static Cvar _PrintSpeed;// = { "scr_printspeed", "8" };
-        private static Cvar _glTripleBuffer;// = { "gl_triplebuffer", "1", true };
-
-        private static string _NotifyString; // scr_notifystring
+        private static string _NotifyString;
         private static bool _IsMouseWindowed; // windowed_mouse (don't confuse with _windowed_mouse cvar)
-                                              // scr_fullupdate    set to 0 to force full redraw
 
-        // SCR_Init
         public static void Init()
         {
             if( _ViewSize == null )
             {
                 _ViewSize = new Cvar( "viewsize", "100", true );
-                _Fov = new Cvar( "fov", "90" );	// 10 - 170
+                _Fov = new Cvar( "fov", "90" );
                 _ConSpeed = new Cvar( "scr_conspeed", "3000" );
                 _CenterTime = new Cvar( "scr_centertime", "2" );
                 _ShowRam = new Cvar( "showram", "1" );
@@ -159,9 +133,7 @@ namespace SharpQuake
                 _glTripleBuffer = new Cvar( "gl_triplebuffer", "1", true );
             }
 
-            //
             // register our commands
-            //
             Cmd.Add( "screenshot", ScreenShot_f );
             Cmd.Add( "sizeup", SizeUp_f );
             Cmd.Add( "sizedown", SizeDown_f );
@@ -176,12 +148,13 @@ namespace SharpQuake
             _IsInitialized = true;
         }
 
-        // void SCR_UpdateScreen (void);
-        // This is called every frame, and can also be called explicitly to flush
-        // text to the screen.
-        //
-        // WARNING: be very careful calling this from elsewhere, because the refresh
-        // needs almost the entire 256k of stack space!
+        /* This is called every frame, and can also be called explicitly to flush
+         * text to the screen.
+         *
+         * WARNING: be very careful calling this from elsewhere, because the refresh
+         * needs almost the entire 256k of stack space!
+         */
+
         public static void UpdateScreen()
         {
             if( BlockDrawing || !_IsInitialized || _InUpdate )
@@ -213,13 +186,11 @@ namespace SharpQuake
                 }
 
                 if( !Con.IsInitialized )
-                    return;	// not initialized yet
+                    return; // not initialized yet
 
                 BeginRendering();
 
-                //
                 // determine size of refresh window
-                //
                 if( _OldFov != _Fov.Value )
                 {
                     _OldFov = _Fov.Value;
@@ -235,18 +206,14 @@ namespace SharpQuake
                 if( _VidDef.recalc_refdef )
                     CalcRefdef();
 
-                //
                 // do 3D refresh drawing, and then update the screen
-                //
                 SetUpToDrawConsole();
 
                 View.RenderView();
 
                 Set2D();
 
-                //
                 // draw any areas not covered by the refresh
-                //
                 Scr.TileClear();
 
                 if( _DrawDialog )
@@ -294,9 +261,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// GL_EndRendering
-        /// </summary>
         public static void EndRendering()
         {
             MainForm form = MainForm.Instance;
@@ -320,7 +284,7 @@ namespace SharpQuake
             {
                 _IsMouseWindowed = true;
                 if( Key.Destination == keydest_t.key_game && !Input.IsMouseActive &&
-                    Client.cls.state != cactive_t.ca_disconnected )// && ActiveApp)
+                    Client.cls.state != cactive_t.ca_disconnected )
                 {
                     Input.ActivateMouse();
                     Input.HideMouse();
@@ -336,10 +300,7 @@ namespace SharpQuake
                 Sbar.Changed();
         }
 
-        // SCR_CenterPrint
-        //
-        // Called for important messages that should stay in the center of the screen
-        // for a few moments
+        // Called for important messages that should stay in the center of the screen for a few moments
         public static void CenterPrint( string str )
         {
             _CenterString = str;
@@ -355,9 +316,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// SCR_EndLoadingPlaque
-        /// </summary>
         public static void EndLoadingPlaque()
         {
             Scr.IsDisabledForLoading = false;
@@ -365,9 +323,6 @@ namespace SharpQuake
             Con.ClearNotify();
         }
 
-        /// <summary>
-        /// SCR_BeginLoadingPlaque
-        /// </summary>
         public static void BeginLoadingPlaque()
         {
             Sound.StopAllSounds( true );
@@ -393,10 +348,7 @@ namespace SharpQuake
             Scr.FullUpdate = 0;
         }
 
-        /// <summary>
-        /// SCR_ModalMessage
-        /// Displays a text string in the center of the screen and waits for a Y or N keypress.
-        /// </summary>
+        // Displays a text string in the center of the screen and waits for a Y or N keypress.
         public static bool ModalMessage( string text )
         {
             if( Client.cls.state == cactive_t.ca_dedicated )
@@ -410,11 +362,11 @@ namespace SharpQuake
             UpdateScreen();
             _DrawDialog = false;
 
-            Sound.ClearBuffer();		// so dma doesn't loop current sound
+            Sound.ClearBuffer();  // so dma doesn't loop current sound
 
             do
             {
-                Key.KeyCount = -1;		// wait for a key down and up
+                Key.KeyCount = -1;  // wait for a key down and up
                 Sys.SendKeyEvents();
             } while( Key.LastPress != 'y' && Key.LastPress != 'n' && Key.LastPress != Key.K_ESCAPE );
 
@@ -424,37 +376,28 @@ namespace SharpQuake
             return ( Key.LastPress == 'y' );
         }
 
-        // SCR_SizeUp_f
-        //
-        // Keybinding command
         private static void SizeUp_f()
         {
             Cvar.Set( "viewsize", _ViewSize.Value + 10 );
             _VidDef.recalc_refdef = true;
         }
 
-        // SCR_SizeDown_f
-        //
-        // Keybinding command
         private static void SizeDown_f()
         {
             Cvar.Set( "viewsize", _ViewSize.Value - 10 );
             _VidDef.recalc_refdef = true;
         }
 
-        // SCR_ScreenShot_f
         private static void ScreenShot_f()
         {
-            //
             // find a file name to save it to
-            //
             string path = null;
             int i;
             for( i = 0; i <= 999; i++ )
             {
                 path = Path.Combine( Common.GameDir, String.Format( "quake{0:D3}.tga", i ) );
                 if( Sys.GetFileTime( path ) == DateTime.MinValue )
-                    break;	// file doesn't exist
+                    break; // file doesn't exist
             }
             if( i == 100 )
             {
@@ -472,7 +415,7 @@ namespace SharpQuake
             {
                 // Write tga header (18 bytes)
                 writer.Write( (ushort)0 );
-                writer.Write( (byte)2 ); //buffer[2] = 2; uncompressed type
+                writer.Write( (byte)2 ); // uncompressed type
                 writer.Write( (byte)0 );
                 writer.Write( (uint)0 );
                 writer.Write( (uint)0 );
@@ -499,9 +442,6 @@ namespace SharpQuake
             Con.Print( "Wrote {0}\n", Path.GetFileName( path ) );
         }
 
-        /// <summary>
-        /// GL_BeginRendering
-        /// </summary>
         private static void BeginRendering()
         {
             glX = 0;
@@ -518,10 +458,6 @@ namespace SharpQuake
             }
         }
 
-        // SCR_CalcRefdef
-        //
-        // Must be called whenever vid changes
-        // Internal use only
         private static void CalcRefdef()
         {
             Scr.FullUpdate = 0; // force a background redraw
@@ -600,7 +536,6 @@ namespace SharpQuake
             _VRect = rdef.vrect;
         }
 
-        // CalcFov
         private static float CalcFov( float fov_x, float width, float height )
         {
             if( fov_x < 1 || fov_x > 179 )
@@ -612,15 +547,12 @@ namespace SharpQuake
             return (float)a;
         }
 
-        /// <summary>
-        /// SCR_SetUpToDrawConsole
-        /// </summary>
         private static void SetUpToDrawConsole()
         {
             Con.CheckResize();
 
             if( _DrawLoading )
-                return;     // never a console with loading plaque
+                return; // never a console with loading plaque
 
             // decide on the height of the console
             Con.ForcedUp = ( Client.cl.worldmodel == null ) || ( Client.cls.signon != Client.SIGNONS );
@@ -654,13 +586,11 @@ namespace SharpQuake
             }
             else if( ClearNotify++ < _VidDef.numpages )
             {
-                //????????????
             }
             else
                 Con.NotifyLines = 0;
         }
 
-        // SCR_TileClear
         private static void TileClear()
         {
             refdef_t rdef = Render.RefDef;
@@ -683,9 +613,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// SCR_DrawNotifyString
-        /// </summary>
         private static void DrawNotifyString()
         {
             int offset = 0;
@@ -712,9 +639,6 @@ namespace SharpQuake
             } while( offset < _NotifyString.Length );
         }
 
-        /// <summary>
-        /// SCR_DrawLoading
-        /// </summary>
         private static void DrawLoading()
         {
             if( !_DrawLoading )
@@ -724,7 +648,6 @@ namespace SharpQuake
             Drawer.DrawPic( ( vid.width - pic.width ) / 2, ( vid.height - 48 - pic.height ) / 2, pic );
         }
 
-        // SCR_CheckDrawCenterString
         private static void CheckDrawCenterString()
         {
             CopyTop = true;
@@ -741,7 +664,6 @@ namespace SharpQuake
             DrawCenterString();
         }
 
-        // SCR_DrawRam
         private static void DrawRam()
         {
             if( _ShowRam.Value == 0 )
@@ -753,11 +675,8 @@ namespace SharpQuake
             Drawer.DrawPic( _VRect.x + 32, _VRect.y, _Ram );
         }
 
-        // SCR_DrawTurtle
         private static void DrawTurtle()
         {
-            //static int	count;
-
             if( _ShowTurtle.Value == 0 )
                 return;
 
@@ -774,7 +693,6 @@ namespace SharpQuake
             Drawer.DrawPic( _VRect.x, _VRect.y, _Turtle );
         }
 
-        // SCR_DrawNet
         private static void DrawNet()
         {
             if( Host.RealTime - Client.cl.last_received_message < 0.3 )
@@ -785,10 +703,9 @@ namespace SharpQuake
             Drawer.DrawPic( _VRect.x + 64, _VRect.y, _Net );
         }
 
-        // DrawPause
         private static void DrawPause()
         {
-            if( _ShowPause.Value == 0 )	// turn off for screenshots
+            if( _ShowPause.Value == 0 ) // turn off for screenshots
                 return;
 
             if( !Client.cl.paused )
@@ -798,7 +715,6 @@ namespace SharpQuake
             Drawer.DrawPic( ( vid.width - pic.width ) / 2, ( vid.height - 48 - pic.height ) / 2, pic );
         }
 
-        // SCR_DrawConsole
         private static void DrawConsole()
         {
             if( _ConCurrent > 0 )
@@ -810,11 +726,10 @@ namespace SharpQuake
             else if( Key.Destination == keydest_t.key_game ||
                 Key.Destination == keydest_t.key_message )
             {
-                Con.DrawNotify();	// only draw notify in game
+                Con.DrawNotify(); // only draw notify in game
             }
         }
 
-        // SCR_DrawCenterString
         private static void DrawCenterString()
         {
             int remaining;

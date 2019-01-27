@@ -135,16 +135,6 @@ namespace SharpQuake
 
         public const int MM_MCINOTIFY = 0x3B9;
 
-        // MCI_OPEN_PARMS
-
-        // MCI_SET_PARMS
-
-        //MCI_GENERIC_PARMS
-
-        //MCI_PLAY_PARMS
-
-        //MCI_STATUS_PARMS
-
         public static uint MCI_MAKE_TMSF( int t, int m, int s, int f )
         {
             return (uint)( ( (byte)t | ( (uint)m << 8 ) ) | ( ( (uint)(byte)s | ( (uint)f << 8 ) ) << 16 ) );
@@ -456,7 +446,7 @@ namespace SharpQuake
             Mci.PlayParams pp;
             pp.dwFrom = Mci.MCI_MAKE_TMSF( _PlayTrack, 0, 0, 0 );
             pp.dwTo = Mci.MCI_MAKE_TMSF( _PlayTrack + 1, 0, 0, 0 );
-            pp.dwCallback = _Form.Handle;// (DWORD)mainwindow;
+            pp.dwCallback = _Form.Handle;
             int ret = Mci.Play( _DeviceID, Mci.MCI_PLAY, Mci.MCI_TO | Mci.MCI_NOTIFY, ref pp );
             if( ret != 0 )
                 Con.DPrint( "CDAudio: MCI_PLAY failed ({0})\n", ret );
@@ -503,9 +493,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// CDAudio_GetAudioDiskInfo
-        /// </summary>
         public void ReloadDiskInfo()
         {
             _IsValidDisc = false;

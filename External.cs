@@ -1,10 +1,18 @@
-﻿using System;
+﻿/*************************************************
+ * External.cs
+ *
+ * Handles native-side library/code interaction.
+ *
+ * (C) GPL2.0
+ * Daniel Cornelius, yurykiselev, Uze
+ *
+ *************************************************/
+
+using System;
 using System.Runtime.InteropServices;
 
 namespace SharpQuake
 {
-#if _WINDOWS
-
     internal static partial class Mci
     {
         [DllImport( "winmm.dll", EntryPoint = "mciSendCommandA", ExactSpelling = true )]
@@ -25,8 +33,6 @@ namespace SharpQuake
         [DllImport( "winmm.dll", EntryPoint = "mciSendCommandA", ExactSpelling = true )]
         public static extern int SendCommand( IntPtr device, int cmd, int flags, ref GenericParams p );
     }
-
-#endif
 
     internal class External
     {

@@ -24,14 +24,8 @@ using System;
 using System.IO;
 using System.Text;
 
-// menu.h
-// menu.c
-
 namespace SharpQuake
 {
-    /// <summary>
-    /// M_functions
-    /// </summary>
     internal static class Menu
     {
         public static bool EnterSound;
@@ -40,15 +34,12 @@ namespace SharpQuake
         public static MenuBase ReturnMenu;
         private const int SLIDER_RANGE = 10;
 
-        //qboolean	m_entersound	// play after drawing a frame, so caching
-
         // won't disrupt the sound
-        private static bool _RecursiveDraw; // qboolean m_recursiveDraw
+        private static bool _RecursiveDraw;
 
-        private static byte[] _IdentityTable = new byte[256]; // identityTable
-        private static byte[] _TranslationTable = new byte[256]; //translationTable
+        private static byte[] _IdentityTable = new byte[256];
+        private static byte[] _TranslationTable = new byte[256];
 
-        // M_Init (void)
         public static void Init()
         {
             Cmd.Add( "togglemenu", ToggleMenu_f );
@@ -65,18 +56,12 @@ namespace SharpQuake
             Cmd.Add( "menu_quit", Menu_Quit_f );
         }
 
-        /// <summary>
-        /// M_Keydown
-        /// </summary>
         public static void KeyDown( int key )
         {
             if( MenuBase.CurrentMenu != null )
                 MenuBase.CurrentMenu.KeyEvent( key );
         }
 
-        /// <summary>
-        /// M_Draw
-        /// </summary>
         public static void Draw()
         {
             if( MenuBase.CurrentMenu == null || Key.Destination != keydest_t.key_menu )
@@ -113,9 +98,6 @@ namespace SharpQuake
             Sound.ExtraUpdate();
         }
 
-        /// <summary>
-        /// M_ToggleMenu_f
-        /// </summary>
         public static void ToggleMenu_f()
         {
             EnterSound = true;
@@ -150,17 +132,11 @@ namespace SharpQuake
             Drawer.DrawTransPic( x + ( ( Scr.vid.width - 320 ) >> 1 ), y, pic );
         }
 
-        /// <summary>
-        /// M_DrawTransPicTranslate
-        /// </summary>
         public static void DrawTransPicTranslate( int x, int y, glpic_t pic )
         {
             Drawer.TransPicTranslate( x + ( ( Scr.vid.width - 320 ) >> 1 ), y, pic, _TranslationTable );
         }
 
-        /// <summary>
-        /// M_Print
-        /// </summary>
         public static void Print( int cx, int cy, string str )
         {
             for( int i = 0; i < str.Length; i++ )
@@ -170,17 +146,11 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// M_DrawCharacter
-        /// </summary>
         public static void DrawCharacter( int cx, int line, int num )
         {
             Drawer.DrawCharacter( cx + ( ( Scr.vid.width - 320 ) >> 1 ), line, num );
         }
 
-        /// <summary>
-        /// M_PrintWhite
-        /// </summary>
         public static void PrintWhite( int cx, int cy, string str )
         {
             for( int i = 0; i < str.Length; i++ )
@@ -190,9 +160,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// M_DrawTextBox
-        /// </summary>
         public static void DrawTextBox( int x, int y, int width, int lines )
         {
             // draw left side
@@ -244,9 +211,6 @@ namespace SharpQuake
             DrawTransPic( cx, cy + 8, p );
         }
 
-        /// <summary>
-        /// M_DrawSlider
-        /// </summary>
         public static void DrawSlider( int x, int y, float range )
         {
             if( range < 0 )
@@ -261,9 +225,6 @@ namespace SharpQuake
             DrawCharacter( (int)( x + ( SLIDER_RANGE - 1 ) * 8 * range ), y, 131 );
         }
 
-        /// <summary>
-        /// M_DrawCheckbox
-        /// </summary>
         public static void DrawCheckbox( int x, int y, bool on )
         {
             if( on )
@@ -272,9 +233,6 @@ namespace SharpQuake
                 Print( x, y, "off" );
         }
 
-        /// <summary>
-        /// M_BuildTranslationTable
-        /// </summary>
         public static void BuildTranslationTable( int top, int bottom )
         {
             for( int j = 0; j < 256; j++ )
@@ -282,92 +240,69 @@ namespace SharpQuake
 
             _IdentityTable.CopyTo( _TranslationTable, 0 );
 
-            if( top < 128 )	// the artists made some backwards ranges.  sigh.
-                Array.Copy( _IdentityTable, top, _TranslationTable, Render.TOP_RANGE, 16 ); // memcpy (dest + Render.TOP_RANGE, source + top, 16);
+            if( top < 128 ) // the artists made some backwards ranges.  sigh.
+                Array.Copy( _IdentityTable, top, _TranslationTable, Render.TOP_RANGE, 16 );
             else
                 for( int j = 0; j < 16; j++ )
                     _TranslationTable[Render.TOP_RANGE + j] = _IdentityTable[top + 15 - j];
 
             if( bottom < 128 )
-                Array.Copy( _IdentityTable, bottom, _TranslationTable, Render.BOTTOM_RANGE, 16 ); // memcpy(dest + Render.BOTTOM_RANGE, source + bottom, 16);
+                Array.Copy( _IdentityTable, bottom, _TranslationTable, Render.BOTTOM_RANGE, 16 );
             else
                 for( int j = 0; j < 16; j++ )
                     _TranslationTable[Render.BOTTOM_RANGE + j] = _IdentityTable[bottom + 15 - j];
         }
 
-        /// <summary>
-        /// M_Menu_Main_f
-        /// </summary>
         private static void Menu_Main_f()
         {
             MenuBase.MainMenu.Show();
         }
 
-        /// <summary>
-        /// M_Menu_SinglePlayer_f
-        /// </summary>
         private static void Menu_SinglePlayer_f()
         {
             MenuBase.SinglePlayerMenu.Show();
         }
 
-        // M_Menu_Load_f
         private static void Menu_Load_f()
         {
             MenuBase.LoadMenu.Show();
         }
 
-        // M_Menu_Save_f
         private static void Menu_Save_f()
         {
             MenuBase.SaveMenu.Show();
         }
 
-        // M_Menu_MultiPlayer_f
         private static void Menu_MultiPlayer_f()
         {
             MenuBase.MultiPlayerMenu.Show();
         }
 
-        // M_Menu_Setup_f
         private static void Menu_Setup_f()
         {
             MenuBase.SetupMenu.Show();
         }
 
-        // M_Menu_Options_f
         private static void Menu_Options_f()
         {
             MenuBase.OptionsMenu.Show();
         }
 
-        /// <summary>
-        /// M_Menu_Keys_f
-        /// </summary>
         private static void Menu_Keys_f()
         {
             MenuBase.KeysMenu.Show();
         }
 
-        /// <summary>
-        /// M_Menu_Video_f
-        /// </summary>
         private static void Menu_Video_f()
         {
             MenuBase.VideoMenu.Show();
         }
 
-        /// <summary>
-        /// M_Menu_Help_f
-        /// </summary>
         private static void Menu_Help_f()
         {
             MenuBase.HelpMenu.Show();
         }
 
-        /// <summary>
-        /// M_Menu_Quit_f
-        /// </summary>
         private static void Menu_Quit_f()
         {
             MenuBase.QuitMenu.Show();
@@ -433,9 +368,6 @@ namespace SharpQuake
         public abstract void Draw();
     }
 
-    /// <summary>
-    /// MainMenu
-    /// </summary>
     internal class MainMenu : MenuBase
     {
         private const int MAIN_ITEMS = 5;
@@ -452,15 +384,11 @@ namespace SharpQuake
             base.Show();
         }
 
-        /// <summary>
-        /// M_Main_Key
-        /// </summary>
         public override void KeyEvent( int key )
         {
             switch( key )
             {
                 case Key.K_ESCAPE:
-                    //Key.Destination = keydest_t.key_game;
                     MenuBase.Hide();
                     Client.cls.demonum = _SaveDemoNum;
                     if( Client.cls.demonum != -1 && !Client.cls.demoplayback && Client.cls.state != cactive_t.ca_connected )
@@ -525,9 +453,6 @@ namespace SharpQuake
     {
         private const int SINGLEPLAYER_ITEMS = 3;
 
-        /// <summary>
-        /// M_SinglePlayer_Key
-        /// </summary>
         public override void KeyEvent( int key )
         {
             switch( key )
@@ -576,9 +501,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// M_SinglePlayer_Draw
-        /// </summary>
         public override void Draw()
         {
             Menu.DrawTransPic( 16, 4, Drawer.CachePic( "gfx/qplaque.lmp" ) );
@@ -595,8 +517,8 @@ namespace SharpQuake
     internal class LoadMenu : MenuBase
     {
         public const int MAX_SAVEGAMES = 12;
-        protected string[] _FileNames; //[MAX_SAVEGAMES]; // filenames
-        protected bool[] _Loadable; //[MAX_SAVEGAMES]; // loadable
+        protected string[] _FileNames;
+        protected bool[] _Loadable;
 
         public override void Show()
         {
@@ -618,8 +540,9 @@ namespace SharpQuake
                         return;
                     MenuBase.Hide();
 
-                    // Host_Loadgame_f can't bring up the loading plaque because too much
-                    // stack space has been used, so do it now
+                    /* Host_Loadgame_f can't bring up the loading plaque because too much
+                     * stack space has been used, so do it now
+                     */
                     Scr.BeginLoadingPlaque();
 
                     // issue the load command
@@ -656,9 +579,6 @@ namespace SharpQuake
             Menu.DrawCharacter( 8, 32 + _Cursor * 8, 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
         }
 
-        /// <summary>
-        /// M_ScanSaves
-        /// </summary>
         protected void ScanSaves()
         {
             for( int i = 0; i < MAX_SAVEGAMES; i++ )
@@ -755,7 +675,7 @@ namespace SharpQuake
 
     internal class QuitMenu : MenuBase
     {
-        private MenuBase _PrevMenu; // m_quit_prevstate;
+        private MenuBase _PrevMenu;
 
         public override void Show()
         {
@@ -950,9 +870,9 @@ namespace SharpQuake
             }
 
 #if _WIN32
-            if ((options_cursor == 13) && (modestate != MS_WINDOWED))
+            if( ( options_cursor == 13 ) && ( modestate != MS_WINDOWED ) )
             {
-                if (k == K_UPARROW)
+                if( k == K_UPARROW )
                     options_cursor = 12;
                 else
                     options_cursor = 0;
@@ -1006,20 +926,17 @@ namespace SharpQuake
                 Menu.Print( 16, 128, "         Video Options" );
 
 #if _WIN32
-	if (modestate == MS_WINDOWED)
-	{
-		Menu.Print (16, 136, "             Use Mouse");
-		Menu.DrawCheckbox (220, 136, _windowed_mouse.value);
-	}
+            if( modestate == MS_WINDOWED )
+            {
+                Menu.Print( 16, 136, "             Use Mouse" );
+                Menu.DrawCheckbox( 220, 136, _windowed_mouse.value );
+            }
 #endif
 
             // cursor
             Menu.DrawCharacter( 200, 32 + _Cursor * 8, 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
         }
 
-        /// <summary>
-        /// M_AdjustSliders
-        /// </summary>
         private void AdjustSliders( int dir )
         {
             Sound.LocalSound( "misc/menu3.wav" );
@@ -1027,7 +944,7 @@ namespace SharpQuake
 
             switch( _Cursor )
             {
-                case 3:	// screen size
+                case 3: // screen size
                     value = Scr.ViewSize.Value + dir * 10;
                     if( value < 30 )
                         value = 30;
@@ -1036,7 +953,7 @@ namespace SharpQuake
                     Cvar.Set( "viewsize", value );
                     break;
 
-                case 4:	// gamma
+                case 4: // gamma
                     value = View.Gamma - dir * 0.05f;
                     if( value < 0.5 )
                         value = 0.5f;
@@ -1045,7 +962,7 @@ namespace SharpQuake
                     Cvar.Set( "gamma", value );
                     break;
 
-                case 5:	// mouse speed
+                case 5: // mouse speed
                     value = Client.Sensitivity + dir * 0.5f;
                     if( value < 1 )
                         value = 1;
@@ -1054,7 +971,7 @@ namespace SharpQuake
                     Cvar.Set( "sensitivity", value );
                     break;
 
-                case 6:	// music volume
+                case 6: // music volume
                     value = Sound.BgmVolume + dir * _BgmVolumeCoeff;
                     if( value < 0 )
                         value = 0;
@@ -1063,7 +980,7 @@ namespace SharpQuake
                     Cvar.Set( "bgmvolume", value );
                     break;
 
-                case 7:	// sfx volume
+                case 7: // sfx volume
                     value = Sound.Volume + dir * 0.1f;
                     if( value < 0 )
                         value = 0;
@@ -1072,7 +989,7 @@ namespace SharpQuake
                     Cvar.Set( "volume", value );
                     break;
 
-                case 8:	// allways run
+                case 8: // allways run
                     if( Client.ForwardSpeed > 200 )
                     {
                         Cvar.Set( "cl_forwardspeed", 200f );
@@ -1085,22 +1002,22 @@ namespace SharpQuake
                     }
                     break;
 
-                case 9:	// invert mouse
+                case 9: // invert mouse
                     Cvar.Set( "m_pitch", -Client.MPitch );
                     break;
 
-                case 10:	// lookspring
+                case 10: // lookspring
                     Cvar.Set( "lookspring", !Client.LookSpring ? 1f : 0f );
                     break;
 
-                case 11:	// lookstrafe
+                case 11: // lookstrafe
                     Cvar.Set( "lookstrafe", !Client.LookStrafe ? 1f : 0f );
                     break;
 
 #if _WIN32
-	        case 13:	// _windowed_mouse
-		        Cvar_SetValue ("_windowed_mouse", !_windowed_mouse.value);
-		        break;
+                case 13: // _windowed_mouse
+                    Cvar_SetValue ( "_windowed_mouse", !_windowed_mouse.value );
+                    break;
 #endif
             }
         }
@@ -1129,8 +1046,6 @@ namespace SharpQuake
             new string[] {"+moveup",        "swim up"},
             new string[] {"+movedown",      "swim down"}
         };
-
-        //const inte	NUMCOMMANDS	(sizeof(bindnames)/sizeof(bindnames[0]))
 
         private bool _BindGrab; // bind_grab
 
@@ -1181,7 +1096,7 @@ namespace SharpQuake
                         _Cursor = 0;
                     break;
 
-                case Key.K_ENTER:		// go into bind mode
+                case Key.K_ENTER: // go into bind mode
                     int[] keys = new int[2];
                     FindKeysForCommand( _BindNames[_Cursor][0], keys );
                     Sound.LocalSound( "misc/menu2.wav" );
@@ -1190,8 +1105,8 @@ namespace SharpQuake
                     _BindGrab = true;
                     break;
 
-                case Key.K_BACKSPACE:		// delete bindings
-                case Key.K_DEL:				// delete bindings
+                case Key.K_BACKSPACE: // delete bindings
+                case Key.K_DEL: // delete bindings
                     Sound.LocalSound( "misc/menu2.wav" );
                     UnbindCommand( _BindNames[_Cursor][0] );
                     break;
@@ -1242,9 +1157,6 @@ namespace SharpQuake
                 Menu.DrawCharacter( 130, 48 + _Cursor * 8, 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
         }
 
-        /// <summary>
-        /// M_FindKeysForCommand
-        /// </summary>
         private void FindKeysForCommand( string command, int[] twokeys )
         {
             twokeys[0] = twokeys[1] = -1;
@@ -1267,9 +1179,6 @@ namespace SharpQuake
             }
         }
 
-        /// <summary>
-        /// M_UnbindCommand
-        /// </summary>
         private void UnbindCommand( string command )
         {
             int len = command.Length;
@@ -1349,9 +1258,6 @@ namespace SharpQuake
         }
     }
 
-    /// <summary>
-    /// M_Menu_LanConfig_functions
-    /// </summary>
     internal class LanConfigMenu : MenuBase
     {
         public bool JoiningGame
@@ -1563,18 +1469,15 @@ namespace SharpQuake
         private readonly int[] _CursorTable = new int[]
         {
             40, 56, 80, 104, 140
-        }; // setup_cursor_table
+        };
 
-        private string _HostName; // setup_hostname[16]
-        private string _MyName; // setup_myname[16]
-        private int _OldTop; // setup_oldtop
-        private int _OldBottom; // setup_oldbottom
-        private int _Top; // setup_top
-        private int _Bottom; // setup_bottom
+        private string _HostName;
+        private string _MyName;
+        private int _OldTop;
+        private int _OldBottom;
+        private int _Top;
+        private int _Bottom;
 
-        /// <summary>
-        /// M_Menu_Setup_f
-        /// </summary>
         public override void Show()
         {
             _MyName = Client.Name;
@@ -1650,7 +1553,7 @@ forward:
                     if( _Cursor == 0 )
                     {
                         if( !String.IsNullOrEmpty( _HostName ) )
-                            _HostName = _HostName.Substring( 0, _HostName.Length - 1 );// setup_hostname[strlen(setup_hostname) - 1] = 0;
+                            _HostName = _HostName.Substring( 0, _HostName.Length - 1 );
                     }
 
                     if( _Cursor == 1 )
@@ -1684,10 +1587,13 @@ forward:
 
             if( _Top > 13 )
                 _Top = 0;
+
             if( _Top < 0 )
                 _Top = 13;
+
             if( _Bottom > 13 )
                 _Bottom = 0;
+
             if( _Bottom < 0 )
                 _Bottom = 13;
         }
@@ -1728,142 +1634,133 @@ forward:
         }
     }
 
-    /// <summary>
-    /// M_Menu_GameOptions_functions
-    /// </summary>
     internal class GameOptionsMenu : MenuBase
     {
         private const int NUM_GAMEOPTIONS = 9;
 
         private static readonly level_t[] Levels = new level_t[]
         {
-            new level_t("start", "Entrance"),	// 0
+            new level_t( "start", "Entrance" ), // 0
 
-	        new level_t("e1m1", "Slipgate Complex"),				// 1
-	        new level_t("e1m2", "Castle of the Damned"),
-            new level_t("e1m3", "The Necropolis"),
-            new level_t("e1m4", "The Grisly Grotto"),
-            new level_t("e1m5", "Gloom Keep"),
-            new level_t("e1m6", "The Door To Chthon"),
-            new level_t("e1m7", "The House of Chthon"),
-            new level_t("e1m8", "Ziggurat Vertigo"),
+            new level_t( "e1m1", "Slipgate Complex" ), // 1
+            new level_t( "e1m2", "Castle of the Damned" ),
+            new level_t( "e1m3", "The Necropolis" ),
+            new level_t( "e1m4", "The Grisly Grotto" ),
+            new level_t( "e1m5", "Gloom Keep" ),
+            new level_t( "e1m6", "The Door To Chthon" ),
+            new level_t( "e1m7", "The House of Chthon" ),
+            new level_t( "e1m8", "Ziggurat Vertigo" ),
 
-            new level_t("e2m1", "The Installation"),				// 9
-	        new level_t("e2m2", "Ogre Citadel"),
-            new level_t("e2m3", "Crypt of Decay"),
-            new level_t("e2m4", "The Ebon Fortress"),
-            new level_t("e2m5", "The Wizard's Manse"),
-            new level_t("e2m6", "The Dismal Oubliette"),
-            new level_t("e2m7", "Underearth"),
+            new level_t( "e2m1", "The Installation" ), // 9
+            new level_t( "e2m2", "Ogre Citadel" ),
+            new level_t( "e2m3", "Crypt of Decay" ),
+            new level_t( "e2m4", "The Ebon Fortress" ),
+            new level_t( "e2m5", "The Wizard's Manse" ),
+            new level_t( "e2m6", "The Dismal Oubliette" ),
+            new level_t( "e2m7", "Underearth" ),
 
-            new level_t("e3m1", "Termination Central"),			// 16
-	        new level_t("e3m2", "The Vaults of Zin"),
-            new level_t("e3m3", "The Tomb of Terror"),
-            new level_t("e3m4", "Satan's Dark Delight"),
-            new level_t("e3m5", "Wind Tunnels"),
-            new level_t("e3m6", "Chambers of Torment"),
-            new level_t("e3m7", "The Haunted Halls"),
+            new level_t( "e3m1", "Termination Central" ), // 16
+            new level_t( "e3m2", "The Vaults of Zin" ),
+            new level_t( "e3m3", "The Tomb of Terror" ),
+            new level_t( "e3m4", "Satan's Dark Delight" ),
+            new level_t( "e3m5", "Wind Tunnels" ),
+            new level_t( "e3m6", "Chambers of Torment" ),
+            new level_t( "e3m7", "The Haunted Halls" ),
 
-            new level_t("e4m1", "The Sewage System"),				// 23
-	        new level_t("e4m2", "The Tower of Despair"),
-            new level_t("e4m3", "The Elder God Shrine"),
-            new level_t("e4m4", "The Palace of Hate"),
-            new level_t("e4m5", "Hell's Atrium"),
-            new level_t("e4m6", "The Pain Maze"),
-            new level_t("e4m7", "Azure Agony"),
-            new level_t("e4m8", "The Nameless City"),
+            new level_t( "e4m1", "The Sewage System" ), // 23
+            new level_t( "e4m2", "The Tower of Despair" ),
+            new level_t( "e4m3", "The Elder God Shrine" ),
+            new level_t( "e4m4", "The Palace of Hate" ),
+            new level_t( "e4m5", "Hell's Atrium" ),
+            new level_t( "e4m6", "The Pain Maze" ),
+            new level_t( "e4m7", "Azure Agony" ),
+            new level_t( "e4m8", "The Nameless City" ),
 
-            new level_t("end", "Shub-Niggurath's Pit"),			// 31
+            new level_t( "end", "Shub-Niggurath's Pit" ), // 31
 
-	        new level_t("dm1", "Place of Two Deaths"),				// 32
-	        new level_t("dm2", "Claustrophobopolis"),
-            new level_t("dm3", "The Abandoned Base"),
-            new level_t("dm4", "The Bad Place"),
-            new level_t("dm5", "The Cistern"),
-            new level_t("dm6", "The Dark Zone")
+            new level_t( "dm1", "Place of Two Deaths" ), // 32
+            new level_t( "dm2", "Claustrophobopolis" ),
+            new level_t( "dm3", "The Abandoned Base" ),
+            new level_t( "dm4", "The Bad Place" ),
+            new level_t( "dm5", "The Cistern" ),
+            new level_t( "dm6", "The Dark Zone" )
         };
 
-        //MED 01/06/97 added hipnotic levels
         private static readonly level_t[] HipnoticLevels = new level_t[]
         {
-           new level_t("start", "Command HQ"),  // 0
+           new level_t( "start", "Command HQ" ), // 0
 
-           new level_t("hip1m1", "The Pumping Station"),          // 1
-           new level_t("hip1m2", "Storage Facility"),
-           new level_t("hip1m3", "The Lost Mine"),
-           new level_t("hip1m4", "Research Facility"),
-           new level_t("hip1m5", "Military Complex"),
+           new level_t( "hip1m1", "The Pumping Station" ), // 1
+           new level_t( "hip1m2", "Storage Facility" ),
+           new level_t( "hip1m3", "The Lost Mine" ),
+           new level_t( "hip1m4", "Research Facility" ),
+           new level_t( "hip1m5", "Military Complex" ),
 
-           new level_t("hip2m1", "Ancient Realms"),          // 6
-           new level_t("hip2m2", "The Black Cathedral"),
-           new level_t("hip2m3", "The Catacombs"),
-           new level_t("hip2m4", "The Crypt"),
-           new level_t("hip2m5", "Mortum's Keep"),
-           new level_t("hip2m6", "The Gremlin's Domain"),
+           new level_t( "hip2m1", "Ancient Realms" ), // 6
+           new level_t( "hip2m2", "The Black Cathedral" ),
+           new level_t( "hip2m3", "The Catacombs" ),
+           new level_t( "hip2m4", "The Crypt" ),
+           new level_t( "hip2m5", "Mortum's Keep" ),
+           new level_t( "hip2m6", "The Gremlin's Domain" ),
 
-           new level_t("hip3m1", "Tur Torment"),       // 12
-           new level_t("hip3m2", "Pandemonium"),
-           new level_t("hip3m3", "Limbo"),
-           new level_t("hip3m4", "The Gauntlet"),
+           new level_t( "hip3m1", "Tur Torment" ), // 12
+           new level_t( "hip3m2", "Pandemonium" ),
+           new level_t( "hip3m3", "Limbo" ),
+           new level_t( "hip3m4", "The Gauntlet" ),
 
-           new level_t("hipend", "Armagon's Lair"),       // 16
+           new level_t( "hipend", "Armagon's Lair" ), // 16
 
-           new level_t("hipdm1", "The Edge of Oblivion")           // 17
+           new level_t( "hipdm1", "The Edge of Oblivion" ) // 17
         };
 
-        //PGM 01/07/97 added rogue levels
-        //PGM 03/02/97 added dmatch level
         private static readonly level_t[] RogueLevels = new level_t[]
         {
-            new level_t("start", "Split Decision"),
-            new level_t("r1m1", "Deviant's Domain"),
-            new level_t("r1m2", "Dread Portal"),
-            new level_t("r1m3", "Judgement Call"),
-            new level_t("r1m4", "Cave of Death"),
-            new level_t("r1m5", "Towers of Wrath"),
-            new level_t("r1m6", "Temple of Pain"),
-            new level_t("r1m7", "Tomb of the Overlord"),
-            new level_t("r2m1", "Tempus Fugit"),
-            new level_t("r2m2", "Elemental Fury I"),
-            new level_t("r2m3", "Elemental Fury II"),
-            new level_t("r2m4", "Curse of Osiris"),
-            new level_t("r2m5", "Wizard's Keep"),
-            new level_t("r2m6", "Blood Sacrifice"),
-            new level_t("r2m7", "Last Bastion"),
-            new level_t("r2m8", "Source of Evil"),
-            new level_t("ctf1", "Division of Change")
+            new level_t( "start", "Split Decision" ),
+            new level_t( "r1m1", "Deviant's Domain" ),
+            new level_t( "r1m2", "Dread Portal" ),
+            new level_t( "r1m3", "Judgement Call" ),
+            new level_t( "r1m4", "Cave of Death" ),
+            new level_t( "r1m5", "Towers of Wrath" ),
+            new level_t( "r1m6", "Temple of Pain" ),
+            new level_t( "r1m7", "Tomb of the Overlord" ),
+            new level_t( "r2m1", "Tempus Fugit" ),
+            new level_t( "r2m2", "Elemental Fury I" ),
+            new level_t( "r2m3", "Elemental Fury II" ),
+            new level_t( "r2m4", "Curse of Osiris" ),
+            new level_t( "r2m5", "Wizard's Keep" ),
+            new level_t( "r2m6", "Blood Sacrifice" ),
+            new level_t( "r2m7", "Last Bastion" ),
+            new level_t( "r2m8", "Source of Evil" ),
+            new level_t( "ctf1", "Division of Change"   )
         };
 
         private static readonly episode_t[] Episodes = new episode_t[]
         {
-            new episode_t("Welcome to Quake", 0, 1),
-            new episode_t("Doomed Dimension", 1, 8),
-            new episode_t("Realm of Black Magic", 9, 7),
-            new episode_t("Netherworld", 16, 7),
-            new episode_t("The Elder World", 23, 8),
-            new episode_t("Final Level", 31, 1),
-            new episode_t("Deathmatch Arena", 32, 6)
+            new episode_t( "Welcome to Quake", 0, 1 ),
+            new episode_t( "Doomed Dimension", 1, 8 ),
+            new episode_t( "Realm of Black Magic", 9, 7 ),
+            new episode_t( "Netherworld", 16, 7 ),
+            new episode_t( "The Elder World", 23, 8 ),
+            new episode_t( "Final Level", 31, 1 ),
+            new episode_t( "Deathmatch Arena", 32, 6 )
         };
 
-        //MED 01/06/97  added hipnotic episodes
         private static readonly episode_t[] HipnoticEpisodes = new episode_t[]
         {
-           new episode_t("Scourge of Armagon", 0, 1),
-           new episode_t("Fortress of the Dead", 1, 5),
-           new episode_t("Dominion of Darkness", 6, 6),
-           new episode_t("The Rift", 12, 4),
-           new episode_t("Final Level", 16, 1),
-           new episode_t("Deathmatch Arena", 17, 1)
+           new episode_t( "Scourge of Armagon", 0, 1 ),
+           new episode_t( "Fortress of the Dead", 1, 5 ),
+           new episode_t( "Dominion of Darkness", 6, 6 ),
+           new episode_t( "The Rift", 12, 4 ),
+           new episode_t( "Final Level", 16, 1 ),
+           new episode_t( "Deathmatch Arena", 17, 1 )
         };
 
-        //PGM 01/07/97 added rogue episodes
-        //PGM 03/02/97 added dmatch episode
         private static readonly episode_t[] RogueEpisodes = new episode_t[]
         {
-            new episode_t("Introduction", 0, 1),
-            new episode_t("Hell's Fortress", 1, 7),
-            new episode_t("Corridors of Time", 8, 8),
-            new episode_t("Deathmatch Arena", 16, 1)
+            new episode_t( "Introduction", 0, 1 ),
+            new episode_t( "Hell's Fortress", 1, 7 ),
+            new episode_t( "Corridors of Time", 8, 8 ),
+            new episode_t( "Deathmatch Arena", 16, 1 )
         };
 
         private static readonly int[] _CursorTable = new int[]
@@ -1872,13 +1769,9 @@ forward:
         };
 
         private int _StartEpisode;
-
         private int _StartLevel;
-
         private int _MaxPlayers;
-
         private bool _ServerInfoMessage;
-
         private double _ServerInfoMessageTime;
 
         public override void Show()
@@ -1933,7 +1826,7 @@ forward:
                     {
                         if( Server.IsActive )
                             Cbuf.AddText( "disconnect\n" );
-                        Cbuf.AddText( "listen 0\n" );	// so host_netport will be re-examined
+                        Cbuf.AddText( "listen 0\n" ); // so host_netport will be re-examined
                         Cbuf.AddText( String.Format( "maxplayers {0}\n", _MaxPlayers ) );
                         Scr.BeginLoadingPlaque();
 
@@ -2051,23 +1944,21 @@ forward:
                 Menu.Print( 160, 96, String.Format( "{0} minutes", (int)Host.TimeLimit ) );
 
             Menu.Print( 0, 112, "         Episode" );
-            //MED 01/06/97 added hipnotic episodes
+
             if( Common.GameKind == GameKind.Hipnotic )
                 Menu.Print( 160, 112, HipnoticEpisodes[_StartEpisode].description );
-            //PGM 01/07/97 added rogue episodes
             else if( Common.GameKind == GameKind.Rogue )
                 Menu.Print( 160, 112, RogueEpisodes[_StartEpisode].description );
             else
                 Menu.Print( 160, 112, Episodes[_StartEpisode].description );
 
             Menu.Print( 0, 120, "           Level" );
-            //MED 01/06/97 added hipnotic episodes
+
             if( Common.GameKind == GameKind.Hipnotic )
             {
                 Menu.Print( 160, 120, HipnoticLevels[HipnoticEpisodes[_StartEpisode].firstLevel + _StartLevel].description );
                 Menu.Print( 160, 128, HipnoticLevels[HipnoticEpisodes[_StartEpisode].firstLevel + _StartLevel].name );
             }
-            //PGM 01/07/97 added rogue episodes
             else if( Common.GameKind == GameKind.Rogue )
             {
                 Menu.Print( 160, 120, RogueLevels[RogueEpisodes[_StartEpisode].firstLevel + _StartLevel].description );
@@ -2111,7 +2002,7 @@ forward:
                 this.name = name;
                 this.description = desc;
             }
-        } //level_t;
+        }
 
         private class episode_t
         {
@@ -2125,11 +2016,8 @@ forward:
                 this.firstLevel = firstLevel;
                 this.levels = levels;
             }
-        } //episode_t;
+        }
 
-        /// <summary>
-        /// M_NetStart_Change
-        /// </summary>
         private void Change( int dir )
         {
             int count;
@@ -2196,11 +2084,9 @@ forward:
 
                 case 7:
                     _StartEpisode += dir;
-                    //MED 01/06/97 added hipnotic count
+
                     if( Common.GameKind == GameKind.Hipnotic )
                         count = 6;
-                    //PGM 01/07/97 added rogue count
-                    //PGM 03/02/97 added 1 for dmatch episode
                     else if( Common.GameKind == GameKind.Rogue )
                         count = 4;
                     else if( Common.IsRegistered )
@@ -2219,10 +2105,9 @@ forward:
 
                 case 8:
                     _StartLevel += dir;
-                    //MED 01/06/97 added hipnotic episodes
+
                     if( Common.GameKind == GameKind.Hipnotic )
                         count = HipnoticEpisodes[_StartEpisode].levels;
-                    //PGM 01/06/97 added hipnotic episodes
                     else if( Common.GameKind == GameKind.Rogue )
                         count = RogueEpisodes[_StartEpisode].levels;
                     else
@@ -2254,7 +2139,6 @@ forward:
 
         public override void KeyEvent( int key )
         {
-            // nothing to do
         }
 
         public override void Draw()
@@ -2388,14 +2272,14 @@ forward:
             public int modenum;
             public string desc;
             public bool iscur;
-        } //modedesc_t;
+        }
 
         private const int MAX_COLUMN_SIZE = 9;
         private const int MODE_AREA_HEIGHT = MAX_COLUMN_SIZE + 2;
         private const int MAX_MODEDESCS = MAX_COLUMN_SIZE * 3;
 
-        private int _WModes; // vid_wmodes
-        private modedesc_t[] _ModeDescs = new modedesc_t[MAX_MODEDESCS]; // modedescs
+        private int _WModes;
+        private modedesc_t[] _ModeDescs = new modedesc_t[MAX_MODEDESCS];
 
         public override void KeyEvent( int key )
         {

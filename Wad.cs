@@ -30,16 +30,13 @@ namespace SharpQuake
     [StructLayout( LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi )]
     internal struct wadinfo_t
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst=4)]
-        public byte[] identification; // [4];		// should be WAD2 or 2DAW
+        [MarshalAs( UnmanagedType.ByValArray, SizeConst = 4 )]
+        public byte[] identification; // should be WAD2 or 2DAW
 
         public int numlumps;
         public int infotableofs;
     }
 
-    /// <summary>
-    /// W_functions
-    /// </summary>
     internal static class Wad
     {
         public static byte[] Data
@@ -64,19 +61,18 @@ namespace SharpQuake
         public const int TYP_NONE = 0;
         public const int TYP_LABEL = 1;
 
-        public const int TYP_LUMPY = 64;				// 64 + grab command number
+        public const int TYP_LUMPY = 64; // 64 + grab command number
         public const int TYP_PALETTE = 64;
         public const int TYP_QTEX = 65;
         public const int TYP_QPIC = 66;
         public const int TYP_SOUND = 67;
         public const int TYP_MIPTEX = 68;
 
-        private static byte[] _Data; // void* wad_base
+        private static byte[] _Data;
         private static Dictionary<string, lumpinfo_t> _Lumps;
         private static GCHandle _Handle;
         private static IntPtr _DataPtr;
 
-        // W_LoadWadFile (char *filename)
         public static void LoadWadFile( string filename )
         {
             _Data = Common.LoadFile( filename );
@@ -119,7 +115,6 @@ namespace SharpQuake
             }
         }
 
-        // lumpinfo_t *W_GetLumpinfo (char *name)
         public static lumpinfo_t GetLumpInfo( string name )
         {
             lumpinfo_t lump;
@@ -135,14 +130,12 @@ namespace SharpQuake
             throw new InvalidOperationException( "W_GetLumpinfo: Unreachable code reached!" );
         }
 
-        // void	*W_GetLumpName (char *name)
         // Uze: returns index in _Data byte array where the lumpinfo_t starts
         public static int GetLumpNameOffset( string name )
         {
             return GetLumpInfo( name ).filepos; // GetLumpInfo() never returns null
         }
 
-        // SwapPic (qpic_t *pic)
         public static void SwapPic( dqpicheader_t pic )
         {
             pic.width = Common.LittleLong( pic.width );
@@ -156,19 +149,17 @@ namespace SharpQuake
         public int width, height;
     }
 
-    //wadinfo_t;
-
     [StructLayout( LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi )]
     internal class lumpinfo_t
     {
-        public int  filepos;
-        public int  disksize;
-        public int  size;                   // uncompressed
+        public int filepos;
+        public int disksize;
+        public int size; // uncompressed
         public byte type;
         public byte compression;
         private byte pad1, pad2;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        public byte[] name; //[16];				// must be null terminated
-    } // lumpinfo_t;
+        [MarshalAs( UnmanagedType.ByValArray, SizeConst = 16 )]
+        public byte[] name; // must be null terminated
+    }
 }

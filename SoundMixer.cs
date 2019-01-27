@@ -24,15 +24,14 @@ using System;
 
 namespace SharpQuake
 {
-    partial class Sound
+    internal partial class Sound
     {
         private const int PAINTBUFFER_SIZE = 512;
         private const short C8000 = -32768;
 
         private static int[,] _ScaleTable = new int[32, 256];
-        private static portable_samplepair_t[] _PaintBuffer = new portable_samplepair_t[PAINTBUFFER_SIZE]; // paintbuffer[PAINTBUFFER_SIZE]
+        private static portable_samplepair_t[] _PaintBuffer = new portable_samplepair_t[PAINTBUFFER_SIZE];
 
-        // SND_InitScaletable
         private static void InitScaletable()
         {
             for( int i = 0; i < 32; i++ )
@@ -40,7 +39,6 @@ namespace SharpQuake
                     _ScaleTable[i, j] = ( (sbyte)j ) * i * 8;
         }
 
-        // S_PaintChannels
         private static void PaintChannels( int endtime )
         {
             while( _PaintedTime < endtime )
@@ -96,7 +94,7 @@ namespace SharpQuake
                                 ch.end = ltime + sc.length - ch.pos;
                             }
                             else
-                            {	// channel just stopped
+                            { // channel just stopped
                                 ch.sfx = null;
                                 break;
                             }
@@ -110,7 +108,6 @@ namespace SharpQuake
             }
         }
 
-        // SND_PaintChannelFrom8
         private static void PaintChannelFrom8( channel_t ch, sfxcache_t sc, int count )
         {
             if( ch.leftvol > 255 )
@@ -132,13 +129,12 @@ namespace SharpQuake
             ch.pos += count;
         }
 
-        // SND_PaintChannelFrom16
         private static void PaintChannelFrom16( channel_t ch, sfxcache_t sc, int count )
         {
             int leftvol = ch.leftvol;
             int rightvol = ch.rightvol;
             byte[] sfx = sc.data;
-            int offset = ch.pos * 2; // sfx = (signed short *)sc->data + ch->pos;
+            int offset = ch.pos * 2;
 
             for( int i = 0; i < count; i++ )
             {
@@ -153,7 +149,6 @@ namespace SharpQuake
             ch.pos += count;
         }
 
-        // S_TransferPaintBuffer
         private static void TransferPaintBuffer( int endtime )
         {
             if( _shm.samplebits == 16 && _shm.channels == 2 )
@@ -164,7 +159,7 @@ namespace SharpQuake
 
             int count = ( endtime - _PaintedTime ) * _shm.channels;
             int out_mask = _shm.samples - 1;
-            int out_idx = 0; //_PaintedTime * _shm.channels & out_mask;
+            int out_idx = 0;
             int step = 3 - _shm.channels;
             int snd_vol = (int)( _Volume.Value * 256 );
             byte[] buffer = _Controller.LockBuffer();
@@ -183,8 +178,8 @@ namespace SharpQuake
                         val = ( _PaintBuffer[srcIndex].right * snd_vol ) >> 8;
                     if( val > 0x7fff )
                         val = 0x7fff;
-                    else if( val < C8000 )// (short)0x8000)
-                        val = C8000;// (short)0x8000;
+                    else if( val < C8000 )
+                        val = C8000;
 
                     uval.i0 = val;
                     buffer[out_idx * 2] = uval.b0;
@@ -213,8 +208,8 @@ namespace SharpQuake
                         val = ( _PaintBuffer[srcIndex].right * snd_vol ) >> 8;
                     if( val > 0x7fff )
                         val = 0x7fff;
-                    else if( val < C8000 )//(short)0x8000)
-                        val = C8000;//(short)0x8000;
+                    else if( val < C8000 )
+                        val = C8000;
 
                     buffer[out_idx] = (byte)( ( val >> 8 ) + 128 );
                     out_idx = ( out_idx + 1 ) & out_mask;
@@ -232,7 +227,6 @@ namespace SharpQuake
             _Controller.UnlockBuffer( destCount );
         }
 
-        // S_TransferStereo16
         private static void TransferStereo16( int endtime )
         {
             int snd_vol = (int)( _Volume.Value * 256 );
@@ -247,12 +241,10 @@ namespace SharpQuake
             {
                 // handle recirculating buffer issues
                 int lpos = lpaintedtime & ( ( _shm.samples >> 1 ) - 1 );
-                //int destOffset = (lpos << 2); // in bytes!!!
-                int snd_linear_count = ( _shm.samples >> 1 ) - lpos; // in portable_samplepair_t's!!!
+                int snd_linear_count = ( _shm.samples >> 1 ) - lpos;
                 if( lpaintedtime + snd_linear_count > endtime )
                     snd_linear_count = endtime - lpaintedtime;
 
-                // beginning of Snd_WriteLinearBlastStereo16
                 // write a linear blast of samples
                 for( int i = 0; i < snd_linear_count; i++ )
                 {
@@ -278,13 +270,12 @@ namespace SharpQuake
 
                     destOffset += 4;
                 }
-                // end of Snd_WriteLinearBlastStereo16 ();
 
                 // Uze
                 destCount += snd_linear_count * 4;
 
-                srcOffset += snd_linear_count; // snd_p += snd_linear_count;
-                lpaintedtime += ( snd_linear_count );// >> 1);
+                srcOffset += snd_linear_count;
+                lpaintedtime += ( snd_linear_count );
             }
 
             _Controller.UnlockBuffer( destCount );

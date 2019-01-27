@@ -27,27 +27,28 @@ namespace SharpQuake
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
     internal struct lump_t
     {
-        public int fileofs, filelen;
+        public int fileofs;
+        public int filelen;
     }
 
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
     internal struct dmodel_t
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public float[] mins; // [3];
+        public float[] mins;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public float[] maxs; //[3];
+        public float[] maxs;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public float[] origin; // [3];
+        public float[] origin;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BspFile.MAX_MAP_HULLS)]
-        public int[] headnode; //[MAX_MAP_HULLS];
+        public int[] headnode;
 
-        public int visleafs;		// not including the solid leaf 0
-        public int firstface, numfaces;
-
+        public int visleafs; // not including the solid leaf 0
+        public int firstface;
+        public int numfaces;
         public static int SizeInBytes = Marshal.SizeOf(typeof(dmodel_t));
     }
 
@@ -57,7 +58,7 @@ namespace SharpQuake
         public int version;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BspFile.HEADER_LUMPS)]
-        public lump_t[] lumps; //[HEADER_LUMPS];
+        public lump_t[] lumps;
 
         public static int SizeInBytes = Marshal.SizeOf(typeof(dheader_t));
     }
@@ -66,9 +67,6 @@ namespace SharpQuake
     internal struct dmiptexlump_t
     {
         public int nummiptex;
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst=4)]
-        //public int[] dataofs; // [nummiptex]
-
         public static int SizeInBytes = Marshal.SizeOf(typeof(dmiptexlump_t));
     }
 
@@ -76,12 +74,13 @@ namespace SharpQuake
     internal struct miptex_t
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=16)]
-        public byte[] name; //[16];
+        public byte[] name;
 
-        public uint width, height;
+        public uint width;
+        public uint height;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=BspFile.MIPLEVELS)]
-        public uint[] offsets; //[MIPLEVELS];		// four mip maps stored
+        public uint[] offsets; // four mip maps stored
 
         public static int SizeInBytes = Marshal.SizeOf(typeof(miptex_t));
     }
@@ -90,7 +89,7 @@ namespace SharpQuake
     internal struct dvertex_t
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=3)]
-        public float[] point; //[3];
+        public float[] point;
 
         public static int SizeInBytes = Marshal.SizeOf(typeof(dvertex_t));
     }
@@ -99,31 +98,29 @@ namespace SharpQuake
     internal struct dplane_t
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=3)]
-        public float[] normal; //[3];
+        public float[] normal;
 
         public float dist;
-        public int type;		// PLANE_X - PLANE_ANYZ ?remove? trivial to regenerate
-
+        public int type; // PLANE_X - PLANE_ANYZ ?remove? trivial to regenerate
         public static int SizeInBytes = Marshal.SizeOf(typeof(dplane_t));
     }
 
-    // !!! if this is changed, it must be changed in asm_i386.h too !!!
     [StructLayout( LayoutKind.Sequential, Pack = 1 )]
     internal struct dnode_t
     {
         public int planenum;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-        public short[] children;//[2];	// negative numbers are -(leafs+1), not nodes
+        public short[] children; // negative numbers are -(leafs+1), not nodes
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public short[] mins; //[3];		// for sphere culling
+        public short[] mins; // for sphere culling
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public short[] maxs; //[3];
+        public short[] maxs;
 
         public ushort firstface;
-        public ushort numfaces;	// counting both sides
+        public ushort numfaces; // counting both sides
 
         public static int SizeInBytes = Marshal.SizeOf(typeof(dnode_t));
     }
@@ -134,7 +131,7 @@ namespace SharpQuake
         public int planenum;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=2)]
-        public short[] children; //[2];	// negative numbers are contents
+        public short[] children; // negative numbers are contents
 
         public static int SizeInBytes = Marshal.SizeOf(typeof(dclipnode_t));
     }
@@ -143,7 +140,7 @@ namespace SharpQuake
     internal struct texinfo_t
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=8)]
-        public float[] vecs; //[2][4];		// [s/t][xyz offset]
+        public float[] vecs; // [s/t][xyz offset]
 
         public int miptex;
         public int flags;
@@ -157,7 +154,7 @@ namespace SharpQuake
     internal struct dedge_t
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=2)]
-        public ushort[] v; //[2];		// vertex numbers
+        public ushort[] v; // vertex numbers
 
         public static int SizeInBytes = Marshal.SizeOf(typeof(dedge_t));
     }
@@ -168,15 +165,15 @@ namespace SharpQuake
         public short planenum;
         public short side;
 
-        public int firstedge;		// we must support > 64k edges
+        public int firstedge; // we must support > 64k edges
         public short numedges;
         public short texinfo;
 
         // lighting info
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BspFile.MAXLIGHTMAPS)]
-        public byte[] styles; //[MAXLIGHTMAPS];
+        public byte[] styles;
 
-        public int lightofs;		// start of [numstyles*surfsize] samples
+        public int lightofs; // start of [numstyles*surfsize] samples
 
         public static int SizeInBytes = Marshal.SizeOf(typeof(dface_t));
     }
@@ -187,27 +184,25 @@ namespace SharpQuake
     internal struct dleaf_t
     {
         public int contents;
-        public int visofs;				// -1 = no visibility info
+        public int visofs; // -1 = no visibility info
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=3)]
-        public short[] mins;//[3];			// for frustum culling
+        public short[] mins; // for frustum culling
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=3)]
-        public short[] maxs;//[3];
+        public short[] maxs;
 
         public ushort firstmarksurface;
         public ushort nummarksurfaces;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst=Ambients.NUM_AMBIENTS)]
-        public byte[] ambient_level; // [NUM_AMBIENTS];
+        public byte[] ambient_level;
 
         public static int SizeInBytes = Marshal.SizeOf(typeof(dleaf_t));
     }
 
     internal static class BspFile
     {
-        // upper design bounds
-
         public const int MAX_MAP_HULLS = 4;
 
         public const int MAX_MAP_MODELS = 256;
@@ -216,8 +211,8 @@ namespace SharpQuake
         public const int MAX_MAP_ENTSTRING = 65536;
 
         public const int MAX_MAP_PLANES = 32767;
-        public const int MAX_MAP_NODES = 32767;		// because negative shorts are contents
-        public const int MAX_MAP_CLIPNODES = 32767;		//
+        public const int MAX_MAP_NODES = 32767; // because negative shorts are contents
+        public const int MAX_MAP_CLIPNODES = 32767;
         public const int MAX_MAP_LEAFS = 8192;
         public const int MAX_MAP_VERTS = 65535;
         public const int MAX_MAP_FACES = 65535;
@@ -232,8 +227,8 @@ namespace SharpQuake
 
         public const int MAX_MAP_PORTALS = 65536;
 
-        // key / value pair sizes
-
+        /* key / value pair sizes
+         */
         public const int MAX_KEY = 32;
         public const int MAX_VALUE = 1024;
 
@@ -246,10 +241,8 @@ namespace SharpQuake
 
         public const int MIPLEVELS = 4;
 
-        public const int TEX_SPECIAL = 1;		// sky or slime, no lightmap or 256 subdivision
+        public const int TEX_SPECIAL = 1; // sky or slime, no lightmap or 256 subdivision
     }
-
-    // lump_t;
 
     internal static class Lumps
     {
@@ -270,16 +263,6 @@ namespace SharpQuake
         public const int LUMP_MODELS = 14;
     }
 
-    // dmodel_t;
-
-    // dheader_t;
-
-    // dmiptexlump_t;
-
-    // miptex_t;
-
-    // dvertex_t;
-
     internal static class Planes
     {
         // 0-2 are axial planes
@@ -295,8 +278,6 @@ namespace SharpQuake
         public const int PLANE_ANYZ = 5;
     }
 
-    // dplane_t;
-
     internal static class Contents
     {
         public const int CONTENTS_EMPTY = -1;
@@ -305,8 +286,8 @@ namespace SharpQuake
         public const int CONTENTS_SLIME = -4;
         public const int CONTENTS_LAVA = -5;
         public const int CONTENTS_SKY = -6;
-        public const int CONTENTS_ORIGIN = -7;		// removed at csg time
-        public const int CONTENTS_CLIP = -8;		// changed to contents_solid
+        public const int CONTENTS_ORIGIN = -7; // removed at csg time
+        public const int CONTENTS_CLIP = -8; // changed to contents_solid
 
         public const int CONTENTS_CURRENT_0 = -9;
         public const int CONTENTS_CURRENT_90 = -10;
@@ -316,16 +297,6 @@ namespace SharpQuake
         public const int CONTENTS_CURRENT_DOWN = -14;
     }
 
-    // dnode_t;
-
-    // dclipnode_t;
-
-    //texinfo_t;
-
-    // dedge_t;
-
-    // dface_t;
-
     internal static class Ambients
     {
         public const int AMBIENT_WATER = 0;
@@ -333,8 +304,6 @@ namespace SharpQuake
         public const int AMBIENT_SLIME = 2;
         public const int AMBIENT_LAVA = 3;
 
-        public const int NUM_AMBIENTS = 4;		// automatic ambient sounds
+        public const int NUM_AMBIENTS = 4; // automatic ambient sounds
     }
-
-    //dleaf_t;
 }
