@@ -41,12 +41,9 @@ namespace SharpQuake
         internal class WindowsShell
         {
             /// <summary>
-            /// <para>
-            /// Notifies the system of an event that an application has performed.
-            /// </para>
+            /// <para>Notifies the system of an event that an application has performed.</para>
             /// An application should use this function if it performs an action that may affect the Shell.
-            /// <para>
-            /// </para>
+            /// <para></para>
             /// </summary>
             /// <param name="eventId"></param>
             /// <param name="flags"></param>

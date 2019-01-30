@@ -1,37 +1,35 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
-using System;
 using System.IO;
 using System.Text;
 
 namespace SharpQuake
 {
-    partial class Client
+    internal partial class Client
     {
         public static void StopPlayback()
         {
             if( !cls.demoplayback )
+            {
                 return;
+            }
 
             if( cls.demofile != null )
             {
@@ -42,13 +40,17 @@ namespace SharpQuake
             cls.state = cactive_t.ca_disconnected;
 
             if( cls.timedemo )
+            {
                 FinishTimeDemo();
+            }
         }
 
         private static void Record_f()
         {
             if( Cmd.Source != cmd_source_t.src_command )
+            {
                 return;
+            }
 
             int c = Cmd.Argc;
             if( c != 2 && c != 3 && c != 4 )
@@ -77,13 +79,17 @@ namespace SharpQuake
                 Con.Print( "Forcing CD track to {0}\n", track );
             }
             else
+            {
                 track = -1;
+            }
 
             string name = Path.Combine( Common.GameDir, Cmd.Argv( 1 ) );
 
             // start the map up
             if( c > 2 )
-                Cmd.ExecuteString( String.Format( "map {0}", Cmd.Argv( 2 ) ), cmd_source_t.src_command );
+            {
+                Cmd.ExecuteString( string.Format( "map {0}", Cmd.Argv( 2 ) ), cmd_source_t.src_command );
+            }
 
             // open the demo file
             name = Path.ChangeExtension( name, ".dem" );
@@ -107,7 +113,9 @@ namespace SharpQuake
         private static void Stop_f()
         {
             if( Cmd.Source != cmd_source_t.src_command )
+            {
                 return;
+            }
 
             if( !cls.demorecording )
             {
@@ -133,7 +141,9 @@ namespace SharpQuake
         private static void PlayDemo_f()
         {
             if( Cmd.Source != cmd_source_t.src_command )
+            {
                 return;
+            }
 
             if( Cmd.Argc != 2 )
             {
@@ -152,8 +162,7 @@ namespace SharpQuake
             {
                 cls.demofile.Dispose();
             }
-            DisposableWrapper<BinaryReader> reader;
-            Common.FOpenFile( name, out reader );
+            Common.FOpenFile( name, out DisposableWrapper<BinaryReader> reader );
             cls.demofile = reader;
             if( cls.demofile == null )
             {
@@ -173,22 +182,32 @@ namespace SharpQuake
             {
                 c = s.ReadByte();
                 if( c == '\n' )
+                {
                     break;
+                }
 
                 if( c == '-' )
+                {
                     neg = true;
+                }
                 else
+                {
                     cls.forcetrack = cls.forcetrack * 10 + ( c - '0' );
+                }
             }
 
             if( neg )
+            {
                 cls.forcetrack = -cls.forcetrack;
+            }
         }
 
         private static void TimeDemo_f()
         {
             if( Cmd.Source != cmd_source_t.src_command )
+            {
                 return;
+            }
 
             if( Cmd.Argc != 2 )
             {
@@ -216,14 +235,19 @@ namespace SharpQuake
                     if( cls.timedemo )
                     {
                         if( Host.FrameCount == cls.td_lastframe )
+                        {
                             return 0; // allready read this frame's message
+                        }
+
                         cls.td_lastframe = Host.FrameCount;
 
                         /* if this is the second frame, grab the real td_starttime
                          * so the bogus time on the first frame doesn't count
                          */
                         if( Host.FrameCount == cls.td_startframe + 1 )
+                        {
                             cls.td_starttime = (float)Host.RealTime;
+                        }
                     }
                     else if( cl.time <= cl.mtime[0] )
                     {
@@ -235,7 +259,9 @@ namespace SharpQuake
                 BinaryReader reader = ( (DisposableWrapper<BinaryReader>)cls.demofile ).Object;
                 int size = Common.LittleLong( reader.ReadInt32() );
                 if( size > QDef.MAX_MSGLEN )
+                {
                     Sys.Error( "Demo message > MAX_MSGLEN" );
+                }
 
                 cl.mviewangles[1] = cl.mviewangles[0];
                 cl.mviewangles[0].X = Common.LittleFloat( reader.ReadSingle() );
@@ -257,17 +283,25 @@ namespace SharpQuake
                 r = Net.GetMessage( cls.netcon );
 
                 if( r != 1 && r != 2 )
+                {
                     return r;
+                }
 
                 // discard nop keepalive message
                 if( Net.Message.Length == 1 && Net.Message.Data[0] == Protocol.svc_nop )
+                {
                     Con.Print( "<-- server to client keepalive\n" );
+                }
                 else
+                {
                     break;
+                }
             }
 
             if( cls.demorecording )
+            {
                 WriteDemoMessage();
+            }
 
             return r;
         }
@@ -280,7 +314,10 @@ namespace SharpQuake
             int frames = ( Host.FrameCount - cls.td_startframe ) - 1;
             float time = (float)Host.RealTime - cls.td_starttime;
             if( time == 0 )
+            {
                 time = 1;
+            }
+
             Con.Print( "{0} frames {1:F5} seconds {2:F2} fps\n", frames, time, frames / time );
         }
 

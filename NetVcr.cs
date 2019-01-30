@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -82,7 +79,9 @@ namespace SharpQuake
         public qsocket_t CheckNewConnections()
         {
             if( Host.Time != _Next.time || _Next.op != VcrOp.VCR_OP_CONNECT )
+            {
                 Sys.Error( "VCR missmatch" );
+            }
 
             if( _Next.session == 0 )
             {
@@ -105,7 +104,9 @@ namespace SharpQuake
         public int GetMessage( qsocket_t sock )
         {
             if( Host.Time != _Next.time || _Next.op != VcrOp.VCR_OP_GETMESSAGE || _Next.session != SocketToSession( sock ) )
+            {
                 Sys.Error( "VCR missmatch" );
+            }
 
             int ret = Host.VcrReader.ReadInt32();
             if( ret != 1 )
@@ -125,7 +126,9 @@ namespace SharpQuake
         public int SendMessage( qsocket_t sock, MsgWriter data )
         {
             if( Host.Time != _Next.time || _Next.op != VcrOp.VCR_OP_SENDMESSAGE || _Next.session != SocketToSession( sock ) )
+            {
                 Sys.Error( "VCR missmatch" );
+            }
 
             int ret = Host.VcrReader.ReadInt32();
 
@@ -142,7 +145,9 @@ namespace SharpQuake
         public bool CanSendMessage( qsocket_t sock )
         {
             if( Host.Time != _Next.time || _Next.op != VcrOp.VCR_OP_CANSENDMESSAGE || _Next.session != SocketToSession( sock ) )
+            {
                 Sys.Error( "VCR missmatch" );
+            }
 
             int ret = Host.VcrReader.ReadInt32();
 
@@ -172,12 +177,16 @@ namespace SharpQuake
             }
             catch( IOException )
             {
-                _Next = new VcrRecord();
-                _Next.op = 255;
+                _Next = new VcrRecord
+                {
+                    op = 255
+                };
                 Sys.Error( "=== END OF PLAYBACK===\n" );
             }
             if( _Next.op < 1 || _Next.op > VcrOp.VCR_MAX_MESSAGE )
+            {
                 Sys.Error( "VCR_ReadNext: bad op" );
+            }
         }
 
         #endregion INetDriver Members

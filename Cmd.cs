@@ -1,26 +1,22 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,12 +24,11 @@ namespace SharpQuake
 {
     internal delegate void xcommand_t(); // typedef void (*xcommand_t) (void);
 
-    // Command execution takes a string, breaks it into tokens,
-    // then searches for a command or variable that matches the first token.
+    // Command execution takes a string, breaks it into tokens, then searches for a command or
+    // variable that matches the first token.
     //
-    // Commands can come from three sources, but the handler functions may choose
-    // to dissallow the action or forward it to a remote server if the source is
-    // not apropriate.
+    // Commands can come from three sources, but the handler functions may choose to dissallow the
+    // action or forward it to a remote server if the source is not apropriate.
 
     internal enum cmd_source_t
     {
@@ -106,7 +101,9 @@ namespace SharpQuake
         {
             // ??? because hunk allocation would get stomped
             if( Host.IsInitialized )
+            {
                 Sys.Error( "Cmd.Add after host initialized!" );
+            }
 
             // fail if the command is a variable name
             if( Cvar.Exists( name ) )
@@ -127,14 +124,18 @@ namespace SharpQuake
 
         public static string[] Complete( string partial )
         {
-            if( String.IsNullOrEmpty( partial ) )
+            if( string.IsNullOrEmpty( partial ) )
+            {
                 return null;
+            }
 
             List<string> result = new List<string>();
             foreach( string cmd in _Functions.Keys )
             {
                 if( cmd.StartsWith( partial ) )
+                {
                     result.Add( cmd );
+                }
             }
             return ( result.Count > 0 ? result.ToArray() : null );
         }
@@ -142,7 +143,9 @@ namespace SharpQuake
         public static string Argv( int arg )
         {
             if( arg < 0 || arg >= _Argc )
-                return String.Empty;
+            {
+                return string.Empty;
+            }
 
             return _Argv[arg];
         }
@@ -160,15 +163,19 @@ namespace SharpQuake
             _Argv = null;
 
             List<string> argv = new List<string>( MAX_ARGS );
-            while( !String.IsNullOrEmpty( text ) )
+            while( !string.IsNullOrEmpty( text ) )
             {
                 if( _Argc == 1 )
+                {
                     _Args = text;
+                }
 
                 text = Common.Parse( text );
 
-                if( String.IsNullOrEmpty( Common.Token ) )
+                if( string.IsNullOrEmpty( Common.Token ) )
+                {
                     break;
+                }
 
                 if( _Argc < MAX_ARGS )
                 {
@@ -188,7 +195,9 @@ namespace SharpQuake
 
             // execute the command line
             if( _Argc <= 0 )
+            {
                 return;  // no tokens
+            }
 
             // check functions
             xcommand_t handler = Find( _Argv[0] ); // must search with comparison like Q_strcasecmp()
@@ -200,7 +209,7 @@ namespace SharpQuake
             {
                 // check alias
                 string alias = FindAlias( _Argv[0] ); // must search with compare func like Q_strcasecmp
-                if( !String.IsNullOrEmpty( alias ) )
+                if( !string.IsNullOrEmpty( alias ) )
                 {
                     Cbuf.InsertText( alias );
                 }
@@ -208,7 +217,9 @@ namespace SharpQuake
                 {
                     // check cvars
                     if( !Cvar.Command() )
+                    {
                         Con.Print( "Unknown command \"{0}\"\n", _Argv[0] );
+                    }
                 }
             }
         }
@@ -222,7 +233,9 @@ namespace SharpQuake
             }
 
             if( Client.cls.demoplayback )
+            {
                 return; // not really connected
+            }
 
             MsgWriter writer = Client.cls.message;
             writer.WriteByte( Protocol.clc_stringcmd );
@@ -242,20 +255,18 @@ namespace SharpQuake
 
         public static string JoinArgv()
         {
-            return String.Join( " ", _Argv );
+            return string.Join( " ", _Argv );
         }
 
         private static xcommand_t Find( string name )
         {
-            xcommand_t result;
-            _Functions.TryGetValue( name, out result );
+            _Functions.TryGetValue( name, out xcommand_t result );
             return result;
         }
 
         private static string FindAlias( string name )
         {
-            string result;
-            _Aliases.TryGetValue( name, out result );
+            _Aliases.TryGetValue( name, out string result );
             return result;
         }
 
@@ -271,11 +282,13 @@ namespace SharpQuake
             StringBuilder sb = new StringBuilder( 1024 );
             for( int i = 1; i < _Argc; i++ )
             {
-                if( !String.IsNullOrEmpty( _Argv[i] ) )
+                if( !string.IsNullOrEmpty( _Argv[i] ) )
                 {
                     sb.Append( _Argv[i] );
                     if( i + 1 < _Argc )
+                    {
                         sb.Append( " " );
+                    }
                 }
             }
 
@@ -362,7 +375,9 @@ namespace SharpQuake
             {
                 sb.Append( _Argv[i] );
                 if( i + 1 < _Argc )
+                {
                     sb.Append( " " );
+                }
             }
             sb.AppendLine();
             _Aliases[name] = sb.ToString();
@@ -396,8 +411,10 @@ namespace SharpQuake
 
         public static void AddText( string text )
         {
-            if( String.IsNullOrEmpty( text ) )
+            if( string.IsNullOrEmpty( text ) )
+            {
                 return;
+            }
 
             int len = text.Length;
             if( _Buf.Length + len > _Buf.Capacity )
@@ -427,13 +444,19 @@ namespace SharpQuake
                 for( i = 0; i < text.Length; i++ )
                 {
                     if( text[i] == '"' )
+                    {
                         quotes++;
+                    }
 
                     if( ( ( quotes & 1 ) == 0 ) && ( text[i] == ';' ) )
+                    {
                         break;  // don't break if inside a quoted string
+                    }
 
                     if( text[i] == '\n' )
+                    {
                         break;
+                    }
                 }
 
                 string line = text.Substring( 0, i ).TrimEnd( '\n', ';' );
@@ -453,14 +476,13 @@ namespace SharpQuake
                 }
 
                 // execute the command line
-                if( !String.IsNullOrEmpty( line ) )
+                if( !string.IsNullOrEmpty( line ) )
                 {
                     Cmd.ExecuteString( line, cmd_source_t.src_command );
 
                     if( _Wait )
                     {
-                        // skip out while text still remains in buffer, leaving it
-                        // for next frame
+                        // skip out while text still remains in buffer, leaving it for next frame
                         _Wait = false;
                         break;
                     }

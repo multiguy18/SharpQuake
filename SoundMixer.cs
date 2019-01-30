@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -35,8 +32,12 @@ namespace SharpQuake
         private static void InitScaletable()
         {
             for( int i = 0; i < 32; i++ )
+            {
                 for( int j = 0; j < 256; j++ )
+                {
                     _ScaleTable[i, j] = ( (sbyte)j ) * i * 8;
+                }
+            }
         }
 
         private static void PaintChannels( int endtime )
@@ -46,7 +47,9 @@ namespace SharpQuake
                 // if paintbuffer is smaller than DMA buffer
                 int end = endtime;
                 if( endtime - _PaintedTime > PAINTBUFFER_SIZE )
+                {
                     end = _PaintedTime + PAINTBUFFER_SIZE;
+                }
 
                 // clear the paint buffer
                 Array.Clear( _PaintBuffer, 0, end - _PaintedTime );
@@ -57,13 +60,20 @@ namespace SharpQuake
                     channel_t ch = _Channels[i];
 
                     if( ch.sfx == null )
+                    {
                         continue;
+                    }
+
                     if( ch.leftvol == 0 && ch.rightvol == 0 )
+                    {
                         continue;
+                    }
 
                     sfxcache_t sc = LoadSound( ch.sfx );
                     if( sc == null )
+                    {
                         continue;
+                    }
 
                     int count, ltime = _PaintedTime;
 
@@ -71,16 +81,24 @@ namespace SharpQuake
                     {
                         // paint up to end
                         if( ch.end < end )
+                        {
                             count = ch.end - ltime;
+                        }
                         else
+                        {
                             count = end - ltime;
+                        }
 
                         if( count > 0 )
                         {
                             if( sc.width == 1 )
+                            {
                                 PaintChannelFrom8( ch, sc, count );
+                            }
                             else
+                            {
                                 PaintChannelFrom16( ch, sc, count );
+                            }
 
                             ltime += count;
                         }
@@ -111,9 +129,14 @@ namespace SharpQuake
         private static void PaintChannelFrom8( channel_t ch, sfxcache_t sc, int count )
         {
             if( ch.leftvol > 255 )
+            {
                 ch.leftvol = 255;
+            }
+
             if( ch.rightvol > 255 )
+            {
                 ch.rightvol = 255;
+            }
 
             int lscale = ch.leftvol >> 3;
             int rscale = ch.rightvol >> 3;
@@ -173,13 +196,22 @@ namespace SharpQuake
                 while( count-- > 0 )
                 {
                     if( useLeft )
+                    {
                         val = ( _PaintBuffer[srcIndex].left * snd_vol ) >> 8;
+                    }
                     else
+                    {
                         val = ( _PaintBuffer[srcIndex].right * snd_vol ) >> 8;
+                    }
+
                     if( val > 0x7fff )
+                    {
                         val = 0x7fff;
+                    }
                     else if( val < C8000 )
+                    {
                         val = C8000;
+                    }
 
                     uval.i0 = val;
                     buffer[out_idx * 2] = uval.b0;
@@ -203,19 +235,30 @@ namespace SharpQuake
                 while( count-- > 0 )
                 {
                     if( useLeft )
+                    {
                         val = ( _PaintBuffer[srcIndex].left * snd_vol ) >> 8;
+                    }
                     else
+                    {
                         val = ( _PaintBuffer[srcIndex].right * snd_vol ) >> 8;
+                    }
+
                     if( val > 0x7fff )
+                    {
                         val = 0x7fff;
+                    }
                     else if( val < C8000 )
+                    {
                         val = C8000;
+                    }
 
                     buffer[out_idx] = (byte)( ( val >> 8 ) + 128 );
                     out_idx = ( out_idx + 1 ) & out_mask;
 
                     if( _shm.channels == 2 && useLeft )
+                    {
                         useLeft = false;
+                    }
                     else
                     {
                         useLeft = true;
@@ -243,7 +286,9 @@ namespace SharpQuake
                 int lpos = lpaintedtime & ( ( _shm.samples >> 1 ) - 1 );
                 int snd_linear_count = ( _shm.samples >> 1 ) - lpos;
                 if( lpaintedtime + snd_linear_count > endtime )
+                {
                     snd_linear_count = endtime - lpaintedtime;
+                }
 
                 // write a linear blast of samples
                 for( int i = 0; i < snd_linear_count; i++ )
@@ -252,14 +297,22 @@ namespace SharpQuake
                     int val2 = ( _PaintBuffer[srcOffset + i].right * snd_vol ) >> 8;
 
                     if( val1 > 0x7fff )
+                    {
                         val1 = 0x7fff;
+                    }
                     else if( val1 < C8000 )
+                    {
                         val1 = C8000;
+                    }
 
                     if( val2 > 0x7fff )
+                    {
                         val2 = 0x7fff;
+                    }
                     else if( val2 < C8000 )
+                    {
                         val2 = C8000;
+                    }
 
                     uval.s0 = (short)val1;
                     uval.s1 = (short)val2;

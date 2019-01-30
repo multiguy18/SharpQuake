@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -34,7 +31,9 @@ namespace SharpQuake
         public static void PushDlights()
         {
             if( _glFlashBlend.Value != 0 )
+            {
                 return;
+            }
 
             _DlightFrameCount = _FrameCount + 1; // because the count hasn't advanced yet for this frame
 
@@ -42,7 +41,10 @@ namespace SharpQuake
             {
                 dlight_t l = Client.DLights[i];
                 if( l.die < Client.cl.time || l.radius == 0 )
+                {
                     continue;
+                }
+
                 Render.MarkLights( l, 1 << i, Client.cl.worldmodel.nodes[0] );
             }
         }
@@ -50,7 +52,9 @@ namespace SharpQuake
         private static void MarkLights( dlight_t light, int bit, mnodebase_t node )
         {
             if( node.contents < 0 )
+            {
                 return;
+            }
 
             mnode_t n = (mnode_t)node;
             mplane_t splitplane = n.plane;
@@ -86,7 +90,9 @@ namespace SharpQuake
         private static void RenderDlights()
         {
             if( _glFlashBlend.Value == 0 )
+            {
                 return;
+            }
 
             _DlightFrameCount = _FrameCount + 1; // because the count hasn't advanced yet for this frame
 
@@ -100,7 +106,9 @@ namespace SharpQuake
             {
                 dlight_t l = Client.DLights[i];
                 if( l.die < Client.cl.time || l.radius == 0 )
+                {
                     continue;
+                }
 
                 RenderDlight( l );
             }
@@ -114,12 +122,11 @@ namespace SharpQuake
 
         private static void AnimateLight()
         {
-            // light animations
-            // 'm' is normal light, 'a' is no light, 'z' is double bright
+            // light animations 'm' is normal light, 'a' is no light, 'z' is double bright
             int i = (int)( Client.cl.time * 10 );
             for( int j = 0; j < QDef.MAX_LIGHTSTYLES; j++ )
             {
-                if( String.IsNullOrEmpty( Client.LightStyle[j].map ) )
+                if( string.IsNullOrEmpty( Client.LightStyle[j].map ) )
                 {
                     _LightStyleValue[j] = 256;
                     continue;
@@ -135,14 +142,18 @@ namespace SharpQuake
         private static int LightPoint( ref Vector3 p )
         {
             if( Client.cl.worldmodel.lightdata == null )
+            {
                 return 255;
+            }
 
             Vector3 end = p;
             end.Z -= 2048;
 
             int r = RecursiveLightPoint( Client.cl.worldmodel.nodes[0], ref p, ref end );
             if( r == -1 )
+            {
                 r = 0;
+            }
 
             return r;
         }
@@ -150,7 +161,9 @@ namespace SharpQuake
         private static int RecursiveLightPoint( mnodebase_t node, ref Vector3 start, ref Vector3 end )
         {
             if( node.contents < 0 )
+            {
                 return -1;  // didn't hit anything
+            }
 
             mnode_t n = (mnode_t)node;
 
@@ -163,7 +176,9 @@ namespace SharpQuake
             int side = front < 0 ? 1 : 0;
 
             if( ( back < 0 ? 1 : 0 ) == side )
+            {
                 return RecursiveLightPoint( n.children[side], ref start, ref end );
+            }
 
             float frac = front / ( front - back );
             Vector3 mid = start + ( end - start ) * frac;
@@ -171,10 +186,14 @@ namespace SharpQuake
             // go down front side
             int r = RecursiveLightPoint( n.children[side], ref start, ref mid );
             if( r >= 0 )
+            {
                 return r;  // hit something
+            }
 
             if( ( back < 0 ? 1 : 0 ) == side )
+            {
                 return -1;  // didn't hit anuthing
+            }
 
             // check for impact on this node
             _LightSpot = mid;
@@ -185,7 +204,9 @@ namespace SharpQuake
             for( int i = 0; i < n.numsurfaces; i++, offset++ )
             {
                 if( ( surf[offset].flags & Surf.SURF_DRAWTILED ) != 0 )
+                {
                     continue; // no lightmaps
+                }
 
                 mtexinfo_t tex = surf[offset].texinfo;
 
@@ -193,16 +214,22 @@ namespace SharpQuake
                 int t = (int)( Vector3.Dot( mid, tex.vecs[1].Xyz ) + tex.vecs[1].W );
 
                 if( s < surf[offset].texturemins[0] || t < surf[offset].texturemins[1] )
+                {
                     continue;
+                }
 
                 int ds = s - surf[offset].texturemins[0];
                 int dt = t - surf[offset].texturemins[1];
 
                 if( ds > surf[offset].extents[0] || dt > surf[offset].extents[1] )
+                {
                     continue;
+                }
 
                 if( surf[offset].sample_base == null )
+                {
                     return 0;
+                }
 
                 ds >>= 4;
                 dt >>= 4;

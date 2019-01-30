@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using OpenTK;
@@ -36,7 +33,9 @@ namespace SharpQuake
         public static void AddEfrags( entity_t ent )
         {
             if( ent.model == null )
+            {
                 return;
+            }
 
             _AddEnt = ent;
             _LastObj = ent;
@@ -53,13 +52,17 @@ namespace SharpQuake
         private static void SplitEntityOnNode( mnodebase_t node )
         {
             if( node.contents == Contents.CONTENTS_SOLID )
+            {
                 return;
+            }
 
             // add an efrag if the node is a leaf
             if( node.contents < 0 )
             {
                 if( _EfragTopNode == null )
+                {
                     _EfragTopNode = node as mnode_t;
+                }
 
                 mleaf_t leaf = (mleaf_t)(object)node;
 
@@ -97,7 +100,9 @@ namespace SharpQuake
             // NODE_MIXED
             mnode_t n = node as mnode_t;
             if( n == null )
+            {
                 return;
+            }
 
             mplane_t splitplane = n.plane;
             int sides = Mathlib.BoxOnPlaneSide( ref _EMins, ref _EMaxs, splitplane );
@@ -106,15 +111,21 @@ namespace SharpQuake
             {
                 // split on this plane. if this is the first splitter of this bmodel, remember it
                 if( _EfragTopNode == null )
+                {
                     _EfragTopNode = n;
+                }
             }
 
             // recurse down the contacted sides
             if( ( sides & 1 ) != 0 )
+            {
                 SplitEntityOnNode( n.children[0] );
+            }
 
             if( ( sides & 2 ) != 0 )
+            {
                 SplitEntityOnNode( n.children[1] );
+            }
         }
 
         // FIXME: a lot of this goes away with edge-based

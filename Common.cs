@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -56,7 +53,7 @@ namespace SharpQuake
     [StructLayout( LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi )]
     internal struct dpackfile_t
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst=56)]
+        [MarshalAs( UnmanagedType.ByValArray, SizeConst = 56 )]
         public byte[] name;
 
         public int filepos;
@@ -66,63 +63,63 @@ namespace SharpQuake
     [StructLayout( LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi )]
     internal struct dpackheader_t
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        [MarshalAs( UnmanagedType.ByValArray, SizeConst = 4 )]
         public byte[] id;
 
-        [MarshalAs(UnmanagedType.I4, SizeConst = 4)]
+        [MarshalAs( UnmanagedType.I4, SizeConst = 4 )]
         public int dirofs;
 
-        [MarshalAs(UnmanagedType.I4, SizeConst = 4)]
+        [MarshalAs( UnmanagedType.I4, SizeConst = 4 )]
         public int dirlen;
     }
 
     [StructLayout( LayoutKind.Explicit )]
     internal struct Union4b
     {
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public uint ui0;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public int i0;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public float f0;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public short s0;
 
-        [FieldOffset(2)]
+        [FieldOffset( 2 )]
         public short s1;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public ushort us0;
 
-        [FieldOffset(2)]
+        [FieldOffset( 2 )]
         public ushort us1;
 
-        [FieldOffset(0)]
+        [FieldOffset( 0 )]
         public byte b0;
 
-        [FieldOffset(1)]
+        [FieldOffset( 1 )]
         public byte b1;
 
-        [FieldOffset(2)]
+        [FieldOffset( 2 )]
         public byte b2;
 
-        [FieldOffset(3)]
+        [FieldOffset( 3 )]
         public byte b3;
 
-        public static readonly Union4b Empty = new Union4b(0, 0, 0, 0);
+        public static readonly Union4b Empty = new Union4b( 0, 0, 0, 0 );
 
         public Union4b( byte b0, byte b1, byte b2, byte b3 )
         {
-            this.ui0 = 0;
-            this.i0 = 0;
-            this.f0 = 0;
-            this.s0 = 0;
-            this.s1 = 0;
-            this.us0 = 0;
-            this.us1 = 0;
+            ui0 = 0;
+            i0 = 0;
+            f0 = 0;
+            s0 = 0;
+            s1 = 0;
+            us0 = 0;
+            us1 = 0;
             this.b0 = b0;
             this.b1 = b1;
             this.b2 = b2;
@@ -174,7 +171,7 @@ namespace SharpQuake
             {
                 _Argv = new string[value.Length];
                 value.CopyTo( _Argv, 0 );
-                _Args = String.Join( " ", value );
+                _Args = string.Join( " ", value );
             }
         }
 
@@ -204,12 +201,12 @@ namespace SharpQuake
         public static Vector3 ZeroVector = Vector3.Zero;
 
         // for passing as reference
-        public static v3f ZeroVector3f = default(v3f);
+        public static v3f ZeroVector3f = default( v3f );
 
         private static readonly byte[] ZeroBytes = new byte[4096];
 
         // this graphic needs to be in the pak file to use registered features
-        private static ushort[] _Pop = new ushort[]
+        private static readonly ushort[] _Pop = new ushort[]
         {
             0x0000,0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
             0x0000, 0x0000, 0x6600, 0x0000, 0x0000, 0x0000, 0x6600, 0x0000,
@@ -246,7 +243,7 @@ namespace SharpQuake
         private static GameKind _GameKind;
         private static bool _IsModified;
         private static bool _StaticRegistered;
-        private static char[] _Slashes = new char[] { '/', '\\' };
+        private static readonly char[] _Slashes = new char[] { '/', '\\' };
         private static string _Token;
 
         public static string Argv( int index )
@@ -259,7 +256,9 @@ namespace SharpQuake
             for( int i = 1; i < _Argv.Length; i++ )
             {
                 if( _Argv[i].Equals( parm ) )
+                {
                     return i;
+                }
             }
             return 0;
         }
@@ -285,7 +284,7 @@ namespace SharpQuake
         public static void InitArgv( string[] argv )
         {
             // reconstitute the command line for the cmdline externally visible cvar
-            _Args = String.Join( " ", argv );
+            _Args = string.Join( " ", argv );
             _Argv = new string[argv.Length];
             argv.CopyTo( _Argv, 0 );
 
@@ -313,18 +312,24 @@ namespace SharpQuake
             _GameKind = GameKind.StandardQuake;
 
             if( HasParam( "-rogue" ) )
+            {
                 _GameKind = GameKind.Rogue;
+            }
 
             if( HasParam( "-hipnotic" ) )
+            {
                 _GameKind = GameKind.Hipnotic;
+            }
         }
 
         public static string Parse( string data )
         {
-            _Token = String.Empty;
+            _Token = string.Empty;
 
-            if( String.IsNullOrEmpty( data ) )
+            if( string.IsNullOrEmpty( data ) )
+            {
                 return null;
+            }
 
             // skip whitespace
             int i = 0;
@@ -333,26 +338,36 @@ namespace SharpQuake
                 while( i < data.Length )
                 {
                     if( data[i] > ' ' )
+                    {
                         break;
+                    }
 
                     i++;
                 }
 
                 if( i >= data.Length )
+                {
                     return null;
+                }
 
                 // skip // comments
                 if( ( data[i] == '/' ) && ( i + 1 < data.Length ) && ( data[i + 1] == '/' ) )
                 {
                     while( i < data.Length && data[i] != '\n' )
+                    {
                         i++;
+                    }
                 }
                 else
+                {
                     break;
+                }
             }
 
             if( i >= data.Length )
+            {
                 return null;
+            }
 
             int i0 = i;
 
@@ -362,7 +377,9 @@ namespace SharpQuake
                 i++;
                 i0 = i;
                 while( i < data.Length && data[i] != '\"' )
+                {
                     i++;
+                }
 
                 if( i == data.Length )
                 {
@@ -409,10 +426,11 @@ namespace SharpQuake
         public static byte[] LoadFile( string path )
         {
             // look for it in the filesystem or pack files
-            DisposableWrapper<BinaryReader> file;
-            int length = OpenFile( path, out file );
+            int length = OpenFile( path, out DisposableWrapper<BinaryReader> file );
             if( file == null )
+            {
                 return null;
+            }
 
             byte[] result = new byte[length];
             using( file )
@@ -423,7 +441,10 @@ namespace SharpQuake
                 {
                     int count = file.Object.Read( result, length - left, left );
                     if( count == 0 )
+                    {
                         Sys.Error( "COM_LoadFile: reading failed!" );
+                    }
+
                     left -= count;
                 }
                 Drawer.EndDisc();
@@ -435,13 +456,17 @@ namespace SharpQuake
         {
             FileStream file = Sys.FileOpenRead( packfile );
             if( file == null )
+            {
                 return null;
+            }
 
             dpackheader_t header = Sys.ReadStructure<dpackheader_t>( file );
 
             string id = Encoding.ASCII.GetString( header.id );
             if( id != "PACK" )
+            {
                 Sys.Error( "{0} is not a packfile", packfile );
+            }
 
             header.dirofs = LittleLong( header.dirofs );
             header.dirlen = LittleLong( header.dirlen );
@@ -449,7 +474,9 @@ namespace SharpQuake
             int numpackfiles = header.dirlen / Marshal.SizeOf( typeof( dpackfile_t ) );
 
             if( numpackfiles > MAX_FILES_IN_PACK )
+            {
                 Sys.Error( "{0} has {1} files", packfile, numpackfiles );
+            }
 
             file.Seek( header.dirofs, SeekOrigin.Begin );
             byte[] buf = new byte[header.dirlen];
@@ -481,12 +508,16 @@ namespace SharpQuake
             }
 
             // crc the directory to check for modifications
-            ushort crc;
-            CRC.Init( out crc );
+            CRC.Init( out ushort crc );
             for( int i = 0; i < buf.Length; i++ )
+            {
                 CRC.ProcessByte( ref crc, buf[i] );
+            }
+
             if( crc != PAK0_CRC )
+            {
                 _IsModified = true;
+            }
 
             buf = null;
 
@@ -494,10 +525,12 @@ namespace SharpQuake
             packfile_t[] newfiles = new packfile_t[numpackfiles];
             for( int i = 0; i < numpackfiles; i++ )
             {
-                packfile_t pf = new packfile_t();
-                pf.name = Common.GetString( info[i].name );
-                pf.filepos = LittleLong( info[i].filepos );
-                pf.filelen = LittleLong( info[i].filelen );
+                packfile_t pf = new packfile_t
+                {
+                    name = Common.GetString( info[i].name ),
+                    filepos = LittleLong( info[i].filepos ),
+                    filelen = LittleLong( info[i].filelen )
+                };
                 newfiles[i] = pf;
             }
 
@@ -513,8 +546,10 @@ namespace SharpQuake
 
         public static int atoi( string s )
         {
-            if( String.IsNullOrEmpty( s ) )
+            if( string.IsNullOrEmpty( s ) )
+            {
                 return 0;
+            }
 
             int sign = 1;
             int result = 0;
@@ -548,26 +583,27 @@ namespace SharpQuake
                     result = (byte)s[i + 1];
                 }
                 else
+                {
                     int.TryParse( s.Substring( offset ), out result );
+                }
             }
             return sign * result;
         }
 
         public static float atof( string s )
         {
-            float v;
-            float.TryParse( s, NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out v );
+            float.TryParse( s, NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out float v );
             return v;
         }
 
         public static bool SameText( string a, string b )
         {
-            return ( String.Compare( a, b, true ) == 0 );
+            return ( string.Compare( a, b, true ) == 0 );
         }
 
         public static bool SameText( string a, string b, int count )
         {
-            return ( String.Compare( a, 0, b, 0, count, true ) == 0 );
+            return ( string.Compare( a, 0, b, 0, count, true ) == 0 );
         }
 
         public static short BigShort( short l )
@@ -625,7 +661,9 @@ namespace SharpQuake
             int elementSizeInBytes = Marshal.SizeOf( typeof( T ) );
             int blockSize = Math.Min( dest.Length, 4096 / elementSizeInBytes );
             for( int i = 0; i < blockSize; i++ )
+            {
                 dest[i] = value;
+            }
 
             int blockSizeInBytes = blockSize * elementSizeInBytes;
             int offset = blockSizeInBytes;
@@ -634,10 +672,14 @@ namespace SharpQuake
             {
                 int left = lengthInBytes - offset;
                 if( left < blockSizeInBytes )
+                {
                     blockSizeInBytes = left;
+                }
 
                 if( blockSizeInBytes <= 0 )
+                {
                     break;
+                }
 
                 Buffer.BlockCopy( dest, 0, dest, offset, blockSizeInBytes );
                 offset += blockSizeInBytes;
@@ -653,10 +695,14 @@ namespace SharpQuake
             {
                 int blockSize = sizeInBytes - offset;
                 if( blockSize > ZeroBytes.Length )
+                {
                     blockSize = ZeroBytes.Length;
+                }
 
                 if( blockSize <= 0 )
+                {
                     break;
+                }
 
                 Buffer.BlockCopy( ZeroBytes, 0, dest, offset, blockSize );
                 offset += blockSize;
@@ -666,7 +712,9 @@ namespace SharpQuake
         public static string Copy( string src, int maxLength )
         {
             if( src == null )
+            {
                 return null;
+            }
 
             return ( src.Length > maxLength ? src.Substring( 1, maxLength ) : src );
         }
@@ -689,9 +737,11 @@ namespace SharpQuake
         {
             int count = 0;
             while( count < src.Length && src[count] != 0 )
+            {
                 count++;
+            }
 
-            return ( count > 0 ? Encoding.ASCII.GetString( src, 0, count ) : String.Empty );
+            return ( count > 0 ? Encoding.ASCII.GetString( src, 0, count ) : string.Empty );
         }
 
         public static Vector3 ToVector( ref v3f v )
@@ -720,14 +770,18 @@ namespace SharpQuake
                 long remaining = src.Length;
                 string dirName = Path.GetDirectoryName( cachepath );
                 if( !Directory.Exists( dirName ) )
+                {
                     Directory.CreateDirectory( dirName );
+                }
 
                 byte[] buf = new byte[4096];
                 while( remaining > 0 )
                 {
                     int count = buf.Length;
                     if( remaining < count )
+                    {
                         count = (int)remaining;
+                    }
 
                     src.Read( buf, 0, count );
                     dest.Write( buf, 0, count );
@@ -740,7 +794,7 @@ namespace SharpQuake
         {
             file = null;
 
-            string cachepath = String.Empty;
+            string cachepath = string.Empty;
 
             // search through the path, one element at a time
             foreach( searchpath_t sp in _SearchPaths )
@@ -779,16 +833,20 @@ namespace SharpQuake
                     {
                         // if not a registered version, don't ever go beyond base
                         if( filename.IndexOfAny( _Slashes ) != -1 )
+                        {
                             continue;
+                        }
                     }
 
                     string netpath = sp.filename + "/" + filename;
                     DateTime findtime = Sys.GetFileTime( netpath );
                     if( findtime == DateTime.MinValue )
+                    {
                         continue;
+                    }
 
                     // see if the file needs to be updated in the cache
-                    if( String.IsNullOrEmpty( _CacheDir ) )
+                    if( string.IsNullOrEmpty( _CacheDir ) )
                     {
                         cachepath = netpath;
                     }
@@ -797,9 +855,13 @@ namespace SharpQuake
                         if( Sys.IsWindows )
                         {
                             if( netpath.Length < 2 || netpath[1] != ':' )
+                            {
                                 cachepath = _CacheDir + netpath;
+                            }
                             else
+                            {
                                 cachepath = _CacheDir + netpath.Substring( 2 );
+                            }
                         }
                         else
                         {
@@ -808,7 +870,10 @@ namespace SharpQuake
 
                         DateTime cachetime = Sys.GetFileTime( cachepath );
                         if( cachetime < findtime )
+                        {
                             CopyFile( netpath, cachepath );
+                        }
+
                         netpath = cachepath;
                     }
 
@@ -858,7 +923,10 @@ namespace SharpQuake
             {
                 Con.Print( "Playing shareware version.\n" );
                 if( _IsModified )
+                {
                     Sys.Error( "You must have the registered version to use modified games" );
+                }
+
                 return;
             }
 
@@ -867,7 +935,9 @@ namespace SharpQuake
             for( int i = 0; i < 128; i++ )
             {
                 if( _Pop[i] != (ushort)_Converter.BigShort( (short)check[i] ) )
+                {
                     Sys.Error( "Corrupted data file." );
+                }
             }
 
             Cvar.Set( "cmdline", _Args );
@@ -878,9 +948,8 @@ namespace SharpQuake
 
         private static void InitFileSystem()
         {
-            // -basedir <path>
-            // Overrides the system supplied base directory (under GAMENAME)
-            string basedir = String.Empty;
+            // -basedir <path> Overrides the system supplied base directory (under GAMENAME)
+            string basedir = string.Empty;
             int i = CheckParm( "-basedir" );
             if( ( i > 0 ) && ( i < _Argv.Length - 1 ) )
             {
@@ -891,41 +960,48 @@ namespace SharpQuake
                 basedir = Host.Params.basedir;
             }
 
-            if( !String.IsNullOrEmpty( basedir ) )
+            if( !string.IsNullOrEmpty( basedir ) )
             {
                 basedir.TrimEnd( '\\', '/' );
             }
 
-            // -cachedir <path>
-            // Overrides the system supplied cache directory (NULL or /qcache)
+            // -cachedir <path> Overrides the system supplied cache directory (NULL or /qcache)
             // -cachedir - will disable caching.
             i = CheckParm( "-cachedir" );
             if( ( i > 0 ) && ( i < _Argv.Length - 1 ) )
             {
                 if( _Argv[i + 1][0] == '-' )
-                    _CacheDir = String.Empty;
+                {
+                    _CacheDir = string.Empty;
+                }
                 else
+                {
                     _CacheDir = _Argv[i + 1];
+                }
             }
-            else if( !String.IsNullOrEmpty( Host.Params.cachedir ) )
+            else if( !string.IsNullOrEmpty( Host.Params.cachedir ) )
             {
                 _CacheDir = Host.Params.cachedir;
             }
             else
             {
-                _CacheDir = String.Empty;
+                _CacheDir = string.Empty;
             }
 
             // start up with GAMENAME by default (id1)
             AddGameDirectory( basedir + "/" + QDef.GAMENAME );
 
             if( HasParam( "-rogue" ) )
+            {
                 AddGameDirectory( basedir + "/rogue" );
-            if( HasParam( "-hipnotic" ) )
-                AddGameDirectory( basedir + "/hipnotic" );
+            }
 
-            // -game <gamedir>
-            // Adds basedir/gamedir as an override game
+            if( HasParam( "-hipnotic" ) )
+            {
+                AddGameDirectory( basedir + "/hipnotic" );
+            }
+
+            // -game <gamedir> Adds basedir/gamedir as an override game
             i = CheckParm( "-game" );
             if( ( i > 0 ) && ( i < _Argv.Length - 1 ) )
             {
@@ -933,8 +1009,8 @@ namespace SharpQuake
                 AddGameDirectory( basedir + "/" + _Argv[i + 1] );
             }
 
-            // -path <dir or packfile> [<dir or packfile>] ...
-            // Fully specifies the exact serach path, overriding the generated one
+            // -path <dir or packfile> [<dir or packfile>] ... Fully specifies the exact serach path,
+            // overriding the generated one
             i = CheckParm( "-path" );
             if( i > 0 )
             {
@@ -942,8 +1018,10 @@ namespace SharpQuake
                 _SearchPaths.Clear();
                 while( ++i < _Argv.Length )
                 {
-                    if( String.IsNullOrEmpty( _Argv[i] ) || _Argv[i][0] == '+' || _Argv[i][0] == '-' )
+                    if( string.IsNullOrEmpty( _Argv[i] ) || _Argv[i][0] == '+' || _Argv[i][0] == '-' )
+                    {
                         break;
+                    }
 
                     _SearchPaths.Insert( 0, new searchpath_t( _Argv[i] ) );
                 }
@@ -960,10 +1038,12 @@ namespace SharpQuake
             // add any pak files in the format pak0.pak pak1.pak, ...
             for( int i = 0; ; i++ )
             {
-                string pakfile = String.Format( "{0}/pak{1}.pak", dir, i );
+                string pakfile = string.Format( "{0}/pak{1}.pak", dir, i );
                 pack_t pak = LoadPackFile( pakfile );
                 if( pak == null )
+                {
                     break;
+                }
 
                 _SearchPaths.Insert( 0, new searchpath_t( pak ) );
             }
@@ -989,7 +1069,7 @@ namespace SharpQuake
     internal class link_t
     {
         private link_t _Prev, _Next;
-        private object _Owner;
+        private readonly object _Owner;
 
         public link_t Prev
         {
@@ -1194,19 +1274,27 @@ namespace SharpQuake
         public void WriteString( string s )
         {
             int count = 1;
-            if( !String.IsNullOrEmpty( s ) )
+            if( !string.IsNullOrEmpty( s ) )
+            {
                 count += s.Length;
+            }
 
             NeedRoom( count );
             for( int i = 0; i < count - 1; i++ )
+            {
                 _Buffer[_Count++] = (byte)s[i];
+            }
+
             _Buffer[_Count++] = 0;
         }
 
         public void Print( string s )
         {
             if( _Count > 0 && _Buffer[_Count - 1] == 0 )
+            {
                 _Count--; // remove previous trailing 0
+            }
+
             WriteString( s );
         }
 
@@ -1243,7 +1331,10 @@ namespace SharpQuake
             {
                 int r = src.Read( _Buffer, _Count, count - _Count );
                 if( r == 0 )
+                {
                     break;
+                }
+
                 _Count += r;
             }
         }
@@ -1261,7 +1352,10 @@ namespace SharpQuake
             Clear();
             int result = Net.LanDriver.Read( socket, _Buffer, _Buffer.Length, ref ep );
             if( result >= 0 )
+            {
                 _Count = result;
+            }
+
             return result;
         }
 
@@ -1276,13 +1370,17 @@ namespace SharpQuake
         {
             if( _Count + bytes > _Buffer.Length )
             {
-                if( !this.AllowOverflow )
+                if( !AllowOverflow )
+                {
                     Sys.Error( "MsgWriter: overflow without allowoverflow set!" );
+                }
 
-                this.IsOveflowed = true;
+                IsOveflowed = true;
                 _Count = 0;
                 if( bytes > _Buffer.Length )
+                {
                     Sys.Error( "MsgWriter: Requested more than whole buffer has!" );
+                }
             }
         }
 
@@ -1297,15 +1395,21 @@ namespace SharpQuake
             if( _Buffer != null )
             {
                 if( _Buffer.Length == value )
+                {
                     return;
+                }
 
                 Array.Resize( ref _Buffer, value );
 
                 if( _Count > _Buffer.Length )
+                {
                     _Count = _Buffer.Length;
+                }
             }
             else
+            {
                 _Buffer = new byte[value];
+            }
         }
 
         private State GetState( object state )
@@ -1330,7 +1434,7 @@ namespace SharpQuake
         public MsgWriter( int capacity )
         {
             SetBufferSize( capacity );
-            this.AllowOverflow = false;
+            AllowOverflow = false;
         }
     }
 
@@ -1367,7 +1471,9 @@ namespace SharpQuake
         public int ReadChar()
         {
             if( !HasRoom( 1 ) )
+            {
                 return -1;
+            }
 
             return (sbyte)_Source.Data[_Count++];
         }
@@ -1375,7 +1481,9 @@ namespace SharpQuake
         public int ReadByte()
         {
             if( !HasRoom( 1 ) )
+            {
                 return -1;
+            }
 
             return (byte)_Source.Data[_Count++];
         }
@@ -1383,7 +1491,9 @@ namespace SharpQuake
         public int ReadShort()
         {
             if( !HasRoom( 2 ) )
+            {
                 return -1;
+            }
 
             int c = (short)( _Source.Data[_Count + 0] + ( _Source.Data[_Count + 1] << 8 ) );
             _Count += 2;
@@ -1393,7 +1503,9 @@ namespace SharpQuake
         public int ReadLong()
         {
             if( !HasRoom( 4 ) )
+            {
                 return -1;
+            }
 
             int c = _Source.Data[_Count + 0] +
                 ( _Source.Data[_Count + 1] << 8 ) +
@@ -1407,7 +1519,9 @@ namespace SharpQuake
         public float ReadFloat()
         {
             if( !HasRoom( 4 ) )
+            {
                 return 0;
+            }
 
             _Val.b0 = _Source.Data[_Count + 0];
             _Val.b1 = _Source.Data[_Count + 1];
@@ -1427,12 +1541,15 @@ namespace SharpQuake
             {
                 int c = ReadChar();
                 if( c == -1 || c == 0 )
+                {
                     break;
+                }
+
                 _Tmp[l] = (char)c;
                 l++;
             } while( l < _Tmp.Length - 1 );
 
-            return new String( _Tmp, 0, l );
+            return new string( _Tmp, 0, l );
         }
 
         public float ReadCoord()
@@ -1634,7 +1751,7 @@ namespace SharpQuake
 
         public override string ToString()
         {
-            return String.Format( "{0}, at {1}, {2} bytes}", this.name, this.filepos, this.filelen );
+            return string.Format( "{0}, at {1}, {2} bytes}", name, filepos, filelen );
         }
     }
 
@@ -1647,7 +1764,7 @@ namespace SharpQuake
         public pack_t( string filename, BinaryReader reader, packfile_t[] files )
         {
             this.filename = filename;
-            this.stream = reader;
+            stream = reader;
             this.files = files;
         }
     }
@@ -1661,17 +1778,21 @@ namespace SharpQuake
         {
             if( path.EndsWith( ".pak" ) )
             {
-                this.pack = Common.LoadPackFile( path );
-                if( this.pack == null )
+                pack = Common.LoadPackFile( path );
+                if( pack == null )
+                {
                     Sys.Error( "Couldn't load packfile: {0}", path );
+                }
             }
             else
-                this.filename = path;
+            {
+                filename = path;
+            }
         }
 
         public searchpath_t( pack_t pak )
         {
-            this.pack = pak;
+            pack = pak;
         }
     }
 
@@ -1686,7 +1807,7 @@ namespace SharpQuake
         }
 
         private T _Object;
-        private bool _Owned;
+        private readonly bool _Owned;
 
         private void Dispose( bool disposing )
         {

@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -39,7 +36,7 @@ namespace SharpQuake
         private const int WSAEWOULDBLOCK = 10035;
         private const int WSAECONNREFUSED = 10061;
 
-        private static NetTcpIp _Singletone = new NetTcpIp();
+        private static readonly NetTcpIp _Singletone = new NetTcpIp();
 
         private bool _IsInitialized;
         private IPAddress _MyAddress;
@@ -83,7 +80,9 @@ namespace SharpQuake
             _IsInitialized = false;
 
             if( Common.HasParam( "-noudp" ) )
+            {
                 return false;
+            }
 
             // determine my name
             string hostName;
@@ -100,8 +99,7 @@ namespace SharpQuake
             // if the quake hostname isn't set, set it to the machine name
             if( Net.HostName == "UNNAMED" )
             {
-                IPAddress addr;
-                if( !IPAddress.TryParse( hostName, out addr ) )
+                if( !IPAddress.TryParse( hostName, out IPAddress addr ) )
                 {
                     int i = hostName.IndexOf( '.' );
                     if( i != -1 )
@@ -119,7 +117,10 @@ namespace SharpQuake
                 {
                     string ipaddr = Common.Argv( i2 + 1 );
                     if( !IPAddress.TryParse( ipaddr, out _MyAddress ) )
+                    {
                         Sys.Error( "{0} is not a valid IP address!", ipaddr );
+                    }
+
                     Net.MyTcpIpAddress = ipaddr;
                 }
                 else
@@ -162,7 +163,9 @@ namespace SharpQuake
                 {
                     _AcceptSocket = OpenSocket( Net.HostPort );
                     if( _AcceptSocket == null )
+                    {
                         Sys.Error( "UDP_Listen: Unable to open accept socket\n" );
+                    }
                 }
             }
             else
@@ -181,8 +184,10 @@ namespace SharpQuake
             Socket result = null;
             try
             {
-                result = new Socket( AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp );
-                result.Blocking = false;
+                result = new Socket( AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp )
+                {
+                    Blocking = false
+                };
                 EndPoint ep = new IPEndPoint( _MyAddress, port );
                 result.Bind( ep );
             }
@@ -202,7 +207,9 @@ namespace SharpQuake
         public int CloseSocket( Socket socket )
         {
             if( socket == _BroadcastSocket )
+            {
                 _BroadcastSocket = null;
+            }
 
             socket.Close();
             return 0;
@@ -223,28 +230,30 @@ namespace SharpQuake
             catch( SocketException )
             {
             }
-            return String.Empty;
+            return string.Empty;
         }
 
         public EndPoint GetAddrFromName( string name )
         {
             try
             {
-                IPAddress addr;
                 int i = name.IndexOf( ':' );
                 string saddr;
                 int port = Net.HostPort;
                 if( i != -1 )
                 {
                     saddr = name.Substring( 0, i );
-                    int p;
-                    if( int.TryParse( name.Substring( i + 1 ), out p ) )
+                    if( int.TryParse( name.Substring( i + 1 ), out int p ) )
+                    {
                         port = p;
+                    }
                 }
                 else
+                {
                     saddr = name;
+                }
 
-                if( IPAddress.TryParse( saddr, out addr ) )
+                if( IPAddress.TryParse( saddr, out IPAddress addr ) )
                 {
                     return new IPEndPoint( addr, port );
                 }
@@ -263,19 +272,27 @@ namespace SharpQuake
         public int AddrCompare( EndPoint addr1, EndPoint addr2 )
         {
             if( addr1.AddressFamily != addr2.AddressFamily )
+            {
                 return -1;
+            }
 
             IPEndPoint ep1 = addr1 as IPEndPoint;
             IPEndPoint ep2 = addr2 as IPEndPoint;
 
             if( ep1 == null || ep2 == null )
+            {
                 return -1;
+            }
 
             if( !ep1.Address.Equals( ep2.Address ) )
+            {
                 return -1;
+            }
 
             if( ep1.Port != ep2.Port )
+            {
                 return 1;
+            }
 
             return 0;
         }
@@ -294,10 +311,14 @@ namespace SharpQuake
         public Socket CheckNewConnections()
         {
             if( _AcceptSocket == null )
+            {
                 return null;
+            }
 
             if( _AcceptSocket.Available > 0 )
+            {
                 return _AcceptSocket;
+            }
 
             return null;
         }
@@ -312,9 +333,13 @@ namespace SharpQuake
             catch( SocketException se )
             {
                 if( se.ErrorCode == WSAEWOULDBLOCK || se.ErrorCode == WSAECONNREFUSED )
+                {
                     ret = 0;
+                }
                 else
+                {
                     ret = -1;
+                }
             }
             return ret;
         }
@@ -329,9 +354,13 @@ namespace SharpQuake
             catch( SocketException se )
             {
                 if( se.ErrorCode == WSAEWOULDBLOCK )
+                {
                     ret = 0;
+                }
                 else
+                {
                     ret = -1;
+                }
             }
             return ret;
         }
@@ -341,7 +370,10 @@ namespace SharpQuake
             if( socket != _BroadcastSocket )
             {
                 if( _BroadcastSocket != null )
+                {
                     Sys.Error( "Attempted to use multiple broadcasts sockets\n" );
+                }
+
                 try
                 {
                     socket.EnableBroadcast = true;

@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -143,7 +140,9 @@ namespace SharpQuake
             _Turtle = Drawer.PicFromWad( "turtle" );
 
             if( Common.HasParam( "-fullsbar" ) )
+            {
                 FullSbarDraw = true;
+            }
 
             _IsInitialized = true;
         }
@@ -158,7 +157,9 @@ namespace SharpQuake
         public static void UpdateScreen()
         {
             if( BlockDrawing || !_IsInitialized || _InUpdate )
+            {
                 return;
+            }
 
             _InUpdate = true;
             try
@@ -166,7 +167,9 @@ namespace SharpQuake
                 if( MainForm.Instance != null )
                 {
                     if( ( MainForm.Instance.VSync == VSyncMode.On ) != Vid.Wait )
+                    {
                         MainForm.Instance.VSync = ( Vid.Wait ? VSyncMode.On : VSyncMode.Off );
+                    }
                 }
 
                 _VidDef.numpages = 2 + (int)_glTripleBuffer.Value;
@@ -182,11 +185,15 @@ namespace SharpQuake
                         Con.Print( "Load failed.\n" );
                     }
                     else
+                    {
                         return;
+                    }
                 }
 
                 if( !Con.IsInitialized )
+                {
                     return; // not initialized yet
+                }
 
                 BeginRendering();
 
@@ -204,7 +211,9 @@ namespace SharpQuake
                 }
 
                 if( _VidDef.recalc_refdef )
+                {
                     CalcRefdef();
+                }
 
                 // do 3D refresh drawing, and then update the screen
                 SetUpToDrawConsole();
@@ -240,7 +249,9 @@ namespace SharpQuake
                 else
                 {
                     if( View.Crosshair > 0 )
+                    {
                         Drawer.DrawCharacter( _VRect.x + _VRect.width / 2, _VRect.y + _VRect.height / 2, '+' );
+                    }
 
                     DrawRam();
                     DrawNet();
@@ -265,10 +276,14 @@ namespace SharpQuake
         {
             MainForm form = MainForm.Instance;
             if( form == null )
+            {
                 return;
+            }
 
             if( !SkipUpdate || BlockDrawing )
+            {
                 form.SwapBuffers();
+            }
 
             // handle the mouse state
             if( !Vid.WindowedMouse )
@@ -297,7 +312,9 @@ namespace SharpQuake
             }
 
             if( FullSbarDraw )
+            {
                 Sbar.Changed();
+            }
         }
 
         // Called for important messages that should stay in the center of the screen for a few moments
@@ -312,7 +329,9 @@ namespace SharpQuake
             foreach( char c in _CenterString )
             {
                 if( c == '\n' )
+                {
                     _CenterLines++;
+                }
             }
         }
 
@@ -328,9 +347,14 @@ namespace SharpQuake
             Sound.StopAllSounds( true );
 
             if( Client.cls.state != cactive_t.ca_connected )
+            {
                 return;
+            }
+
             if( Client.cls.signon != Client.SIGNONS )
+            {
                 return;
+            }
 
             // redraw with no console and the loading plaque
             Con.ClearNotify();
@@ -352,7 +376,9 @@ namespace SharpQuake
         public static bool ModalMessage( string text )
         {
             if( Client.cls.state == cactive_t.ca_dedicated )
+            {
                 return true;
+            }
 
             _NotifyString = text;
 
@@ -395,9 +421,11 @@ namespace SharpQuake
             int i;
             for( i = 0; i <= 999; i++ )
             {
-                path = Path.Combine( Common.GameDir, String.Format( "quake{0:D3}.tga", i ) );
+                path = Path.Combine( Common.GameDir, string.Format( "quake{0:D3}.tga", i ) );
                 if( Sys.GetFileTime( path ) == DateTime.MinValue )
+                {
                     break; // file doesn't exist
+                }
             }
             if( i == 100 )
             {
@@ -468,29 +496,49 @@ namespace SharpQuake
 
             // bound viewsize
             if( _ViewSize.Value < 30 )
+            {
                 Cvar.Set( "viewsize", "30" );
+            }
+
             if( _ViewSize.Value > 120 )
+            {
                 Cvar.Set( "viewsize", "120" );
+            }
 
             // bound field of view
             if( _Fov.Value < 10 )
+            {
                 Cvar.Set( "fov", "10" );
+            }
+
             if( _Fov.Value > 170 )
+            {
                 Cvar.Set( "fov", "170" );
+            }
 
             // intermission is always full screen
             float size;
             if( Client.cl.intermission > 0 )
+            {
                 size = 120;
+            }
             else
+            {
                 size = _ViewSize.Value;
+            }
 
             if( size >= 120 )
+            {
                 Sbar.Lines = 0; // no status bar at all
+            }
             else if( size >= 110 )
+            {
                 Sbar.Lines = 24; // no inventory
+            }
             else
+            {
                 Sbar.Lines = 24 + 16 + 8;
+            }
 
             bool full = false;
             if( _ViewSize.Value >= 100.0 )
@@ -499,7 +547,9 @@ namespace SharpQuake
                 size = 100.0f;
             }
             else
+            {
                 size = _ViewSize.Value;
+            }
 
             if( Client.cl.intermission > 0 )
             {
@@ -521,14 +571,24 @@ namespace SharpQuake
 
             rdef.vrect.height = (int)( _VidDef.height * size );
             if( rdef.vrect.height > _VidDef.height - Sbar.Lines )
+            {
                 rdef.vrect.height = _VidDef.height - Sbar.Lines;
+            }
+
             if( rdef.vrect.height > _VidDef.height )
+            {
                 rdef.vrect.height = _VidDef.height;
+            }
+
             rdef.vrect.x = ( _VidDef.width - rdef.vrect.width ) / 2;
             if( full )
+            {
                 rdef.vrect.y = 0;
+            }
             else
+            {
                 rdef.vrect.y = ( h - rdef.vrect.height ) / 2;
+            }
 
             rdef.fov_x = _Fov.Value;
             rdef.fov_y = CalcFov( rdef.fov_x, rdef.vrect.width, rdef.vrect.height );
@@ -539,7 +599,9 @@ namespace SharpQuake
         private static float CalcFov( float fov_x, float width, float height )
         {
             if( fov_x < 1 || fov_x > 179 )
+            {
                 Sys.Error( "Bad fov: {0}", fov_x );
+            }
 
             double x = width / Math.Tan( fov_x / 360.0 * Math.PI );
             double a = Math.Atan( height / x );
@@ -552,7 +614,9 @@ namespace SharpQuake
             Con.CheckResize();
 
             if( _DrawLoading )
+            {
                 return; // never a console with loading plaque
+            }
 
             // decide on the height of the console
             Con.ForcedUp = ( Client.cl.worldmodel == null ) || ( Client.cls.signon != Client.SIGNONS );
@@ -563,21 +627,29 @@ namespace SharpQuake
                 _ConCurrent = _ConLines;
             }
             else if( Key.Destination == keydest_t.key_console )
+            {
                 _ConLines = _VidDef.height / 2; // half screen
+            }
             else
+            {
                 _ConLines = 0; // none visible
+            }
 
             if( _ConLines < _ConCurrent )
             {
                 _ConCurrent -= (int)( _ConSpeed.Value * Host.FrameTime );
                 if( _ConLines > _ConCurrent )
+                {
                     _ConCurrent = _ConLines;
+                }
             }
             else if( _ConLines > _ConCurrent )
             {
                 _ConCurrent += (int)( _ConSpeed.Value * Host.FrameTime );
                 if( _ConLines < _ConCurrent )
+                {
                     _ConCurrent = _ConLines;
+                }
             }
 
             if( _ClearConsole++ < _VidDef.numpages )
@@ -588,7 +660,9 @@ namespace SharpQuake
             {
             }
             else
+            {
                 Con.NotifyLines = 0;
+            }
         }
 
         private static void TileClear()
@@ -622,16 +696,23 @@ namespace SharpQuake
             {
                 int end = _NotifyString.IndexOf( '\n', offset );
                 if( end == -1 )
+                {
                     end = _NotifyString.Length;
+                }
+
                 if( end - offset > 40 )
+                {
                     end = offset + 40;
+                }
 
                 int length = end - offset;
                 if( length > 0 )
                 {
                     int x = ( vid.width - length * 8 ) / 2;
                     for( int j = 0; j < length; j++, x += 8 )
+                    {
                         Drawer.DrawCharacter( x, y, _NotifyString[offset + j] );
+                    }
 
                     y += 8;
                 }
@@ -642,7 +723,9 @@ namespace SharpQuake
         private static void DrawLoading()
         {
             if( !_DrawLoading )
+            {
                 return;
+            }
 
             glpic_t pic = Drawer.CachePic( "gfx/loading.lmp" );
             Drawer.DrawPic( ( vid.width - pic.width ) / 2, ( vid.height - 48 - pic.height ) / 2, pic );
@@ -652,14 +735,21 @@ namespace SharpQuake
         {
             CopyTop = true;
             if( _CenterLines > _EraseLines )
+            {
                 _EraseLines = _CenterLines;
+            }
 
             CenterTimeOff -= (float)Host.FrameTime;
 
             if( CenterTimeOff <= 0 && Client.cl.intermission == 0 )
+            {
                 return;
+            }
+
             if( Key.Destination != keydest_t.key_game )
+            {
                 return;
+            }
 
             DrawCenterString();
         }
@@ -667,10 +757,14 @@ namespace SharpQuake
         private static void DrawRam()
         {
             if( _ShowRam.Value == 0 )
+            {
                 return;
+            }
 
             if( !Render.CacheTrash )
+            {
                 return;
+            }
 
             Drawer.DrawPic( _VRect.x + 32, _VRect.y, _Ram );
         }
@@ -678,7 +772,9 @@ namespace SharpQuake
         private static void DrawTurtle()
         {
             if( _ShowTurtle.Value == 0 )
+            {
                 return;
+            }
 
             if( Host.FrameTime < 0.1 )
             {
@@ -688,7 +784,9 @@ namespace SharpQuake
 
             _TurtleCount++;
             if( _TurtleCount < 3 )
+            {
                 return;
+            }
 
             Drawer.DrawPic( _VRect.x, _VRect.y, _Turtle );
         }
@@ -696,9 +794,14 @@ namespace SharpQuake
         private static void DrawNet()
         {
             if( Host.RealTime - Client.cl.last_received_message < 0.3 )
+            {
                 return;
+            }
+
             if( Client.cls.demoplayback )
+            {
                 return;
+            }
 
             Drawer.DrawPic( _VRect.x + 64, _VRect.y, _Net );
         }
@@ -706,10 +809,14 @@ namespace SharpQuake
         private static void DrawPause()
         {
             if( _ShowPause.Value == 0 ) // turn off for screenshots
+            {
                 return;
+            }
 
             if( !Client.cl.paused )
+            {
                 return;
+            }
 
             glpic_t pic = Drawer.CachePic( "gfx/pause.lmp" );
             Drawer.DrawPic( ( vid.width - pic.width ) / 2, ( vid.height - 48 - pic.height ) / 2, pic );
@@ -736,13 +843,19 @@ namespace SharpQuake
 
             // the finale prints the characters one at a time
             if( Client.cl.intermission > 0 )
+            {
                 remaining = (int)( _PrintSpeed.Value * ( Client.cl.time - _CenterTimeStart ) );
+            }
             else
+            {
                 remaining = 9999;
+            }
 
             int y = 48;
             if( _CenterLines <= 4 )
+            {
                 y = (int)( _VidDef.height * 0.35 );
+            }
 
             string[] lines = _CenterString.Split( '\n' );
             for( int i = 0; i < lines.Length; i++ )
@@ -754,7 +867,9 @@ namespace SharpQuake
                 {
                     Drawer.DrawCharacter( x, y, line[j] );
                     if( remaining-- <= 0 )
+                    {
                         return;
+                    }
                 }
                 y += 8;
             }

@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -134,7 +131,9 @@ namespace SharpQuake
 
             // flush the non-C variable lookup cache
             for( int i = 0; i < GEFV_CACHESIZE; i++ )
+            {
                 _gefvCache[i].field = null;
+            }
 
             CRC.Init( out _Crc );
 
@@ -142,19 +141,29 @@ namespace SharpQuake
 
             _Progs = Sys.BytesToStructure<dprograms_t>( buf, 0 );
             if( _Progs == null )
+            {
                 Sys.Error( "PR_LoadProgs: couldn't load progs.dat" );
+            }
+
             Con.DPrint( "Programs occupy {0}K.\n", buf.Length / 1024 );
 
             for( int i = 0; i < buf.Length; i++ )
+            {
                 CRC.ProcessByte( ref _Crc, buf[i] );
+            }
 
             // byte swap the header
             _Progs.SwapBytes();
 
             if( _Progs.version != PROG_VERSION )
+            {
                 Sys.Error( "progs.dat has wrong version number ({0} should be {1})", _Progs.version, PROG_VERSION );
+            }
+
             if( _Progs.crc != PROGHEADER_CRC )
+            {
                 Sys.Error( "progs.dat system vars have been modified, progdefs.h is out of date" );
+            }
 
             // Functions
             _Functions = new dfunction_t[_Progs.numfunctions];
@@ -172,7 +181,9 @@ namespace SharpQuake
             {
                 // count string length
                 while( buf[offset] != 0 )
+                {
                     offset++;
+                }
             }
             int length = offset - str0;
             _Strings = Encoding.ASCII.GetString( buf, str0, length );
@@ -194,7 +205,9 @@ namespace SharpQuake
                 _FieldDefs[i] = Sys.BytesToStructure<ddef_t>( buf, offset );
                 _FieldDefs[i].SwapBytes();
                 if( ( _FieldDefs[i].type & DEF_SAVEGLOBAL ) != 0 )
+                {
                     Sys.Error( "PR_LoadProgs: pr_fielddefs[i].type & DEF_SAVEGLOBAL" );
+                }
             }
 
             // Statements
@@ -233,7 +246,9 @@ namespace SharpQuake
         {
             Con.Print( "{0} entities\n", Server.sv.num_edicts );
             for( int i = 0; i < Server.sv.num_edicts; i++ )
+            {
                 PrintNum( i );
+            }
         }
 
         public static int StringOffset( string value )
@@ -281,15 +296,24 @@ namespace SharpQuake
                 // parse the opening brace
                 data = Common.Parse( data );
                 if( data == null )
+                {
                     break;
+                }
 
                 if( Common.Token != "{" )
+                {
                     Sys.Error( "ED_LoadFromFile: found {0} when expecting {", Common.Token );
+                }
 
                 if( ent == null )
+                {
                     ent = Server.EdictNum( 0 );
+                }
                 else
+                {
                     ent = Server.AllocEdict();
+                }
+
                 data = ParseEdict( data, ent );
 
                 // remove things from different skill levels or deathmatch
@@ -343,7 +367,9 @@ namespace SharpQuake
 
             // clear it
             if( ent != Server.sv.edicts[0] ) // hack
+            {
                 ent.Clear();
+            }
 
             // go through all the dictionary pairs
             bool anglehack;
@@ -352,10 +378,14 @@ namespace SharpQuake
                 // parse key
                 data = Common.Parse( data );
                 if( Common.Token.StartsWith( "}" ) )
+                {
                     break;
+                }
 
                 if( data == null )
+                {
                     Sys.Error( "ED_ParseEntity: EOF without closing brace" );
+                }
 
                 string token = Common.Token;
 
@@ -368,21 +398,29 @@ namespace SharpQuake
                     anglehack = true;
                 }
                 else
+                {
                     anglehack = false;
+                }
 
                 // FIXME: change light to _light to get rid of this hack
                 if( token == "light" )
+                {
                     token = "light_lev"; // hack for single light def
+                }
 
                 string keyname = token.TrimEnd();
 
                 // parse value
                 data = Common.Parse( data );
                 if( data == null )
+                {
                     Sys.Error( "ED_ParseEntity: EOF without closing brace" );
+                }
 
                 if( Common.Token.StartsWith( "}" ) )
+                {
                     Sys.Error( "ED_ParseEntity: closing brace without data" );
+                }
 
                 init = true;
 
@@ -390,7 +428,9 @@ namespace SharpQuake
                  * and are immediately discarded by quake
                  */
                 if( keyname[0] == '_' )
+                {
                     continue;
+                }
 
                 ddef_t key = FindField( keyname );
                 if( key == null )
@@ -406,11 +446,15 @@ namespace SharpQuake
                 }
 
                 if( !ParsePair( ent, key, token ) )
+                {
                     Host.Error( "ED_ParseEdict: parse error" );
+                }
             }
 
             if( !init )
+            {
                 ent.free = true;
+            }
 
             return data;
         }
@@ -430,17 +474,20 @@ namespace SharpQuake
                 string name = GetString( d.s_name );
 
                 if( name.Length > 2 && name[name.Length - 2] == '_' )
+                {
                     continue;
+                }
 
                 int type = d.type & ~DEF_SAVEGLOBAL;
-                int offset;
-                if( ed.IsV( d.ofs, out offset ) )
+                if( ed.IsV( d.ofs, out int offset ) )
                 {
                     fixed ( void* ptr = &ed.v )
                     {
                         int* v = (int*)ptr + offset;
                         if( IsEmptyField( type, v ) )
+                        {
                             continue;
+                        }
 
                         Con.Print( "{0,15} ", name );
                         Con.Print( "{0}\n", ValueString( (etype_t)d.type, (void*)v ) );
@@ -452,7 +499,9 @@ namespace SharpQuake
                     {
                         int* v = (int*)ptr + offset;
                         if( IsEmptyField( type, v ) )
+                        {
                             continue;
+                        }
 
                         Con.Print( "{0,15} ", name );
                         Con.Print( "{0}\n", ValueString( (etype_t)d.type, (void*)v ) );
@@ -463,16 +512,19 @@ namespace SharpQuake
 
         public static string GetString( int strId )
         {
-            int offset;
-            if( IsStaticString( strId, out offset ) )
+            if( IsStaticString( strId, out int offset ) )
             {
                 int i0 = offset;
                 while( offset < _Strings.Length && _Strings[offset] != 0 )
+                {
                     offset++;
+                }
 
                 int length = offset - i0;
                 if( length > 0 )
+                {
                     return _Strings.Substring( i0, length );
+                }
             }
             else
             {
@@ -483,21 +535,29 @@ namespace SharpQuake
                 return _DynamicStrings[offset];
             }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         public static bool SameName( int name1, string name2 )
         {
             int offset = name1;
             if( offset + name2.Length > _Strings.Length )
+            {
                 return false;
+            }
 
             for( int i = 0; i < name2.Length; i++, offset++ )
+            {
                 if( _Strings[offset] != name2[i] )
+                {
                     return false;
+                }
+            }
 
             if( offset < _Strings.Length && _Strings[offset] != 0 )
+            {
                 return false;
+            }
 
             return true;
         }
@@ -513,12 +573,18 @@ namespace SharpQuake
                 {
                     i++;
                     if( s[i] == 'n' )
+                    {
                         sb.Append( '\n' );
+                    }
                     else
+                    {
                         sb.Append( '\\' );
+                    }
                 }
                 else
+                {
                     sb.Append( s[i] );
+                }
             }
             SetString( id, sb.ToString() );
             return id;
@@ -528,7 +594,9 @@ namespace SharpQuake
         {
             ddef_t def = CachedSearch( ed, field );
             if( def == null )
+            {
                 return defValue;
+            }
 
             return ed.GetFloat( def.ofs );
         }
@@ -547,14 +615,13 @@ namespace SharpQuake
         public static int AllocString()
         {
             int id = _DynamicStrings.Count;
-            _DynamicStrings.Add( String.Empty );
+            _DynamicStrings.Add( string.Empty );
             return MakeStingId( id, false );
         }
 
         public static void SetString( int id, string value )
         {
-            int offset;
-            if( IsStaticString( id, out offset ) )
+            if( IsStaticString( id, out int offset ) )
             {
                 throw new ArgumentException( "Static strings are read-only!" );
             }
@@ -573,12 +640,16 @@ namespace SharpQuake
                 ddef_t def = _GlobalDefs[i];
                 etype_t type = (etype_t)def.type;
                 if( ( def.type & DEF_SAVEGLOBAL ) == 0 )
+                {
                     continue;
+                }
 
                 type &= (etype_t)~DEF_SAVEGLOBAL;
 
                 if( type != etype_t.ev_string && type != etype_t.ev_float && type != etype_t.ev_entity )
+                {
                     continue;
+                }
 
                 writer.Write( "\"" );
                 writer.Write( GetString( def.s_name ) );
@@ -604,17 +675,20 @@ namespace SharpQuake
                 ddef_t d = _FieldDefs[i];
                 string name = GetString( d.s_name );
                 if( name != null && name.Length > 2 && name[name.Length - 2] == '_' )
+                {
                     continue;
+                }
 
                 int type = d.type & ~DEF_SAVEGLOBAL;
-                int offset1;
-                if( ed.IsV( d.ofs, out offset1 ) )
+                if( ed.IsV( d.ofs, out int offset1 ) )
                 {
                     fixed ( void* ptr = &ed.v )
                     {
                         int* v = (int*)ptr + offset1;
                         if( IsEmptyField( type, v ) )
+                        {
                             continue;
+                        }
 
                         writer.WriteLine( "\"{0}\" \"{1}\"", name, UglyValueString( (etype_t)d.type, (eval_t*)v ) );
                     }
@@ -625,7 +699,9 @@ namespace SharpQuake
                     {
                         int* v = (int*)ptr + offset1;
                         if( IsEmptyField( type, v ) )
+                        {
                             continue;
+                        }
 
                         writer.WriteLine( "\"{0}\" \"{1}\"", name, UglyValueString( (etype_t)d.type, (eval_t*)v ) );
                     }
@@ -642,20 +718,28 @@ namespace SharpQuake
                 // parse key
                 data = Common.Parse( data );
                 if( Common.Token.StartsWith( "}" ) )
+                {
                     break;
+                }
 
-                if( String.IsNullOrEmpty( data ) )
+                if( string.IsNullOrEmpty( data ) )
+                {
                     Sys.Error( "ED_ParseEntity: EOF without closing brace" );
+                }
 
                 string keyname = Common.Token;
 
                 // parse value
                 data = Common.Parse( data );
-                if( String.IsNullOrEmpty( data ) )
+                if( string.IsNullOrEmpty( data ) )
+                {
                     Sys.Error( "ED_ParseEntity: EOF without closing brace" );
+                }
 
                 if( Common.Token.StartsWith( "}" ) )
+                {
                     Sys.Error( "ED_ParseEntity: closing brace without data" );
+                }
 
                 ddef_t key = FindGlobal( keyname );
                 if( key == null )
@@ -665,7 +749,9 @@ namespace SharpQuake
                 }
 
                 if( !ParseGlobalPair( key, Common.Token ) )
+                {
                     Host.Error( "ED_ParseGlobals: parse error" );
+                }
             }
         }
 
@@ -678,7 +764,9 @@ namespace SharpQuake
         {
             entity_t p = Client.ViewEntity;
             if( p == null )
+            {
                 return;
+            }
 
             OpenTK.Vector3 org = p.origin;
 
@@ -687,11 +775,12 @@ namespace SharpQuake
                 edict_t ed = Server.sv.edicts[i];
 
                 if( ed.free )
+                {
                     continue;
+                }
 
-                OpenTK.Vector3 vmin, vmax;
-                Mathlib.Copy( ref ed.v.absmax, out vmax );
-                Mathlib.Copy( ref ed.v.absmin, out vmin );
+                Mathlib.Copy( ref ed.v.absmax, out OpenTK.Vector3 vmax );
+                Mathlib.Copy( ref ed.v.absmin, out OpenTK.Vector3 vmin );
 
                 if( org.X >= vmin.X && org.Y >= vmin.Y && org.Z >= vmin.Z &&
                     org.X <= vmax.X && org.Y <= vmax.Y && org.Z <= vmax.Z )
@@ -734,14 +823,25 @@ namespace SharpQuake
             {
                 edict_t ent = Server.EdictNum( i );
                 if( ent.free )
+                {
                     continue;
+                }
+
                 active++;
                 if( ent.v.solid != 0 )
+                {
                     solid++;
+                }
+
                 if( ent.v.model != 0 )
+                {
                     models++;
+                }
+
                 if( ent.v.movetype == Movetypes.MOVETYPE_STEP )
+                {
                     step++;
+                }
             }
 
             Con.Print( "num_edicts:{0}\n", Server.sv.num_edicts );
@@ -755,7 +855,9 @@ namespace SharpQuake
         {
             int i = IndexOfFunction( name );
             if( i != -1 )
+            {
                 return _Functions[i];
+            }
 
             return null;
         }
@@ -765,7 +867,9 @@ namespace SharpQuake
             for( int i = 0; i < _Functions.Length; i++ )
             {
                 if( SameName( _Functions[i].s_name, name ) )
+                {
                     return i;
+                }
             }
             return -1;
         }
@@ -779,8 +883,7 @@ namespace SharpQuake
 
         private static unsafe bool ParsePair( edict_t ent, ddef_t key, string s )
         {
-            int offset1;
-            if( ent.IsV( key.ofs, out offset1 ) )
+            if( ent.IsV( key.ofs, out int offset1 ) )
             {
                 fixed ( entvars_t* ptr = &ent.v )
                 {
@@ -788,10 +891,12 @@ namespace SharpQuake
                 }
             }
             else
+            {
                 fixed ( float* ptr = ent.fields )
                 {
                     return ParsePair( ptr + offset1, key, s );
                 }
+            }
         }
 
         /* Can parse either fields or globals returns false if error
@@ -855,7 +960,9 @@ namespace SharpQuake
             for( int i = 0; i < _FieldDefs.Length; i++ )
             {
                 if( SameName( _FieldDefs[i].s_name, name ) )
+                {
                     return i;
+                }
             }
             return -1;
         }
@@ -882,8 +989,7 @@ namespace SharpQuake
 
         private static unsafe void* Get( int offset )
         {
-            int offset1;
-            if( IsGlobalStruct( offset, out offset1 ) )
+            if( IsGlobalStruct( offset, out int offset1 ) )
             {
                 return (int*)_GlobalStructAddr + offset1;
             }
@@ -911,7 +1017,9 @@ namespace SharpQuake
         {
             int i = IndexOfField( name );
             if( i != -1 )
+            {
                 return _FieldDefs[i];
+            }
 
             return null;
         }
@@ -950,7 +1058,7 @@ namespace SharpQuake
                     break;
 
                 case etype_t.ev_vector:
-                    result = String.Format( CultureInfo.InvariantCulture.NumberFormat,
+                    result = string.Format( CultureInfo.InvariantCulture.NumberFormat,
                         "{0,5:F1} {1,5:F1} {2,5:F1}", ( (float*)val )[0], ( (float*)val )[1], ( (float*)val )[2] );
                     break;
 
@@ -971,7 +1079,9 @@ namespace SharpQuake
             for( int i = 0; i < _FieldDefs.Length; i++ )
             {
                 if( _FieldDefs[i].ofs == ofs )
+                {
                     return i;
+                }
             }
             return -1;
         }
@@ -980,7 +1090,9 @@ namespace SharpQuake
         {
             int i = IndexOfField( ofs );
             if( i != -1 )
+            {
                 return _FieldDefs[i];
+            }
 
             return null;
         }
@@ -1055,7 +1167,7 @@ namespace SharpQuake
                     break;
 
                 case etype_t.ev_vector:
-                    result = String.Format( CultureInfo.InvariantCulture.NumberFormat,
+                    result = string.Format( CultureInfo.InvariantCulture.NumberFormat,
                         "{0:F6} {1:F6} {2:F6}", val->vector[0], val->vector[1], val->vector[2] );
                     break;
 
@@ -1070,8 +1182,12 @@ namespace SharpQuake
         private static unsafe bool IsEmptyField( int type, int* v )
         {
             for( int j = 0; j < _TypeSize[type]; j++ )
+            {
                 if( v[j] != 0 )
+                {
                     return false;
+                }
+            }
 
             return true;
         }
@@ -1082,15 +1198,16 @@ namespace SharpQuake
             {
                 ddef_t def = _GlobalDefs[i];
                 if( name == GetString( def.s_name ) )
+                {
                     return def;
+                }
             }
             return null;
         }
 
         private static unsafe bool ParseGlobalPair( ddef_t key, string value )
         {
-            int offset;
-            if( IsGlobalStruct( key.ofs, out offset ) )
+            if( IsGlobalStruct( key.ofs, out int offset ) )
             {
                 return ParsePair( (float*)_GlobalStructAddr + offset, key, value );
             }
@@ -1103,15 +1220,17 @@ namespace SharpQuake
 
         private static unsafe string GlobalString( int ofs )
         {
-            string line = String.Empty;
+            string line = string.Empty;
             void* val = Get( ofs );
             ddef_t def = GlobalAtOfs( ofs );
             if( def == null )
-                line = String.Format( "{0}(???)", ofs );
+            {
+                line = string.Format( "{0}(???)", ofs );
+            }
             else
             {
                 string s = ValueString( (etype_t)def.type, val );
-                line = String.Format( "{0}({1}){2} ", ofs, GetString( def.s_name ), s );
+                line = string.Format( "{0}({1}){2} ", ofs, GetString( def.s_name ), s );
             }
 
             line = line.PadRight( 20 );
@@ -1121,12 +1240,16 @@ namespace SharpQuake
 
         private static string GlobalStringNoContents( int ofs )
         {
-            string line = String.Empty;
+            string line = string.Empty;
             ddef_t def = GlobalAtOfs( ofs );
             if( def == null )
-                line = String.Format( "{0}(???)", ofs );
+            {
+                line = string.Format( "{0}(???)", ofs );
+            }
             else
-                line = String.Format( "{0}({1}) ", ofs, GetString( def.s_name ) );
+            {
+                line = string.Format( "{0}({1}) ", ofs, GetString( def.s_name ) );
+            }
 
             line = line.PadRight( 20 );
 
@@ -1139,7 +1262,9 @@ namespace SharpQuake
             {
                 ddef_t def = _GlobalDefs[i];
                 if( def.ofs == ofs )
+                {
                     return def;
+                }
             }
             return null;
         }

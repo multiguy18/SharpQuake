@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -32,7 +29,9 @@ namespace SharpQuake
             wavinfo_t info = new wavinfo_t();
 
             if( wav == null )
+            {
                 return info;
+            }
 
             WavHelper helper = new WavHelper( wav );
 
@@ -94,7 +93,9 @@ namespace SharpQuake
                 }
             }
             else
+            {
                 info.loopstart = -1;
+            }
 
             // find data chunk
             int data = helper.FindChunk( "data", offset );
@@ -108,10 +109,14 @@ namespace SharpQuake
             if( info.samples > 0 )
             {
                 if( samples < info.samples )
+                {
                     Sys.Error( "Sound {0} has a bad loop length", name );
+                }
             }
             else
+            {
                 info.samples = samples;
+            }
 
             info.dataofs = data + 8;
 
@@ -123,20 +128,29 @@ namespace SharpQuake
         {
             sfxcache_t sc = (sfxcache_t)Cache.Check( sfx.cache );
             if( sc == null )
+            {
                 return;
+            }
 
             float stepscale = (float)inrate / _shm.speed; // this is usually 0.5, 1, or 2
 
             int outcount = (int)( sc.length / stepscale );
             sc.length = outcount;
             if( sc.loopstart != -1 )
+            {
                 sc.loopstart = (int)( sc.loopstart / stepscale );
+            }
 
             sc.speed = _shm.speed;
             if( _LoadAs8bit.Value != 0 )
+            {
                 sc.width = 1;
+            }
             else
+            {
                 sc.width = inwidth;
+            }
+
             sc.stereo = 0;
 
             sc.data = new byte[outcount * sc.width]; // uze: check this later!!!
@@ -199,16 +213,22 @@ namespace SharpQuake
             {
                 offset = lastChunk;
                 if( offset >= _Wav.Length )
+                {
                     break; // didn't find the chunk
+                }
 
                 int iff_chunk_len = GetLittleLong( offset + 4 );
                 if( iff_chunk_len < 0 )
+                {
                     break;
+                }
 
                 lastChunk = offset + 8 + ( ( iff_chunk_len + 1 ) & ~1 );
                 string chunkName = Encoding.ASCII.GetString( _Wav, offset, 4 );
                 if( chunkName == name )
+                {
                     return offset;
+                }
             }
             return -1;
         }

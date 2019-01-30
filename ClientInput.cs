@@ -1,26 +1,21 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
-
-using System;
 
 namespace SharpQuake
 {
@@ -90,18 +85,28 @@ namespace SharpQuake
         {
             int k;
             string c = Cmd.Argv( 1 );
-            if( !String.IsNullOrEmpty( c ) )
+            if( !string.IsNullOrEmpty( c ) )
+            {
                 k = int.Parse( c );
+            }
             else
+            {
                 k = -1; // typed manually at the console for continuous down
+            }
 
             if( k == b.down0 || k == b.down1 )
+            {
                 return; // repeating key
+            }
 
             if( b.down0 == 0 )
+            {
                 b.down0 = k;
+            }
             else if( b.down1 == 0 )
+            {
                 b.down1 = k;
+            }
             else
             {
                 Con.Print( "Three keys down for a button!\n" );
@@ -109,7 +114,10 @@ namespace SharpQuake
             }
 
             if( ( b.state & 1 ) != 0 )
+            {
                 return; // still down
+            }
+
             b.state |= 1 + 2; // down + impulse down
         }
 
@@ -117,8 +125,10 @@ namespace SharpQuake
         {
             int k;
             string c = Cmd.Argv( 1 );
-            if( !String.IsNullOrEmpty( c ) )
+            if( !string.IsNullOrEmpty( c ) )
+            {
                 k = int.Parse( c );
+            }
             else
             {
                 // typed manually at the console, assume for unsticking, so clear all
@@ -128,17 +138,28 @@ namespace SharpQuake
             }
 
             if( b.down0 == k )
+            {
                 b.down0 = 0;
+            }
             else if( b.down1 == k )
+            {
                 b.down1 = 0;
+            }
             else
+            {
                 return; // key up without coresponding down (menu pass through)
+            }
 
             if( b.down0 != 0 || b.down1 != 0 )
+            {
                 return; // some other key is still holding it down
+            }
 
             if( ( b.state & 1 ) == 0 )
+            {
                 return; // still up (this should not happen)
+            }
+
             b.state &= ~1; // now up
             b.state |= 4; // impulse up
         }
@@ -163,7 +184,9 @@ namespace SharpQuake
             KeyUp( ref MLookBtn );
 
             if( ( MLookBtn.state & 1 ) == 0 && Client.LookSpring )
+            {
                 View.StartPitchDrift();
+            }
         }
 
         private static void UpDown()
@@ -322,7 +345,7 @@ namespace SharpQuake
         }
     }
 
-    partial class Client
+    internal partial class Client
     {
         public static void SendMove( ref usercmd_t cmd )
         {
@@ -347,11 +370,17 @@ namespace SharpQuake
             int bits = 0;
 
             if( ( ClientInput.AttackBtn.state & 3 ) != 0 )
+            {
                 bits |= 1;
+            }
+
             ClientInput.AttackBtn.state &= ~2;
 
             if( ( ClientInput.JumpBtn.state & 3 ) != 0 )
+            {
                 bits |= 2;
+            }
+
             ClientInput.JumpBtn.state &= ~2;
 
             msg.WriteByte( bits );
@@ -361,11 +390,16 @@ namespace SharpQuake
 
             // deliver the message
             if( cls.demoplayback )
+            {
                 return;
+            }
 
-            // allways dump the first two message, because it may contain leftover inputs from the last level
+            // allways dump the first two message, because it may contain leftover inputs from the
+            // last level
             if( ++cl.movemessages <= 2 )
+            {
                 return;
+            }
 
             if( Net.SendUnreliableMessage( cls.netcon, msg ) == -1 )
             {
@@ -382,7 +416,9 @@ namespace SharpQuake
         private static void BaseMove( ref usercmd_t cmd )
         {
             if( cls.signon != SIGNONS )
+            {
                 return;
+            }
 
             AdjustAngles();
 
@@ -421,7 +457,9 @@ namespace SharpQuake
             float speed = (float)Host.FrameTime;
 
             if( ClientInput.SpeedBtn.IsDown )
+            {
                 speed *= _AngleSpeedKey.Value;
+            }
 
             if( !ClientInput.StrafeBtn.IsDown )
             {
@@ -444,17 +482,29 @@ namespace SharpQuake
             cl.viewangles.X += speed * _PitchSpeed.Value * down;
 
             if( up != 0 || down != 0 )
+            {
                 View.StopPitchDrift();
+            }
 
             if( cl.viewangles.X > 80 )
+            {
                 cl.viewangles.X = 80;
+            }
+
             if( cl.viewangles.X < -70 )
+            {
                 cl.viewangles.X = -70;
+            }
 
             if( cl.viewangles.Z > 50 )
+            {
                 cl.viewangles.Z = 50;
+            }
+
             if( cl.viewangles.Z < -50 )
+            {
                 cl.viewangles.Z = -50;
+            }
         }
 
         /* Returns 0.25 if a key was pressed and released during the frame,
@@ -471,25 +521,52 @@ namespace SharpQuake
             float val = 0;
 
             if( impulsedown && !impulseup )
+            {
                 if( down )
+                {
                     val = 0.5f; // pressed and held this frame
+                }
                 else
+                {
                     val = 0;
+                }
+            }
+
             if( impulseup && !impulsedown )
+            {
                 if( down )
+                {
                     val = 0;
+                }
                 else
+                {
                     val = 0; // released this frame
+                }
+            }
+
             if( !impulsedown && !impulseup )
+            {
                 if( down )
+                {
                     val = 1.0f; // held the entire frame
+                }
                 else
+                {
                     val = 0; // up the entire frame
+                }
+            }
+
             if( impulsedown && impulseup )
+            {
                 if( down )
+                {
                     val = 0.75f; // released and re-pressed this frame
+                }
                 else
+                {
                     val = 0.25f; // pressed and released this frame
+                }
+            }
 
             key.state &= 1; // clear impulses
 

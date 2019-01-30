@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -25,7 +22,7 @@ using OpenTK;
 
 namespace SharpQuake
 {
-    partial class Client
+    internal partial class Client
     {
         private static int _NumTempEntities;
         private static entity_t[] _TempEntities = new entity_t[MAX_TEMP_ENTITIES];
@@ -50,10 +47,14 @@ namespace SharpQuake
             _SfxRExp3 = Sound.PrecacheSound( "weapons/r_exp3.wav" );
 
             for( int i = 0; i < _TempEntities.Length; i++ )
+            {
                 _TempEntities[i] = new entity_t();
+            }
 
             for( int i = 0; i < _Beams.Length; i++ )
+            {
                 _Beams[i] = new beam_t();
+            }
         }
 
         private static void UpdateTempEntities()
@@ -65,7 +66,9 @@ namespace SharpQuake
             {
                 beam_t b = _Beams[i];
                 if( b.model == null || b.endtime < cl.time )
+                {
                     continue;
+                }
 
                 // if coming from the player, update the start position
                 if( b.entity == cl.viewentity )
@@ -81,20 +84,28 @@ namespace SharpQuake
                 {
                     yaw = 0;
                     if( dist.Z > 0 )
+                    {
                         pitch = 90;
+                    }
                     else
+                    {
                         pitch = 270;
+                    }
                 }
                 else
                 {
                     yaw = (int)( Math.Atan2( dist.Y, dist.X ) * 180 / Math.PI );
                     if( yaw < 0 )
+                    {
                         yaw += 360;
+                    }
 
                     forward = (float)Math.Sqrt( dist.X * dist.X + dist.Y * dist.Y );
                     pitch = (int)( Math.Atan2( dist.Z, forward ) * 180 / Math.PI );
                     if( pitch < 0 )
+                    {
                         pitch += 360;
+                    }
                 }
 
                 // add new entities for the lightning
@@ -104,7 +115,9 @@ namespace SharpQuake
                 {
                     entity_t ent = NewTempEntity();
                     if( ent == null )
+                    {
                         return;
+                    }
 
                     ent.origin = org;
                     ent.model = b.model;
@@ -121,9 +134,14 @@ namespace SharpQuake
         private static entity_t NewTempEntity()
         {
             if( NumVisEdicts == MAX_VISEDICTS )
+            {
                 return null;
+            }
+
             if( _NumTempEntities == MAX_TEMP_ENTITIES )
+            {
                 return null;
+            }
 
             entity_t ent = _TempEntities[_NumTempEntities];
             _NumTempEntities++;
@@ -162,16 +180,24 @@ namespace SharpQuake
                     Render.RunParticleEffect( ref pos, ref Common.ZeroVector, 0, 10 );
 #endif
                     if( ( Sys.Random() % 5 ) != 0 )
+                    {
                         Sound.StartSound( -1, 0, _SfxTink1, ref pos, 1, 1 );
+                    }
                     else
                     {
                         int rnd = Sys.Random() & 3;
                         if( rnd == 1 )
+                        {
                             Sound.StartSound( -1, 0, _SfxRic1, ref pos, 1, 1 );
+                        }
                         else if( rnd == 2 )
+                        {
                             Sound.StartSound( -1, 0, _SfxRic2, ref pos, 1, 1 );
+                        }
                         else
+                        {
                             Sound.StartSound( -1, 0, _SfxRic3, ref pos, 1, 1 );
+                        }
                     }
                     break;
 
@@ -180,16 +206,24 @@ namespace SharpQuake
                     Render.RunParticleEffect( ref pos, ref Common.ZeroVector, 0, 20 );
 
                     if( ( Sys.Random() % 5 ) != 0 )
+                    {
                         Sound.StartSound( -1, 0, _SfxTink1, ref pos, 1, 1 );
+                    }
                     else
                     {
                         int rnd = Sys.Random() & 3;
                         if( rnd == 1 )
+                        {
                             Sound.StartSound( -1, 0, _SfxRic1, ref pos, 1, 1 );
+                        }
                         else if( rnd == 2 )
+                        {
                             Sound.StartSound( -1, 0, _SfxRic2, ref pos, 1, 1 );
+                        }
                         else
+                        {
                             Sound.StartSound( -1, 0, _SfxRic3, ref pos, 1, 1 );
+                        }
                     }
                     break;
 

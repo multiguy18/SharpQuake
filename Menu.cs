@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -38,7 +35,7 @@ namespace SharpQuake
         private static bool _RecursiveDraw;
 
         private static byte[] _IdentityTable = new byte[256];
-        private static byte[] _TranslationTable = new byte[256];
+        private static readonly byte[] _TranslationTable = new byte[256];
 
         public static void Init()
         {
@@ -59,13 +56,17 @@ namespace SharpQuake
         public static void KeyDown( int key )
         {
             if( MenuBase.CurrentMenu != null )
+            {
                 MenuBase.CurrentMenu.KeyEvent( key );
+            }
         }
 
         public static void Draw()
         {
             if( MenuBase.CurrentMenu == null || Key.Destination != keydest_t.key_menu )
+            {
                 return;
+            }
 
             if( !_RecursiveDraw )
             {
@@ -77,7 +78,9 @@ namespace SharpQuake
                     Sound.ExtraUpdate();
                 }
                 else
+                {
                     Drawer.FadeScreen();
+                }
 
                 Scr.FullUpdate = 0;
             }
@@ -87,7 +90,9 @@ namespace SharpQuake
             }
 
             if( MenuBase.CurrentMenu != null )
+            {
                 MenuBase.CurrentMenu.Draw();
+            }
 
             if( EnterSound )
             {
@@ -188,7 +193,10 @@ namespace SharpQuake
                 {
                     cy += 8;
                     if( n == 1 )
+                    {
                         p = Drawer.CachePic( "gfx/box_mm2.lmp" );
+                    }
+
                     DrawTransPic( cx, cy, p );
                 }
                 p = Drawer.CachePic( "gfx/box_bm.lmp" );
@@ -214,13 +222,22 @@ namespace SharpQuake
         public static void DrawSlider( int x, int y, float range )
         {
             if( range < 0 )
+            {
                 range = 0;
+            }
+
             if( range > 1 )
+            {
                 range = 1;
+            }
+
             DrawCharacter( x - 8, y, 128 );
             int i;
             for( i = 0; i < SLIDER_RANGE; i++ )
+            {
                 DrawCharacter( x + i * 8, y, 129 );
+            }
+
             DrawCharacter( x + i * 8, y, 130 );
             DrawCharacter( (int)( x + ( SLIDER_RANGE - 1 ) * 8 * range ), y, 131 );
         }
@@ -228,29 +245,47 @@ namespace SharpQuake
         public static void DrawCheckbox( int x, int y, bool on )
         {
             if( on )
+            {
                 Print( x, y, "on" );
+            }
             else
+            {
                 Print( x, y, "off" );
+            }
         }
 
         public static void BuildTranslationTable( int top, int bottom )
         {
             for( int j = 0; j < 256; j++ )
+            {
                 _IdentityTable[j] = (byte)j;
+            }
 
             _IdentityTable.CopyTo( _TranslationTable, 0 );
 
             if( top < 128 ) // the artists made some backwards ranges.  sigh.
+            {
                 Array.Copy( _IdentityTable, top, _TranslationTable, Render.TOP_RANGE, 16 );
+            }
             else
+            {
                 for( int j = 0; j < 16; j++ )
+                {
                     _TranslationTable[Render.TOP_RANGE + j] = _IdentityTable[top + 15 - j];
+                }
+            }
 
             if( bottom < 128 )
+            {
                 Array.Copy( _IdentityTable, bottom, _TranslationTable, Render.BOTTOM_RANGE, 16 );
+            }
             else
+            {
                 for( int j = 0; j < 16; j++ )
+                {
                     _TranslationTable[Render.BOTTOM_RANGE + j] = _IdentityTable[bottom + 15 - j];
+                }
+            }
         }
 
         private static void Menu_Main_f()
@@ -392,19 +427,28 @@ namespace SharpQuake
                     MenuBase.Hide();
                     Client.cls.demonum = _SaveDemoNum;
                     if( Client.cls.demonum != -1 && !Client.cls.demoplayback && Client.cls.state != cactive_t.ca_connected )
+                    {
                         Client.NextDemo();
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     if( ++_Cursor >= MAIN_ITEMS )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_UPARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     if( --_Cursor < 0 )
+                    {
                         _Cursor = MAIN_ITEMS - 1;
+                    }
+
                     break;
 
                 case Key.K_ENTER:
@@ -445,7 +489,7 @@ namespace SharpQuake
 
             int f = (int)( Host.Time * 10 ) % 6;
 
-            Menu.DrawTransPic( 54, 32 + _Cursor * 20, Drawer.CachePic( String.Format( "gfx/menudot{0}.lmp", f + 1 ) ) );
+            Menu.DrawTransPic( 54, 32 + _Cursor * 20, Drawer.CachePic( string.Format( "gfx/menudot{0}.lmp", f + 1 ) ) );
         }
     }
 
@@ -464,13 +508,19 @@ namespace SharpQuake
                 case Key.K_DOWNARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     if( ++_Cursor >= SINGLEPLAYER_ITEMS )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_UPARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     if( --_Cursor < 0 )
+                    {
                         _Cursor = SINGLEPLAYER_ITEMS - 1;
+                    }
+
                     break;
 
                 case Key.K_ENTER:
@@ -480,11 +530,19 @@ namespace SharpQuake
                     {
                         case 0:
                             if( Server.sv.active )
+                            {
                                 if( !Scr.ModalMessage( "Are you sure you want to\nstart a new game?\n" ) )
+                                {
                                     break;
+                                }
+                            }
+
                             Key.Destination = keydest_t.key_game;
                             if( Server.sv.active )
+                            {
                                 Cbuf.AddText( "disconnect\n" );
+                            }
+
                             Cbuf.AddText( "maxplayers 1\n" );
                             Cbuf.AddText( "map start\n" );
                             break;
@@ -510,7 +568,7 @@ namespace SharpQuake
 
             int f = (int)( Host.Time * 10 ) % 6;
 
-            Menu.DrawTransPic( 54, 32 + _Cursor * 20, Drawer.CachePic( String.Format( "gfx/menudot{0}.lmp", f + 1 ) ) );
+            Menu.DrawTransPic( 54, 32 + _Cursor * 20, Drawer.CachePic( string.Format( "gfx/menudot{0}.lmp", f + 1 ) ) );
         }
     }
 
@@ -537,7 +595,10 @@ namespace SharpQuake
                 case Key.K_ENTER:
                     Sound.LocalSound( "misc/menu2.wav" );
                     if( !_Loadable[_Cursor] )
+                    {
                         return;
+                    }
+
                     MenuBase.Hide();
 
                     /* Host_Loadgame_f can't bring up the loading plaque because too much
@@ -546,7 +607,7 @@ namespace SharpQuake
                     Scr.BeginLoadingPlaque();
 
                     // issue the load command
-                    Cbuf.AddText( String.Format( "load s{0}\n", _Cursor ) );
+                    Cbuf.AddText( string.Format( "load s{0}\n", _Cursor ) );
                     return;
 
                 case Key.K_UPARROW:
@@ -554,7 +615,10 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor--;
                     if( _Cursor < 0 )
+                    {
                         _Cursor = MAX_SAVEGAMES - 1;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
@@ -562,7 +626,10 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor++;
                     if( _Cursor >= MAX_SAVEGAMES )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
             }
         }
@@ -573,7 +640,9 @@ namespace SharpQuake
             Menu.DrawPic( ( 320 - p.width ) / 2, 4, p );
 
             for( int i = 0; i < MAX_SAVEGAMES; i++ )
+            {
                 Menu.Print( 16, 32 + 8 * i, _FileNames[i] );
+            }
 
             // line cursor
             Menu.DrawCharacter( 8, 32 + _Cursor * 8, 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
@@ -585,21 +654,29 @@ namespace SharpQuake
             {
                 _FileNames[i] = "--- UNUSED SLOT ---";
                 _Loadable[i] = false;
-                string name = String.Format( "{0}/s{1}.sav", Common.GameDir, i );
+                string name = string.Format( "{0}/s{1}.sav", Common.GameDir, i );
                 FileStream fs = Sys.FileOpenRead( name );
                 if( fs == null )
+                {
                     continue;
+                }
 
                 using( StreamReader reader = new StreamReader( fs, Encoding.ASCII ) )
                 {
                     string version = reader.ReadLine();
                     if( version == null )
+                    {
                         continue;
+                    }
+
                     string info = reader.ReadLine();
                     if( info == null )
+                    {
                         continue;
+                    }
+
                     info = info.TrimEnd( '\0', '_' ).Replace( '_', ' ' );
-                    if( !String.IsNullOrEmpty( info ) )
+                    if( !string.IsNullOrEmpty( info ) )
                     {
                         _FileNames[i] = info;
                         _Loadable[i] = true;
@@ -620,11 +697,19 @@ namespace SharpQuake
         public override void Show()
         {
             if( !Server.sv.active )
+            {
                 return;
+            }
+
             if( Client.cl.intermission != 0 )
+            {
                 return;
+            }
+
             if( Server.svs.maxclients != 1 )
+            {
                 return;
+            }
 
             base.Show();
         }
@@ -639,7 +724,7 @@ namespace SharpQuake
 
                 case Key.K_ENTER:
                     MenuBase.Hide();
-                    Cbuf.AddText( String.Format( "save s{0}\n", _Cursor ) );
+                    Cbuf.AddText( string.Format( "save s{0}\n", _Cursor ) );
                     return;
 
                 case Key.K_UPARROW:
@@ -647,7 +732,10 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor--;
                     if( _Cursor < 0 )
+                    {
                         _Cursor = MAX_SAVEGAMES - 1;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
@@ -655,7 +743,10 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor++;
                     if( _Cursor >= MAX_SAVEGAMES )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
             }
         }
@@ -666,7 +757,9 @@ namespace SharpQuake
             Menu.DrawPic( ( 320 - p.width ) / 2, 4, p );
 
             for( int i = 0; i < MAX_SAVEGAMES; i++ )
+            {
                 Menu.Print( 16, 32 + 8 * i, _FileNames[i] );
+            }
 
             // line cursor
             Menu.DrawCharacter( 8, 32 + _Cursor * 8, 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
@@ -680,7 +773,9 @@ namespace SharpQuake
         public override void Show()
         {
             if( CurrentMenu == this )
+            {
                 return;
+            }
 
             Key.Destination = keydest_t.key_menu;
             _PrevMenu = CurrentMenu;
@@ -696,9 +791,14 @@ namespace SharpQuake
                 case 'n':
                 case 'N':
                     if( _PrevMenu != null )
+                    {
                         _PrevMenu.Show();
+                    }
                     else
+                    {
                         MenuBase.Hide();
+                    }
+
                     break;
 
                 case 'Y':
@@ -763,21 +863,27 @@ namespace SharpQuake
                 case Key.K_RIGHTARROW:
                     Menu.EnterSound = true;
                     if( ++_Page >= NUM_HELP_PAGES )
+                    {
                         _Page = 0;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
                 case Key.K_LEFTARROW:
                     Menu.EnterSound = true;
                     if( --_Page < 0 )
+                    {
                         _Page = NUM_HELP_PAGES - 1;
+                    }
+
                     break;
             }
         }
 
         public override void Draw()
         {
-            Menu.DrawPic( 0, 0, Drawer.CachePic( String.Format( "gfx/help{0}.lmp", _Page ) ) );
+            Menu.DrawPic( 0, 0, Drawer.CachePic( string.Format( "gfx/help{0}.lmp", _Page ) ) );
         }
     }
 
@@ -795,10 +901,14 @@ namespace SharpQuake
             }
 
             if( _Cursor > OPTIONS_ITEMS - 1 )
+            {
                 _Cursor = 0;
+            }
 
             if( _Cursor == OPTIONS_ITEMS - 1 && MenuBase.VideoMenu == null )
+            {
                 _Cursor = 0;
+            }
 
             base.Show();
         }
@@ -842,14 +952,20 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor--;
                     if( _Cursor < 0 )
+                    {
                         _Cursor = OPTIONS_ITEMS - 1;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor++;
                     if( _Cursor >= OPTIONS_ITEMS )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_LEFTARROW:
@@ -864,9 +980,13 @@ namespace SharpQuake
             if( _Cursor == 12 && VideoMenu == null )
             {
                 if( key == Key.K_UPARROW )
+                {
                     _Cursor = 11;
+                }
                 else
+                {
                     _Cursor = 0;
+                }
             }
 
 #if _WIN32
@@ -923,7 +1043,9 @@ namespace SharpQuake
             Menu.DrawCheckbox( 220, 120, Client.LookStrafe );
 
             if( VideoMenu != null )
+            {
                 Menu.Print( 16, 128, "         Video Options" );
+            }
 
 #if _WIN32
             if( modestate == MS_WINDOWED )
@@ -947,45 +1069,75 @@ namespace SharpQuake
                 case 3: // screen size
                     value = Scr.ViewSize.Value + dir * 10;
                     if( value < 30 )
+                    {
                         value = 30;
+                    }
+
                     if( value > 120 )
+                    {
                         value = 120;
+                    }
+
                     Cvar.Set( "viewsize", value );
                     break;
 
                 case 4: // gamma
                     value = View.Gamma - dir * 0.05f;
                     if( value < 0.5 )
+                    {
                         value = 0.5f;
+                    }
+
                     if( value > 1 )
+                    {
                         value = 1;
+                    }
+
                     Cvar.Set( "gamma", value );
                     break;
 
                 case 5: // mouse speed
                     value = Client.Sensitivity + dir * 0.5f;
                     if( value < 1 )
+                    {
                         value = 1;
+                    }
+
                     if( value > 11 )
+                    {
                         value = 11;
+                    }
+
                     Cvar.Set( "sensitivity", value );
                     break;
 
                 case 6: // music volume
                     value = Sound.BgmVolume + dir * _BgmVolumeCoeff;
                     if( value < 0 )
+                    {
                         value = 0;
+                    }
+
                     if( value > 1 )
+                    {
                         value = 1;
+                    }
+
                     Cvar.Set( "bgmvolume", value );
                     break;
 
                 case 7: // sfx volume
                     value = Sound.Volume + dir * 0.1f;
                     if( value < 0 )
+                    {
                         value = 0;
+                    }
+
                     if( value > 1 )
+                    {
                         value = 1;
+                    }
+
                     Cvar.Set( "volume", value );
                     break;
 
@@ -1066,7 +1218,7 @@ namespace SharpQuake
                 }
                 else if( key != '`' )
                 {
-                    string cmd = String.Format( "bind \"{0}\" \"{1}\"\n", Key.KeynumToString( key ), _BindNames[_Cursor][0] );
+                    string cmd = string.Format( "bind \"{0}\" \"{1}\"\n", Key.KeynumToString( key ), _BindNames[_Cursor][0] );
                     Cbuf.InsertText( cmd );
                 }
 
@@ -1085,7 +1237,10 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor--;
                     if( _Cursor < 0 )
+                    {
                         _Cursor = _BindNames.Length - 1;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
@@ -1093,7 +1248,10 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor++;
                     if( _Cursor >= _BindNames.Length )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_ENTER: // go into bind mode
@@ -1101,7 +1259,10 @@ namespace SharpQuake
                     FindKeysForCommand( _BindNames[_Cursor][0], keys );
                     Sound.LocalSound( "misc/menu2.wav" );
                     if( keys[1] != -1 )
+                    {
                         UnbindCommand( _BindNames[_Cursor][0] );
+                    }
+
                     _BindGrab = true;
                     break;
 
@@ -1119,9 +1280,13 @@ namespace SharpQuake
             Menu.DrawPic( ( 320 - p.width ) / 2, 4, p );
 
             if( _BindGrab )
+            {
                 Menu.Print( 12, 32, "Press a key or button for this action" );
+            }
             else
+            {
                 Menu.Print( 18, 32, "Enter to change, backspace to clear" );
+            }
 
             // search for known bindings
             int[] keys = new int[2];
@@ -1152,9 +1317,13 @@ namespace SharpQuake
             }
 
             if( _BindGrab )
+            {
                 Menu.DrawCharacter( 130, 48 + _Cursor * 8, '=' );
+            }
             else
+            {
                 Menu.DrawCharacter( 130, 48 + _Cursor * 8, 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
+            }
         }
 
         private void FindKeysForCommand( string command, int[] twokeys )
@@ -1166,15 +1335,19 @@ namespace SharpQuake
             for( int j = 0; j < 256; j++ )
             {
                 string b = Key.Bindings[j];
-                if( String.IsNullOrEmpty( b ) )
+                if( string.IsNullOrEmpty( b ) )
+                {
                     continue;
+                }
 
-                if( String.Compare( b, 0, command, 0, len ) == 0 )
+                if( string.Compare( b, 0, command, 0, len ) == 0 )
                 {
                     twokeys[count] = j;
                     count++;
                     if( count == 2 )
+                    {
                         break;
+                    }
                 }
             }
         }
@@ -1186,11 +1359,15 @@ namespace SharpQuake
             for( int j = 0; j < 256; j++ )
             {
                 string b = Key.Bindings[j];
-                if( String.IsNullOrEmpty( b ) )
+                if( string.IsNullOrEmpty( b ) )
+                {
                     continue;
+                }
 
-                if( String.Compare( b, 0, command, 0, len ) == 0 )
-                    Key.SetBinding( j, String.Empty );
+                if( string.Compare( b, 0, command, 0, len ) == 0 )
+                {
+                    Key.SetBinding( j, string.Empty );
+                }
             }
         }
     }
@@ -1210,13 +1387,19 @@ namespace SharpQuake
                 case Key.K_DOWNARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     if( ++_Cursor >= MULTIPLAYER_ITEMS )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_UPARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     if( --_Cursor < 0 )
+                    {
                         _Cursor = MULTIPLAYER_ITEMS - 1;
+                    }
+
                     break;
 
                 case Key.K_ENTER:
@@ -1225,12 +1408,18 @@ namespace SharpQuake
                     {
                         case 0:
                             if( Net.TcpIpAvailable )
+                            {
                                 MenuBase.LanConfigMenu.Show();
+                            }
+
                             break;
 
                         case 1:
                             if( Net.TcpIpAvailable )
+                            {
                                 MenuBase.LanConfigMenu.Show();
+                            }
+
                             break;
 
                         case 2:
@@ -1250,10 +1439,13 @@ namespace SharpQuake
 
             float f = (int)( Host.Time * 10 ) % 6;
 
-            Menu.DrawTransPic( 54, 32 + _Cursor * 20, Drawer.CachePic( String.Format( "gfx/menudot{0}.lmp", f + 1 ) ) );
+            Menu.DrawTransPic( 54, 32 + _Cursor * 20, Drawer.CachePic( string.Format( "gfx/menudot{0}.lmp", f + 1 ) ) );
 
             if( Net.TcpIpAvailable )
+            {
                 return;
+            }
+
             Menu.PrintWhite( ( 320 / 2 ) - ( ( 27 * 8 ) / 2 ), 148, "No Communications Available" );
         }
     }
@@ -1291,17 +1483,24 @@ namespace SharpQuake
             if( _Cursor == -1 )
             {
                 if( JoiningGame )
+                {
                     _Cursor = 2;
+                }
                 else
+                {
                     _Cursor = 1;
+                }
             }
             if( StartingGame && _Cursor == 2 )
+            {
                 _Cursor = 1;
+            }
+
             _Port = Net.DefaultHostPort;
             _PortName = _Port.ToString();
 
             Menu.ReturnOnError = false;
-            Menu.ReturnReason = String.Empty;
+            Menu.ReturnReason = string.Empty;
         }
 
         public override void KeyEvent( int key )
@@ -1316,19 +1515,27 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor--;
                     if( _Cursor < 0 )
+                    {
                         _Cursor = NUM_LANCONFIG_CMDS - 1;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor++;
                     if( _Cursor >= NUM_LANCONFIG_CMDS )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_ENTER:
                     if( _Cursor == 0 )
+                    {
                         break;
+                    }
 
                     Menu.EnterSound = true;
                     Net.HostPort = _Port;
@@ -1351,7 +1558,7 @@ namespace SharpQuake
                         Menu.ReturnMenu = this;
                         Menu.ReturnOnError = true;
                         MenuBase.Hide();
-                        Cbuf.AddText( String.Format( "connect \"{0}\"\n", _JoinName ) );
+                        Cbuf.AddText( string.Format( "connect \"{0}\"\n", _JoinName ) );
                         break;
                     }
                     break;
@@ -1359,49 +1566,72 @@ namespace SharpQuake
                 case Key.K_BACKSPACE:
                     if( _Cursor == 0 )
                     {
-                        if( !String.IsNullOrEmpty( _PortName ) )
+                        if( !string.IsNullOrEmpty( _PortName ) )
+                        {
                             _PortName = _PortName.Substring( 0, _PortName.Length - 1 );
+                        }
                     }
 
                     if( _Cursor == 2 )
                     {
-                        if( !String.IsNullOrEmpty( _JoinName ) )
+                        if( !string.IsNullOrEmpty( _JoinName ) )
+                        {
                             _JoinName = _JoinName.Substring( 0, _JoinName.Length - 1 );
+                        }
                     }
                     break;
 
                 default:
                     if( key < 32 || key > 127 )
+                    {
                         break;
+                    }
 
                     if( _Cursor == 2 )
                     {
                         if( _JoinName.Length < 21 )
+                        {
                             _JoinName += (char)key;
+                        }
                     }
 
                     if( key < '0' || key > '9' )
+                    {
                         break;
+                    }
 
                     if( _Cursor == 0 )
                     {
                         if( _PortName.Length < 5 )
+                        {
                             _PortName += (char)key;
+                        }
                     }
                     break;
             }
 
             if( StartingGame && _Cursor == 2 )
+            {
                 if( key == Key.K_UPARROW )
+                {
                     _Cursor = 1;
+                }
                 else
+                {
                     _Cursor = 0;
+                }
+            }
 
             int k = Common.atoi( _PortName );
             if( k > 65535 )
+            {
                 k = _Port;
+            }
             else
+            {
                 _Port = k;
+            }
+
             _PortName = _Port.ToString();
         }
 
@@ -1414,9 +1644,13 @@ namespace SharpQuake
 
             string startJoin;
             if( StartingGame )
+            {
                 startJoin = "New Game - TCP/IP";
+            }
             else
+            {
                 startJoin = "Join Game - TCP/IP";
+            }
 
             Menu.Print( basex, 32, startJoin );
             basex += 8;
@@ -1444,21 +1678,27 @@ namespace SharpQuake
             Menu.DrawCharacter( basex - 8, _CursorTable[_Cursor], 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
 
             if( _Cursor == 0 )
+            {
                 Menu.DrawCharacter( basex + 9 * 8 + 8 * _PortName.Length,
                     _CursorTable[0], 10 + ( (int)( Host.RealTime * 4 ) & 1 ) );
+            }
 
             if( _Cursor == 2 )
+            {
                 Menu.DrawCharacter( basex + 16 + 8 * _JoinName.Length, _CursorTable[2],
                     10 + ( (int)( Host.RealTime * 4 ) & 1 ) );
+            }
 
-            if( !String.IsNullOrEmpty( Menu.ReturnReason ) )
+            if( !string.IsNullOrEmpty( Menu.ReturnReason ) )
+            {
                 Menu.PrintWhite( basex, 148, Menu.ReturnReason );
+            }
         }
 
         public LanConfigMenu()
         {
             _Cursor = -1;
-            _JoinName = String.Empty;
+            _JoinName = string.Empty;
         }
     }
 
@@ -1500,51 +1740,88 @@ namespace SharpQuake
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor--;
                     if( _Cursor < 0 )
+                    {
                         _Cursor = NUM_SETUP_CMDS - 1;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor++;
                     if( _Cursor >= NUM_SETUP_CMDS )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_LEFTARROW:
                     if( _Cursor < 2 )
+                    {
                         return;
+                    }
+
                     Sound.LocalSound( "misc/menu3.wav" );
                     if( _Cursor == 2 )
+                    {
                         _Top = _Top - 1;
+                    }
+
                     if( _Cursor == 3 )
+                    {
                         _Bottom = _Bottom - 1;
+                    }
+
                     break;
 
                 case Key.K_RIGHTARROW:
                     if( _Cursor < 2 )
+                    {
                         return;
+                    }
+
 forward:
                     Sound.LocalSound( "misc/menu3.wav" );
                     if( _Cursor == 2 )
+                    {
                         _Top = _Top + 1;
+                    }
+
                     if( _Cursor == 3 )
+                    {
                         _Bottom = _Bottom + 1;
+                    }
+
                     break;
 
                 case Key.K_ENTER:
                     if( _Cursor == 0 || _Cursor == 1 )
+                    {
                         return;
+                    }
 
                     if( _Cursor == 2 || _Cursor == 3 )
+                    {
                         goto forward;
+                    }
 
                     // _Cursor == 4 (OK)
                     if( _MyName != Client.Name )
-                        Cbuf.AddText( String.Format( "name \"{0}\"\n", _MyName ) );
+                    {
+                        Cbuf.AddText( string.Format( "name \"{0}\"\n", _MyName ) );
+                    }
+
                     if( Net.HostName != _HostName )
+                    {
                         Cvar.Set( "hostname", _HostName );
+                    }
+
                     if( _Top != _OldTop || _Bottom != _OldBottom )
-                        Cbuf.AddText( String.Format( "color {0} {1}\n", _Top, _Bottom ) );
+                    {
+                        Cbuf.AddText( string.Format( "color {0} {1}\n", _Top, _Bottom ) );
+                    }
+
                     Menu.EnterSound = true;
                     MenuBase.MultiPlayerMenu.Show();
                     break;
@@ -1552,20 +1829,27 @@ forward:
                 case Key.K_BACKSPACE:
                     if( _Cursor == 0 )
                     {
-                        if( !String.IsNullOrEmpty( _HostName ) )
+                        if( !string.IsNullOrEmpty( _HostName ) )
+                        {
                             _HostName = _HostName.Substring( 0, _HostName.Length - 1 );
+                        }
                     }
 
                     if( _Cursor == 1 )
                     {
-                        if( !String.IsNullOrEmpty( _MyName ) )
+                        if( !string.IsNullOrEmpty( _MyName ) )
+                        {
                             _MyName = _MyName.Substring( 0, _MyName.Length - 1 );
+                        }
                     }
                     break;
 
                 default:
                     if( key < 32 || key > 127 )
+                    {
                         break;
+                    }
+
                     if( _Cursor == 0 )
                     {
                         int l = _HostName.Length;
@@ -1586,16 +1870,24 @@ forward:
             }
 
             if( _Top > 13 )
+            {
                 _Top = 0;
+            }
 
             if( _Top < 0 )
+            {
                 _Top = 13;
+            }
 
             if( _Bottom > 13 )
+            {
                 _Bottom = 0;
+            }
 
             if( _Bottom < 0 )
+            {
                 _Bottom = 13;
+            }
         }
 
         public override void Draw()
@@ -1627,10 +1919,14 @@ forward:
             Menu.DrawCharacter( 56, _CursorTable[_Cursor], 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
 
             if( _Cursor == 0 )
+            {
                 Menu.DrawCharacter( 168 + 8 * _HostName.Length, _CursorTable[_Cursor], 10 + ( (int)( Host.RealTime * 4 ) & 1 ) );
+            }
 
             if( _Cursor == 1 )
+            {
                 Menu.DrawCharacter( 168 + 8 * _MyName.Length, _CursorTable[_Cursor], 10 + ( (int)( Host.RealTime * 4 ) & 1 ) );
+            }
         }
     }
 
@@ -1779,9 +2075,14 @@ forward:
             base.Show();
 
             if( _MaxPlayers == 0 )
+            {
                 _MaxPlayers = Server.svs.maxclients;
+            }
+
             if( _MaxPlayers < 2 )
+            {
                 _MaxPlayers = Server.svs.maxclientslimit;
+            }
         }
 
         public override void KeyEvent( int key )
@@ -1796,26 +2097,38 @@ forward:
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor--;
                     if( _Cursor < 0 )
+                    {
                         _Cursor = NUM_GAMEOPTIONS - 1;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor++;
                     if( _Cursor >= NUM_GAMEOPTIONS )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_LEFTARROW:
                     if( _Cursor == 0 )
+                    {
                         break;
+                    }
+
                     Sound.LocalSound( "misc/menu3.wav" );
                     Change( -1 );
                     break;
 
                 case Key.K_RIGHTARROW:
                     if( _Cursor == 0 )
+                    {
                         break;
+                    }
+
                     Sound.LocalSound( "misc/menu3.wav" );
                     Change( 1 );
                     break;
@@ -1825,19 +2138,28 @@ forward:
                     if( _Cursor == 0 )
                     {
                         if( Server.IsActive )
+                        {
                             Cbuf.AddText( "disconnect\n" );
+                        }
+
                         Cbuf.AddText( "listen 0\n" ); // so host_netport will be re-examined
-                        Cbuf.AddText( String.Format( "maxplayers {0}\n", _MaxPlayers ) );
+                        Cbuf.AddText( string.Format( "maxplayers {0}\n", _MaxPlayers ) );
                         Scr.BeginLoadingPlaque();
 
                         if( Common.GameKind == GameKind.Hipnotic )
-                            Cbuf.AddText( String.Format( "map {0}\n",
+                        {
+                            Cbuf.AddText( string.Format( "map {0}\n",
                                 HipnoticLevels[HipnoticEpisodes[_StartEpisode].firstLevel + _StartLevel].name ) );
+                        }
                         else if( Common.GameKind == GameKind.Rogue )
-                            Cbuf.AddText( String.Format( "map {0}\n",
+                        {
+                            Cbuf.AddText( string.Format( "map {0}\n",
                                 RogueLevels[RogueEpisodes[_StartEpisode].firstLevel + _StartLevel].name ) );
+                        }
                         else
-                            Cbuf.AddText( String.Format( "map {0}\n", Levels[Episodes[_StartEpisode].firstLevel + _StartLevel].name ) );
+                        {
+                            Cbuf.AddText( string.Format( "map {0}\n", Levels[Episodes[_StartEpisode].firstLevel + _StartLevel].name ) );
+                        }
 
                         return;
                     }
@@ -1861,9 +2183,13 @@ forward:
 
             Menu.Print( 0, 64, "        Game Type" );
             if( Host.IsCoop )
+            {
                 Menu.Print( 160, 64, "Cooperative" );
+            }
             else
+            {
                 Menu.Print( 160, 64, "Deathmatch" );
+            }
 
             Menu.Print( 0, 72, "        Teamplay" );
             if( Common.GameKind == GameKind.Rogue )
@@ -1923,34 +2249,56 @@ forward:
 
             Menu.Print( 0, 80, "            Skill" );
             if( Host.Skill == 0 )
+            {
                 Menu.Print( 160, 80, "Easy difficulty" );
+            }
             else if( Host.Skill == 1 )
+            {
                 Menu.Print( 160, 80, "Normal difficulty" );
+            }
             else if( Host.Skill == 2 )
+            {
                 Menu.Print( 160, 80, "Hard difficulty" );
+            }
             else
+            {
                 Menu.Print( 160, 80, "Nightmare difficulty" );
+            }
 
             Menu.Print( 0, 88, "       Frag Limit" );
             if( Host.FragLimit == 0 )
+            {
                 Menu.Print( 160, 88, "none" );
+            }
             else
-                Menu.Print( 160, 88, String.Format( "{0} frags", (int)Host.FragLimit ) );
+            {
+                Menu.Print( 160, 88, string.Format( "{0} frags", (int)Host.FragLimit ) );
+            }
 
             Menu.Print( 0, 96, "       Time Limit" );
             if( Host.TimeLimit == 0 )
+            {
                 Menu.Print( 160, 96, "none" );
+            }
             else
-                Menu.Print( 160, 96, String.Format( "{0} minutes", (int)Host.TimeLimit ) );
+            {
+                Menu.Print( 160, 96, string.Format( "{0} minutes", (int)Host.TimeLimit ) );
+            }
 
             Menu.Print( 0, 112, "         Episode" );
 
             if( Common.GameKind == GameKind.Hipnotic )
+            {
                 Menu.Print( 160, 112, HipnoticEpisodes[_StartEpisode].description );
+            }
             else if( Common.GameKind == GameKind.Rogue )
+            {
                 Menu.Print( 160, 112, RogueEpisodes[_StartEpisode].description );
+            }
             else
+            {
                 Menu.Print( 160, 112, Episodes[_StartEpisode].description );
+            }
 
             Menu.Print( 0, 120, "           Level" );
 
@@ -2000,7 +2348,7 @@ forward:
             public level_t( string name, string desc )
             {
                 this.name = name;
-                this.description = desc;
+                description = desc;
             }
         }
 
@@ -2012,7 +2360,7 @@ forward:
 
             public episode_t( string desc, int firstLevel, int levels )
             {
-                this.description = desc;
+                description = desc;
                 this.firstLevel = firstLevel;
                 this.levels = levels;
             }
@@ -2033,7 +2381,10 @@ forward:
                         _ServerInfoMessageTime = Host.RealTime;
                     }
                     if( _MaxPlayers < 2 )
+                    {
                         _MaxPlayers = 2;
+                    }
+
                     break;
 
                 case 2:
@@ -2042,15 +2393,23 @@ forward:
 
                 case 3:
                     if( Common.GameKind == GameKind.Rogue )
+                    {
                         count = 6;
+                    }
                     else
+                    {
                         count = 2;
+                    }
 
                     float tp = Host.TeamPlay + dir;
                     if( tp > count )
+                    {
                         tp = 0;
+                    }
                     else if( tp < 0 )
+                    {
                         tp = count;
+                    }
 
                     Cvar.Set( "teamplay", tp );
                     break;
@@ -2058,27 +2417,45 @@ forward:
                 case 4:
                     float skill = Host.Skill + dir;
                     if( skill > 3 )
+                    {
                         skill = 0;
+                    }
+
                     if( skill < 0 )
+                    {
                         skill = 3;
+                    }
+
                     Cvar.Set( "skill", skill );
                     break;
 
                 case 5:
                     float fraglimit = Host.FragLimit + dir * 10;
                     if( fraglimit > 100 )
+                    {
                         fraglimit = 0;
+                    }
+
                     if( fraglimit < 0 )
+                    {
                         fraglimit = 100;
+                    }
+
                     Cvar.Set( "fraglimit", fraglimit );
                     break;
 
                 case 6:
                     float timelimit = Host.TimeLimit + dir * 5;
                     if( timelimit > 60 )
+                    {
                         timelimit = 0;
+                    }
+
                     if( timelimit < 0 )
+                    {
                         timelimit = 60;
+                    }
+
                     Cvar.Set( "timelimit", timelimit );
                     break;
 
@@ -2086,19 +2463,31 @@ forward:
                     _StartEpisode += dir;
 
                     if( Common.GameKind == GameKind.Hipnotic )
+                    {
                         count = 6;
+                    }
                     else if( Common.GameKind == GameKind.Rogue )
+                    {
                         count = 4;
+                    }
                     else if( Common.IsRegistered )
+                    {
                         count = 7;
+                    }
                     else
+                    {
                         count = 2;
+                    }
 
                     if( _StartEpisode < 0 )
+                    {
                         _StartEpisode = count - 1;
+                    }
 
                     if( _StartEpisode >= count )
+                    {
                         _StartEpisode = 0;
+                    }
 
                     _StartLevel = 0;
                     break;
@@ -2107,17 +2496,28 @@ forward:
                     _StartLevel += dir;
 
                     if( Common.GameKind == GameKind.Hipnotic )
+                    {
                         count = HipnoticEpisodes[_StartEpisode].levels;
+                    }
                     else if( Common.GameKind == GameKind.Rogue )
+                    {
                         count = RogueEpisodes[_StartEpisode].levels;
+                    }
                     else
+                    {
                         count = Episodes[_StartEpisode].levels;
+                    }
 
                     if( _StartLevel < 0 )
+                    {
                         _StartLevel = count - 1;
+                    }
 
                     if( _StartLevel >= count )
+                    {
                         _StartLevel = 0;
+                    }
+
                     break;
             }
         }
@@ -2169,7 +2569,9 @@ forward:
 
             Menu.PrintWhite( ( 320 / 2 ) - ( ( 22 * 8 ) / 2 ), 64, "No Quake servers found" );
             if( ( Host.RealTime - _SearchCompleteTime ) < 3.0 )
+            {
                 return;
+            }
 
             MenuBase.LanConfigMenu.Show();
         }
@@ -2184,7 +2586,7 @@ forward:
             base.Show();
             _Cursor = 0;
             Menu.ReturnOnError = false;
-            Menu.ReturnReason = String.Empty;
+            Menu.ReturnReason = string.Empty;
             _Sorted = false;
         }
 
@@ -2205,7 +2607,10 @@ forward:
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor--;
                     if( _Cursor < 0 )
+                    {
                         _Cursor = Net.HostCacheCount - 1;
+                    }
+
                     break;
 
                 case Key.K_DOWNARROW:
@@ -2213,7 +2618,10 @@ forward:
                     Sound.LocalSound( "misc/menu1.wav" );
                     _Cursor++;
                     if( _Cursor >= Net.HostCacheCount )
+                    {
                         _Cursor = 0;
+                    }
+
                     break;
 
                 case Key.K_ENTER:
@@ -2222,7 +2630,7 @@ forward:
                     Menu.ReturnOnError = true;
                     _Sorted = false;
                     MenuBase.Hide();
-                    Cbuf.AddText( String.Format( "connect \"{0}\"\n", Net.HostCache[_Cursor].cname ) );
+                    Cbuf.AddText( string.Format( "connect \"{0}\"\n", Net.HostCache[_Cursor].cname ) );
                     break;
 
                 default:
@@ -2238,7 +2646,7 @@ forward:
                 {
                     Comparison<hostcache_t> cmp = delegate ( hostcache_t a, hostcache_t b )
                     {
-                        return String.Compare( a.cname, b.cname );
+                        return string.Compare( a.cname, b.cname );
                     };
 
                     Array.Sort( Net.HostCache, cmp );
@@ -2253,15 +2661,22 @@ forward:
                 hostcache_t hc = Net.HostCache[n];
                 string tmp;
                 if( hc.maxusers > 0 )
-                    tmp = String.Format( "{0,-15} {1,-15} {2:D2}/{3:D2}\n", hc.name, hc.map, hc.users, hc.maxusers );
+                {
+                    tmp = string.Format( "{0,-15} {1,-15} {2:D2}/{3:D2}\n", hc.name, hc.map, hc.users, hc.maxusers );
+                }
                 else
-                    tmp = String.Format( "{0,-15} {1,-15}\n", hc.name, hc.map );
+                {
+                    tmp = string.Format( "{0,-15} {1,-15}\n", hc.name, hc.map );
+                }
+
                 Menu.Print( 16, 32 + 8 * n, tmp );
             }
             Menu.DrawCharacter( 0, 32 + _Cursor * 8, 12 + ( (int)( Host.RealTime * 4 ) & 1 ) );
 
-            if( !String.IsNullOrEmpty( Menu.ReturnReason ) )
+            if( !string.IsNullOrEmpty( Menu.ReturnReason ) )
+            {
                 Menu.PrintWhite( 16, 148, Menu.ReturnReason );
+            }
         }
     }
 
@@ -2279,7 +2694,7 @@ forward:
         private const int MAX_MODEDESCS = MAX_COLUMN_SIZE * 3;
 
         private int _WModes;
-        private modedesc_t[] _ModeDescs = new modedesc_t[MAX_MODEDESCS];
+        private readonly modedesc_t[] _ModeDescs = new modedesc_t[MAX_MODEDESCS];
 
         public override void KeyEvent( int key )
         {
@@ -2310,11 +2725,13 @@ forward:
                 int k = _WModes;
 
                 _ModeDescs[k].modenum = i;
-                _ModeDescs[k].desc = String.Format( "{0}x{1}x{2}", m.width, m.height, m.bpp );
+                _ModeDescs[k].desc = string.Format( "{0}x{1}x{2}", m.width, m.height, m.bpp );
                 _ModeDescs[k].iscur = false;
 
                 if( i == Vid.ModeNum )
+                {
                     _ModeDescs[k].iscur = true;
+                }
 
                 _WModes++;
             }
@@ -2329,9 +2746,13 @@ forward:
                 for( int i = 0; i < _WModes; i++ )
                 {
                     if( _ModeDescs[i].iscur )
+                    {
                         Menu.PrintWhite( column, row, _ModeDescs[i].desc );
+                    }
                     else
+                    {
                         Menu.Print( column, row, _ModeDescs[i].desc );
+                    }
 
                     column += 13 * 8;
 

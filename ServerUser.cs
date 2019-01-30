@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -40,10 +37,9 @@ namespace SharpQuake
         private static edict_t _Player;
         private static bool _OnGround;
 
-        // world
-        // static v3f angles - this must be a reference to _Player.v.angles
-        // static v3f origin  - this must be a reference to _Player.v.origin
-        // static Vector3 velocity - this must be a reference to _Player.v.velocity
+        // world static v3f angles - this must be a reference to _Player.v.angles static v3f origin -
+        // this must be a reference to _Player.v.origin static Vector3 velocity - this must be a
+        // reference to _Player.v.velocity
 
         private static usercmd_t _Cmd;
 
@@ -60,7 +56,9 @@ namespace SharpQuake
             {
                 Host.HostClient = svs.clients[i];
                 if( !Host.HostClient.active )
+                {
                     continue;
+                }
 
                 _Player = Host.HostClient.edict;
 
@@ -79,14 +77,18 @@ namespace SharpQuake
 
                 // always pause in single player if in console or menus
                 if( !sv.paused && ( svs.maxclients > 1 || Key.Destination == keydest_t.key_game ) )
+                {
                     ClientThink();
+                }
             }
         }
 
         public static void SetIdealPitch()
         {
             if( ( (int)_Player.v.flags & EdictFlags.FL_ONGROUND ) == 0 )
+            {
                 return;
+            }
 
             double angleval = _Player.v.angles.y * Math.PI * 2 / 360;
             double sinval = Math.Sin( angleval );
@@ -104,10 +106,14 @@ namespace SharpQuake
 
                 trace_t tr = Move( ref top, ref Common.ZeroVector3f, ref Common.ZeroVector3f, ref bottom, 1, _Player );
                 if( tr.allsolid )
+                {
                     return; // looking at a wall, leave ideal the way is was
+                }
 
                 if( tr.fraction == 1 )
+                {
                     return; // near a dropoff
+                }
 
                 z[i] = top.z + tr.fraction * ( bottom.z - top.z );
             }
@@ -118,10 +124,14 @@ namespace SharpQuake
             {
                 float step = z[j] - z[j - 1]; // Uze: int in original code???
                 if( step > -QDef.ON_EPSILON && step < QDef.ON_EPSILON ) // Uze: comparing int with ON_EPSILON (0.1)???
+                {
                     continue;
+                }
 
                 if( dir != 0 && ( step - dir > QDef.ON_EPSILON || step - dir < -QDef.ON_EPSILON ) )
+                {
                     return;  // mixed changes
+                }
 
                 steps++;
                 dir = step;
@@ -134,7 +144,10 @@ namespace SharpQuake
             }
 
             if( steps < 2 )
+            {
                 return;
+            }
+
             _Player.v.idealpitch = -dir * _IdealPitchScale.Value;
         }
 
@@ -150,7 +163,9 @@ namespace SharpQuake
                     return false;
                 }
                 if( ret == 0 )
+                {
                     return true;
+                }
 
                 Net.Reader.Reset();
 
@@ -158,7 +173,9 @@ namespace SharpQuake
                 while( flag )
                 {
                     if( !Host.HostClient.active )
+                    {
                         return false; // a command caused an error
+                    }
 
                     if( Net.Reader.IsBadRead )
                     {
@@ -180,53 +197,104 @@ namespace SharpQuake
                         case Protocol.clc_stringcmd:
                             string s = Net.Reader.ReadString();
                             if( Host.HostClient.privileged )
+                            {
                                 ret = 2;
+                            }
                             else
+                            {
                                 ret = 0;
+                            }
+
                             if( Common.SameText( s, "status", 6 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "god", 3 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "notarget", 8 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "fly", 3 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "name", 4 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "noclip", 6 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "say", 3 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "say_team", 8 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "tell", 4 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "color", 5 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "kill", 4 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "pause", 5 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "spawn", 5 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "begin", 5 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "prespawn", 8 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "kick", 4 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "ping", 4 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "give", 4 ) )
+                            {
                                 ret = 1;
+                            }
                             else if( Common.SameText( s, "ban", 3 ) )
+                            {
                                 ret = 1;
+                            }
+
                             if( ret == 2 )
+                            {
                                 Cbuf.InsertText( s );
+                            }
                             else if( ret == 1 )
+                            {
                                 Cmd.ExecuteString( s, cmd_source_t.src_client );
+                            }
                             else
+                            {
                                 Con.DPrint( "{0} tried to {1}\n", Host.HostClient.name, s );
+                            }
+
                             break;
 
                         case Protocol.clc_disconnect:
@@ -243,7 +311,9 @@ namespace SharpQuake
                 }
 
                 if( ret != 1 )
+                {
                     break;
+                }
             }
 
             return true;
@@ -273,7 +343,9 @@ namespace SharpQuake
 
             int i = Net.Reader.ReadByte();
             if( i != 0 )
+            {
                 client.edict.v.impulse = i;
+            }
         }
 
         /* the move fields specify an intended velocity in pix/sec
@@ -283,7 +355,9 @@ namespace SharpQuake
         private static void ClientThink()
         {
             if( _Player.v.movetype == Movetypes.MOVETYPE_NONE )
+            {
                 return;
+            }
 
             _OnGround = ( (int)_Player.v.flags & EdictFlags.FL_ONGROUND ) != 0;
 
@@ -291,14 +365,14 @@ namespace SharpQuake
 
             // if dead, behave differently
             if( _Player.v.health <= 0 )
+            {
                 return;
+            }
 
-            // angles
-            // show 1/3 the pitch angle and all the roll angle
+            // angles show 1/3 the pitch angle and all the roll angle
             _Cmd = Host.HostClient.cmd;
 
-            v3f v_angle;
-            Mathlib.VectorAdd( ref _Player.v.v_angle, ref _Player.v.punchangle, out v_angle );
+            Mathlib.VectorAdd( ref _Player.v.v_angle, ref _Player.v.punchangle, out v3f v_angle );
             Vector3 pang = Common.ToVector( ref _Player.v.angles );
             Vector3 pvel = Common.ToVector( ref _Player.v.velocity );
             _Player.v.angles.z = View.CalcRoll( ref pang, ref pvel ) * 4;
@@ -329,7 +403,10 @@ namespace SharpQuake
             Vector3 v = Common.ToVector( ref _Player.v.punchangle );
             double len = Mathlib.Normalize( ref v ) - 10 * Host.FrameTime;
             if( len < 0 )
+            {
                 len = 0;
+            }
+
             v *= (float)len;
             Mathlib.Copy( ref v, out _Player.v.punchangle );
         }
@@ -353,9 +430,13 @@ namespace SharpQuake
             Vector3 wishvel = _Forward * _Cmd.forwardmove + _Right * _Cmd.sidemove;
 
             if( _Cmd.forwardmove == 0 && _Cmd.sidemove == 0 && _Cmd.upmove == 0 )
+            {
                 wishvel.Z -= 60;  // drift towards bottom
+            }
             else
+            {
                 wishvel.Z += _Cmd.upmove;
+            }
 
             float wishspeed = wishvel.Length;
             if( wishspeed > _MaxSpeed.Value )
@@ -371,24 +452,35 @@ namespace SharpQuake
             {
                 newspeed = (float)( speed - Host.FrameTime * speed * _Friction.Value );
                 if( newspeed < 0 )
+                {
                     newspeed = 0;
+                }
+
                 Mathlib.VectorScale( ref _Player.v.velocity, newspeed / speed, out _Player.v.velocity );
             }
             else
+            {
                 newspeed = 0;
+            }
 
             // water acceleration
             if( wishspeed == 0 )
+            {
                 return;
+            }
 
             float addspeed = wishspeed - newspeed;
             if( addspeed <= 0 )
+            {
                 return;
+            }
 
             Mathlib.Normalize( ref wishvel );
             float accelspeed = (float)( _Accelerate.Value * wishspeed * Host.FrameTime );
             if( accelspeed > addspeed )
+            {
                 accelspeed = addspeed;
+            }
 
             wishvel *= accelspeed;
             _Player.v.velocity.x += wishvel.X;
@@ -406,14 +498,20 @@ namespace SharpQuake
 
             // hack to not let you back into teleporter
             if( sv.time < _Player.v.teleport_time && fmove < 0 )
+            {
                 fmove = 0;
+            }
 
             Vector3 wishvel = _Forward * fmove + _Right * smove;
 
             if( (int)_Player.v.movetype != Movetypes.MOVETYPE_WALK )
+            {
                 wishvel.Z = _Cmd.upmove;
+            }
             else
+            {
                 wishvel.Z = 0;
+            }
 
             _WishDir = wishvel;
             _WishSpeed = Mathlib.Normalize( ref _WishDir );
@@ -444,7 +542,9 @@ namespace SharpQuake
         {
             float speed = Mathlib.LengthXY( ref _Player.v.velocity );
             if( speed == 0 )
+            {
                 return;
+            }
 
             // if the leading edge is over a dropoff, increase friction
             Vector3 start, stop;
@@ -456,14 +556,19 @@ namespace SharpQuake
             trace_t trace = Move( ref start, ref Common.ZeroVector, ref Common.ZeroVector, ref stop, 1, _Player );
             float friction = _Friction.Value;
             if( trace.fraction == 1.0 )
+            {
                 friction *= _EdgeFriction.Value;
+            }
 
             // apply friction
             float control = speed < _StopSpeed.Value ? _StopSpeed.Value : speed;
             float newspeed = (float)( speed - Host.FrameTime * control * friction );
 
             if( newspeed < 0 )
+            {
                 newspeed = 0;
+            }
+
             newspeed /= speed;
 
             Mathlib.VectorScale( ref _Player.v.velocity, newspeed, out _Player.v.velocity );
@@ -474,11 +579,15 @@ namespace SharpQuake
             float currentspeed = Vector3.Dot( Common.ToVector( ref _Player.v.velocity ), _WishDir );
             float addspeed = _WishSpeed - currentspeed;
             if( addspeed <= 0 )
+            {
                 return;
+            }
 
             float accelspeed = (float)( _Accelerate.Value * Host.FrameTime * _WishSpeed );
             if( accelspeed > addspeed )
+            {
                 accelspeed = addspeed;
+            }
 
             _Player.v.velocity.x += _WishDir.X * accelspeed;
             _Player.v.velocity.y += _WishDir.Y * accelspeed;
@@ -489,14 +598,22 @@ namespace SharpQuake
         {
             float wishspd = Mathlib.Normalize( ref wishveloc );
             if( wishspd > 30 )
+            {
                 wishspd = 30;
+            }
+
             float currentspeed = Vector3.Dot( Common.ToVector( ref _Player.v.velocity ), wishveloc );
             float addspeed = wishspd - currentspeed;
             if( addspeed <= 0 )
+            {
                 return;
+            }
+
             float accelspeed = (float)( _Accelerate.Value * _WishSpeed * Host.FrameTime );
             if( accelspeed > addspeed )
+            {
                 accelspeed = addspeed;
+            }
 
             wishveloc *= accelspeed;
             _Player.v.velocity.x += wishveloc.X;

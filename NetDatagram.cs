@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -46,11 +43,11 @@ namespace SharpQuake
             }
         }
 
-        private static NetDatagram _Singletone = new NetDatagram();
+        private static readonly NetDatagram _Singletone = new NetDatagram();
 
         private int _DriverLevel;
         private bool _IsInitialized;
-        private byte[] _PacketBuffer;
+        private readonly byte[] _PacketBuffer;
         private int packetsSent;
         private int packetsReSent;
         private int packetsReceived;
@@ -81,10 +78,14 @@ namespace SharpQuake
             else if( Cmd.Argv( 1 ) == "*" )
             {
                 foreach( qsocket_t s in Net.ActiveSockets )
+                {
                     PrintStats( s );
+                }
 
                 foreach( qsocket_t s in Net.FreeSockets )
+                {
                     PrintStats( s );
+                }
             }
             else
             {
@@ -92,21 +93,31 @@ namespace SharpQuake
                 string cmdAddr = Cmd.Argv( 1 );
 
                 foreach( qsocket_t s in Net.ActiveSockets )
+                {
                     if( Common.SameText( s.address, cmdAddr ) )
                     {
                         sock = s;
                         break;
                     }
+                }
 
                 if( sock == null )
+                {
                     foreach( qsocket_t s in Net.FreeSockets )
+                    {
                         if( Common.SameText( s.address, cmdAddr ) )
                         {
                             sock = s;
                             break;
                         }
+                    }
+                }
+
                 if( sock == null )
+                {
                     return;
+                }
+
                 PrintStats( sock );
             }
         }
@@ -148,7 +159,9 @@ namespace SharpQuake
             Cmd.Add( "net_stats", Stats_f );
 
             if( Common.HasParam( "-nolan" ) )
+            {
                 return;
+            }
 
             foreach( INetLanDriver driver in Net.LanDrivers )
             {
@@ -167,7 +180,9 @@ namespace SharpQuake
             foreach( INetLanDriver drv in Net.LanDrivers )
             {
                 if( drv.IsInitialized )
+                {
                     drv.Listen( state );
+                }
             }
         }
 
@@ -176,9 +191,14 @@ namespace SharpQuake
             for( Net.LanDriverLevel = 0; Net.LanDriverLevel < Net.LanDrivers.Length; Net.LanDriverLevel++ )
             {
                 if( Net.HostCacheCount == Net.HOSTCACHESIZE )
+                {
                     break;
+                }
+
                 if( Net.LanDrivers[Net.LanDriverLevel].IsInitialized )
+                {
                     InternalSearchForHosts( xmit );
+                }
             }
         }
 
@@ -187,12 +207,17 @@ namespace SharpQuake
             qsocket_t ret = null;
 
             for( Net.LanDriverLevel = 0; Net.LanDriverLevel < Net.LanDrivers.Length; Net.LanDriverLevel++ )
+            {
                 if( Net.LanDrivers[Net.LanDriverLevel].IsInitialized )
                 {
                     ret = InternalConnect( host );
                     if( ret != null )
+                    {
                         break;
+                    }
                 }
+            }
+
             return ret;
         }
 
@@ -201,12 +226,17 @@ namespace SharpQuake
             qsocket_t ret = null;
 
             for( Net.LanDriverLevel = 0; Net.LanDriverLevel < Net.LanDrivers.Length; Net.LanDriverLevel++ )
+            {
                 if( Net.LanDriver.IsInitialized )
                 {
                     ret = InternalCheckNewConnections();
                     if( ret != null )
+                    {
                         break;
+                    }
                 }
+            }
+
             return ret;
         }
 
@@ -214,29 +244,43 @@ namespace SharpQuake
         {
             Socket acceptsock = Net.LanDriver.CheckNewConnections();
             if( acceptsock == null )
+            {
                 return null;
+            }
 
             EndPoint clientaddr = new IPEndPoint( IPAddress.Any, 0 );
             Net.Message.FillFrom( acceptsock, ref clientaddr );
 
             if( Net.Message.Length < sizeof( int ) )
+            {
                 return null;
+            }
 
             Net.Reader.Reset();
             int control = Common.BigLong( Net.Reader.ReadLong() );
             if( control == -1 )
+            {
                 return null;
+            }
+
             if( ( control & ( ~NetFlags.NETFLAG_LENGTH_MASK ) ) != NetFlags.NETFLAG_CTL )
+            {
                 return null;
+            }
+
             if( ( control & NetFlags.NETFLAG_LENGTH_MASK ) != Net.Message.Length )
+            {
                 return null;
+            }
 
             int command = Net.Reader.ReadByte();
             if( command == CCReq.CCREQ_SERVER_INFO )
             {
                 string tmp = Net.Reader.ReadString();
                 if( tmp != "QUAKE" )
+                {
                     return null;
+                }
 
                 Net.Message.Clear();
 
@@ -269,11 +313,15 @@ namespace SharpQuake
                     {
                         activeNumber++;
                         if( activeNumber == playerNumber )
+                        {
                             break;
+                        }
                     }
                 }
                 if( clientNumber == Server.svs.maxclients )
+                {
                     return null;
+                }
 
                 Net.Message.Clear();
                 // save space for the header, filled in later
@@ -298,21 +346,29 @@ namespace SharpQuake
                 // find the search start location
                 string prevCvarName = Net.Reader.ReadString();
                 Cvar var;
-                if( !String.IsNullOrEmpty( prevCvarName ) )
+                if( !string.IsNullOrEmpty( prevCvarName ) )
                 {
                     var = Cvar.Find( prevCvarName );
                     if( var == null )
+                    {
                         return null;
+                    }
+
                     var = var.Next;
                 }
                 else
+                {
                     var = Cvar.First;
+                }
 
                 // search for the next server cvar
                 while( var != null )
                 {
                     if( var.IsServer )
+                    {
                         break;
+                    }
+
                     var = var.Next;
                 }
 
@@ -336,10 +392,14 @@ namespace SharpQuake
             }
 
             if( command != CCReq.CCREQ_CONNECT )
+            {
                 return null;
+            }
 
             if( Net.Reader.ReadString() != "QUAKE" )
+            {
                 return null;
+            }
 
             if( Net.Reader.ReadByte() != Net.NET_PROTOCOL_VERSION )
             {
@@ -380,7 +440,9 @@ namespace SharpQuake
             foreach( qsocket_t s in Net.ActiveSockets )
             {
                 if( s.driver != Net.DriverLevel )
+                {
                     continue;
+                }
 
                 int ret = Net.LanDriver.AddrCompare( clientaddr, s.addr );
                 if( ret >= 0 )
@@ -466,8 +528,12 @@ namespace SharpQuake
         public int GetMessage( qsocket_t sock )
         {
             if( !sock.canSend )
+            {
                 if( ( Net.Time - sock.lastSendTime ) > 1.0 )
+                {
                     ReSendMessage( sock );
+                }
+            }
 
             int ret = 0;
             EndPoint readaddr = new IPEndPoint( IPAddress.Any, 0 );
@@ -475,7 +541,9 @@ namespace SharpQuake
             {
                 int length = sock.Read( _PacketBuffer, Net.NET_DATAGRAMSIZE, ref readaddr );
                 if( length == 0 )
+                {
                     break;
+                }
 
                 if( length == -1 )
                 {
@@ -506,7 +574,9 @@ namespace SharpQuake
                 length &= NetFlags.NETFLAG_LENGTH_MASK;
 
                 if( ( flags & NetFlags.NETFLAG_CTL ) != 0 )
+                {
                     continue;
+                }
 
                 uint sequence = (uint)Common.BigLong( header.sequence );
                 packetsReceived++;
@@ -546,7 +616,9 @@ namespace SharpQuake
                     {
                         sock.ackSequence++;
                         if( sock.ackSequence != sock.sendSequence )
+                        {
                             Con.DPrint( "ack sequencing error\n" );
+                        }
                     }
                     else
                     {
@@ -602,7 +674,9 @@ namespace SharpQuake
             }
 
             if( sock.sendNext )
+            {
                 SendMessageNext( sock );
+            }
 
             return ret;
         }
@@ -644,7 +718,9 @@ namespace SharpQuake
             sock.canSend = false;
 
             if( sock.Write( _PacketBuffer, packetLen, sock.addr ) == -1 )
+            {
                 return -1;
+            }
 
             sock.lastSendTime = Net.Time;
             packetsSent++;
@@ -672,7 +748,9 @@ namespace SharpQuake
             Buffer.BlockCopy( data.Data, 0, _PacketBuffer, PacketHeader.SizeInBytes, data.Length );
 
             if( sock.Write( _PacketBuffer, packetLen, sock.addr ) == -1 )
+            {
                 return -1;
+            }
 
             packetsSent++;
             return 1;
@@ -681,7 +759,9 @@ namespace SharpQuake
         public bool CanSendMessage( qsocket_t sock )
         {
             if( sock.sendNext )
+            {
                 SendMessageNext( sock );
+            }
 
             return sock.canSend;
         }
@@ -702,7 +782,9 @@ namespace SharpQuake
             foreach( INetLanDriver driver in Net.LanDrivers )
             {
                 if( driver.IsInitialized )
+                {
                     driver.Shutdown();
+                }
             }
 
             _IsInitialized = false;
@@ -730,41 +812,66 @@ namespace SharpQuake
             {
                 Net.Message.FillFrom( Net.LanDriver.ControlSocket, ref readaddr );
                 if( Net.Message.IsEmpty )
+                {
                     break;
+                }
+
                 if( Net.Message.Length < sizeof( int ) )
+                {
                     continue;
+                }
 
                 // don't answer our own query
                 if( Net.LanDriver.AddrCompare( readaddr, myaddr ) >= 0 )
+                {
                     continue;
+                }
 
                 // is the cache full?
                 if( Net.HostCacheCount == Net.HOSTCACHESIZE )
+                {
                     continue;
+                }
 
                 Net.Reader.Reset();
                 int control = Common.BigLong( Net.Reader.ReadLong() );
 
                 if( control == -1 )
+                {
                     continue;
+                }
+
                 if( ( control & ( ~NetFlags.NETFLAG_LENGTH_MASK ) ) != NetFlags.NETFLAG_CTL )
+                {
                     continue;
+                }
+
                 if( ( control & NetFlags.NETFLAG_LENGTH_MASK ) != Net.Message.Length )
+                {
                     continue;
+                }
 
                 if( Net.Reader.ReadByte() != CCRep.CCREP_SERVER_INFO )
+                {
                     continue;
+                }
 
                 readaddr = Net.LanDriver.GetAddrFromName( Net.Reader.ReadString() );
                 int n;
                 // search the cache for this server
                 for( n = 0; n < Net.HostCacheCount; n++ )
+                {
                     if( Net.LanDriver.AddrCompare( readaddr, Net.HostCache[n].addr ) == 0 )
+                    {
                         break;
+                    }
+                }
 
                 // is it already there?
                 if( n < Net.HostCacheCount )
+                {
                     continue;
+                }
 
                 // add it
                 Net.HostCacheCount++;
@@ -788,7 +895,10 @@ namespace SharpQuake
                 for( int i = 0; i < Net.HostCacheCount; i++ )
                 {
                     if( i == n )
+                    {
                         continue;
+                    }
+
                     hostcache_t hc2 = Net.HostCache[i];
                     if( hc.name == hc2.name )
                     {
@@ -798,7 +908,10 @@ namespace SharpQuake
                             hc.name = hc.name.Substring( 0, i ) + '0';
                         }
                         else
+                        {
                             hc.name = hc.name.Substring( 0, i - 1 ) + (char)( hc.name[i - 1] + 1 );
+                        }
+
                         i = 0;// -1;
                     }
                 }
@@ -810,21 +923,30 @@ namespace SharpQuake
             // see if we can resolve the host name
             EndPoint sendaddr = Net.LanDriver.GetAddrFromName( host );
             if( sendaddr == null )
+            {
                 return null;
+            }
 
             Socket newsock = Net.LanDriver.OpenSocket( 0 );
             if( newsock == null )
+            {
                 return null;
+            }
 
             qsocket_t sock = Net.NewSocket();
             if( sock == null )
+            {
                 goto ErrorReturn2;
+            }
+
             sock.socket = newsock;
             sock.landriver = Net.LanDriverLevel;
 
             // connect to the host
             if( Net.LanDriver.Connect( newsock, sendaddr ) == -1 )
+            {
                 goto ErrorReturn;
+            }
 
             // send the connection request
             Con.Print( "trying...\n" );
@@ -892,13 +1014,16 @@ namespace SharpQuake
                 }
                 while( ( ret == 0 ) && ( Net.SetNetTime() - start_time ) < 2.5 );
                 if( ret > 0 )
+                {
                     break;
+                }
+
                 Con.Print( "still trying...\n" );
                 Scr.UpdateScreen();
                 start_time = Net.SetNetTime();
             }
 
-            string reason = String.Empty;
+            string reason = string.Empty;
             if( ret == 0 )
             {
                 reason = "No Response";
@@ -992,7 +1117,9 @@ ErrorReturn2:
             sock.sendNext = false;
 
             if( sock.Write( _PacketBuffer, packetLen, sock.addr ) == -1 )
+            {
                 return -1;
+            }
 
             sock.lastSendTime = Net.Time;
             packetsSent++;
@@ -1023,7 +1150,9 @@ ErrorReturn2:
             sock.sendNext = false;
 
             if( sock.Write( _PacketBuffer, packetLen, sock.addr ) == -1 )
+            {
                 return -1;
+            }
 
             sock.lastSendTime = Net.Time;
             packetsReSent++;

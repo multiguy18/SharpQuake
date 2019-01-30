@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -103,7 +100,10 @@ namespace SharpQuake
         public static edict_t EdictNum( int n )
         {
             if( n < 0 || n >= _Server.max_edicts )
+            {
                 Sys.Error( "EDICT_NUM: bad number {0}", n );
+            }
+
             return _Server.edicts[n];
         }
 
@@ -122,8 +122,8 @@ namespace SharpQuake
             {
                 e = EdictNum( i );
 
-                // the first couple seconds of server time can involve a lot of
-                // freeing and allocating, so relax the replacement policy
+                // the first couple seconds of server time can involve a lot of freeing and
+                // allocating, so relax the replacement policy
                 if( e.free && ( e.freetime < 2 || sv.time - e.freetime > 0.5 ) )
                 {
                     e.Clear();
@@ -132,7 +132,9 @@ namespace SharpQuake
             }
 
             if( i == QDef.MAX_EDICTS )
+            {
                 Sys.Error( "ED_Alloc: no free edicts" );
+            }
 
             sv.num_edicts++;
             e = EdictNum( i );
@@ -170,7 +172,10 @@ namespace SharpQuake
         public static edict_t ProgToEdict( int e )
         {
             if( e < 0 || e > sv.edicts.Length )
+            {
                 Sys.Error( "ProgToEdict: Bad prog!" );
+            }
+
             return sv.edicts[e];
         }
 
@@ -179,7 +184,10 @@ namespace SharpQuake
             int i = Array.IndexOf( sv.edicts, e ); // todo: optimize this
 
             if( i < 0 )
+            {
                 Sys.Error( "NUM_FOR_EDICT: bad pointer" );
+            }
+
             return i;
         }
 
@@ -272,19 +280,19 @@ namespace SharpQuake
 
         public void Clear()
         {
-            this.axis = 0;
-            this.dist = 0;
-            this.children[0] = null;
-            this.children[1] = null;
-            this.trigger_edicts.ClearToNulls();
-            this.solid_edicts.ClearToNulls();
+            axis = 0;
+            dist = 0;
+            children[0] = null;
+            children[1] = null;
+            trigger_edicts.ClearToNulls();
+            solid_edicts.ClearToNulls();
         }
 
         public areanode_t()
         {
-            this.children = new areanode_t[2];
-            this.trigger_edicts = new link_t( this );
-            this.solid_edicts = new link_t( this );
+            children = new areanode_t[2];
+            trigger_edicts = new link_t( this );
+            solid_edicts = new link_t( this );
         }
     }
 
@@ -326,37 +334,37 @@ namespace SharpQuake
 
         public void Clear()
         {
-            this.active = false;
-            this.paused = false;
-            this.loadgame = false;
-            this.time = 0;
-            this.lastcheck = 0;
-            this.lastchecktime = 0;
-            this.name = null;
-            this.modelname = null;
-            this.worldmodel = null;
-            Array.Clear( this.model_precache, 0, this.model_precache.Length );
-            Array.Clear( this.models, 0, this.models.Length );
-            Array.Clear( this.sound_precache, 0, this.sound_precache.Length );
-            Array.Clear( this.lightstyles, 0, this.lightstyles.Length );
-            this.num_edicts = 0;
-            this.max_edicts = 0;
-            this.edicts = null;
-            this.state = 0;
-            this.datagram.Clear();
-            this.reliable_datagram.Clear();
-            this.signon.Clear();
+            active = false;
+            paused = false;
+            loadgame = false;
+            time = 0;
+            lastcheck = 0;
+            lastchecktime = 0;
+            name = null;
+            modelname = null;
+            worldmodel = null;
+            Array.Clear( model_precache, 0, model_precache.Length );
+            Array.Clear( models, 0, models.Length );
+            Array.Clear( sound_precache, 0, sound_precache.Length );
+            Array.Clear( lightstyles, 0, lightstyles.Length );
+            num_edicts = 0;
+            max_edicts = 0;
+            edicts = null;
+            state = 0;
+            datagram.Clear();
+            reliable_datagram.Clear();
+            signon.Clear();
         }
 
         public server_t()
         {
-            this.model_precache = new string[QDef.MAX_MODELS];
-            this.models = new model_t[QDef.MAX_MODELS];
-            this.sound_precache = new string[QDef.MAX_SOUNDS];
-            this.lightstyles = new string[QDef.MAX_LIGHTSTYLES];
-            this.datagram = new MsgWriter( QDef.MAX_DATAGRAM );
-            this.reliable_datagram = new MsgWriter( QDef.MAX_DATAGRAM );
-            this.signon = new MsgWriter( 8192 );
+            model_precache = new string[QDef.MAX_MODELS];
+            models = new model_t[QDef.MAX_MODELS];
+            sound_precache = new string[QDef.MAX_SOUNDS];
+            lightstyles = new string[QDef.MAX_LIGHTSTYLES];
+            datagram = new MsgWriter( QDef.MAX_DATAGRAM );
+            reliable_datagram = new MsgWriter( QDef.MAX_DATAGRAM );
+            signon = new MsgWriter( 8192 );
         }
     }
 
@@ -392,30 +400,30 @@ namespace SharpQuake
 
         public void Clear()
         {
-            this.active = false;
-            this.spawned = false;
-            this.dropasap = false;
-            this.privileged = false;
-            this.sendsignon = false;
-            this.last_message = 0;
-            this.netconnection = null;
-            this.cmd.Clear();
-            this.wishdir = Vector3.Zero;
-            this.message.Clear();
-            this.edict = null;
-            this.name = null;
-            this.colors = 0;
-            Array.Clear( this.ping_times, 0, this.ping_times.Length );
-            this.num_pings = 0;
-            Array.Clear( this.spawn_parms, 0, this.spawn_parms.Length );
-            this.old_frags = 0;
+            active = false;
+            spawned = false;
+            dropasap = false;
+            privileged = false;
+            sendsignon = false;
+            last_message = 0;
+            netconnection = null;
+            cmd.Clear();
+            wishdir = Vector3.Zero;
+            message.Clear();
+            edict = null;
+            name = null;
+            colors = 0;
+            Array.Clear( ping_times, 0, ping_times.Length );
+            num_pings = 0;
+            Array.Clear( spawn_parms, 0, spawn_parms.Length );
+            old_frags = 0;
         }
 
         public client_t()
         {
-            this.ping_times = new float[Server.NUM_PING_TIMES];
-            this.spawn_parms = new float[Server.NUM_SPAWN_PARMS];
-            this.message = new MsgWriter( QDef.MAX_MSGLEN );
+            ping_times = new float[Server.NUM_PING_TIMES];
+            spawn_parms = new float[Server.NUM_SPAWN_PARMS];
+            message = new MsgWriter( QDef.MAX_MSGLEN );
         }
     }
 }

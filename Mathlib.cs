@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -152,14 +149,20 @@ namespace SharpQuake
         public static float Comp( ref v3f a, int index )
         {
             if( index < 0 || index > 2 )
+            {
                 throw new ArgumentOutOfRangeException( "index" );
+            }
+
             return ( index == 0 ? a.x : ( index == 1 ? a.y : a.z ) );
         }
 
         public static float Comp( ref Vector3 a, int index )
         {
             if( index < 0 || index > 2 )
+            {
                 throw new ArgumentOutOfRangeException( "index" );
+            }
+
             return ( index == 0 ? a.X : ( index == 1 ? a.Y : a.Z ) );
         }
 
@@ -231,29 +234,51 @@ namespace SharpQuake
         public static void SetComp( ref Vector3 dest, int index, float value )
         {
             if( index == 0 )
+            {
                 dest.X = value;
+            }
             else if( index == 1 )
+            {
                 dest.Y = value;
+            }
             else if( index == 2 )
+            {
                 dest.Z = value;
+            }
             else
+            {
                 throw new ArgumentException( "Index must be in range 0-2!" );
+            }
         }
 
         public static void CorrectAngles180( ref Vector3 a )
         {
             if( a.X > 180 )
+            {
                 a.X -= 360;
+            }
             else if( a.X < -180 )
+            {
                 a.X += 360;
+            }
+
             if( a.Y > 180 )
+            {
                 a.Y -= 360;
+            }
             else if( a.Y < -180 )
+            {
                 a.Y += 360;
+            }
+
             if( a.Z > 180 )
+            {
                 a.Z -= 360;
+            }
             else if( a.Z < -180 )
+            {
                 a.Z += 360;
+            }
         }
 
         public static void RotatePointAroundVector( out Vector3 dst, ref Vector3 dir, ref Vector3 point, float degrees )
@@ -332,9 +357,14 @@ namespace SharpQuake
 
             int sides = 0;
             if( dist1 >= p.dist )
+            {
                 sides = 1;
+            }
+
             if( dist2 < p.dist )
+            {
                 sides |= 2;
+            }
 
 #if PARANOID
             if (sides == 0)

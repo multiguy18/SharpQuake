@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 namespace SharpQuake
@@ -33,10 +30,14 @@ namespace SharpQuake
         public static bool Init()
         {
             if( Client.cls.state == cactive_t.ca_dedicated )
+            {
                 return false;
+            }
 
             if( Common.HasParam( "-nocdaudio" ) )
+            {
                 return false;
+            }
 
             _Controller.Init();
 
@@ -82,7 +83,9 @@ namespace SharpQuake
         private static void CD_f()
         {
             if( Cmd.Argc < 2 )
+            {
                 return;
+            }
 
             string command = Cmd.Argv( 1 );
 
@@ -95,7 +98,10 @@ namespace SharpQuake
             if( Common.SameText( command, "off" ) )
             {
                 if( _Controller.IsPlaying )
+                {
                     _Controller.Stop();
+                }
+
                 _Controller.IsEnabled = false;
                 return;
             }
@@ -104,7 +110,9 @@ namespace SharpQuake
             {
                 _Controller.IsEnabled = true;
                 if( _Controller.IsPlaying )
+                {
                     _Controller.Stop();
+                }
 
                 _Controller.ReloadDiskInfo();
                 return;
@@ -117,12 +125,20 @@ namespace SharpQuake
                 if( ret <= 0 )
                 {
                     for( int n = 1; n < 100; n++ )
+                    {
                         if( remap[n] != n )
+                        {
                             Con.Print( "  {0} -> {1}\n", n, remap[n] );
+                        }
+                    }
+
                     return;
                 }
                 for( int n = 1; n <= ret; n++ )
+                {
                     remap[n] = (byte)Common.atoi( Cmd.Argv( n + 1 ) );
+                }
+
                 return;
             }
 
@@ -175,7 +191,10 @@ namespace SharpQuake
             if( Common.SameText( command, "eject" ) )
             {
                 if( _Controller.IsPlaying )
+                {
                     _Controller.Stop();
+                }
+
                 _Controller.Edject();
                 return;
             }
@@ -184,9 +203,14 @@ namespace SharpQuake
             {
                 Con.Print( "%u tracks\n", _Controller.MaxTrack );
                 if( _Controller.IsPlaying )
+                {
                     Con.Print( "Currently {0} track {1}\n", _Controller.IsLooping ? "looping" : "playing", _Controller.CurrentTrack );
+                }
                 else if( _Controller.IsPaused )
+                {
                     Con.Print( "Paused {0} track {1}\n", _Controller.IsLooping ? "looping" : "playing", _Controller.CurrentTrack );
+                }
+
                 Con.Print( "Volume is {0}\n", _Controller.Volume );
                 return;
             }
@@ -195,7 +219,7 @@ namespace SharpQuake
 
     internal class NullCDAudioController : ICDAudioController
     {
-        private byte[] _Remap;
+        private readonly byte[] _Remap;
 
         public NullCDAudioController()
         {

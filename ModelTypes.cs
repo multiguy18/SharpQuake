@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System.Runtime.InteropServices;
@@ -25,8 +22,7 @@ using OpenTK;
 
 namespace SharpQuake
 {
-    // d*_t structures are on-disk representations
-    // m*_t structures are in-memory
+    // d*_t structures are on-disk representations m*_t structures are in-memory
 
     // in memory representation
     internal struct mvertex_t
@@ -57,8 +53,8 @@ namespace SharpQuake
 
         public void Init()
         {
-            this.bboxmin.Init();
-            this.bboxmax.Init();
+            bboxmin.Init();
+            bboxmax.Init();
         }
     }
 
@@ -143,8 +139,10 @@ namespace SharpQuake
         // Call only for manually created instances
         public void Init()
         {
-            if( this.v == null )
-                this.v = new byte[3];
+            if( v == null )
+            {
+                v = new byte[3];
+            }
         }
     }
 
@@ -377,19 +375,21 @@ namespace SharpQuake
 
         public void Clear()
         {
-            this.next = null;
-            this.chain = null;
-            this.numverts = 0;
-            this.flags = 0;
-            this.verts = null;
+            next = null;
+            chain = null;
+            numverts = 0;
+            flags = 0;
+            verts = null;
         }
 
         public void AllocVerts( int count )
         {
-            this.numverts = count;
-            this.verts = new float[count][];
+            numverts = count;
+            verts = new float[count][];
             for( int i = 0; i < count; i++ )
-                this.verts[i] = new float[Mod.VERTEXSIZE];
+            {
+                verts[i] = new float[Mod.VERTEXSIZE];
+            }
         }
     }
 
@@ -463,7 +463,7 @@ namespace SharpQuake
 
         public mnode_t()
         {
-            this.children = new mnodebase_t[2];
+            children = new mnodebase_t[2];
         }
     }
 
@@ -484,7 +484,7 @@ namespace SharpQuake
 
         public mleaf_t()
         {
-            this.ambient_sound_level = new byte[Ambients.NUM_AMBIENTS];
+            ambient_sound_level = new byte[Ambients.NUM_AMBIENTS];
         }
     }
 
@@ -499,22 +499,22 @@ namespace SharpQuake
 
         public void Clear()
         {
-            this.clipnodes = null;
-            this.planes = null;
-            this.firstclipnode = 0;
-            this.lastclipnode = 0;
-            this.clip_mins = Vector3.Zero;
-            this.clip_maxs = Vector3.Zero;
+            clipnodes = null;
+            planes = null;
+            firstclipnode = 0;
+            lastclipnode = 0;
+            clip_mins = Vector3.Zero;
+            clip_maxs = Vector3.Zero;
         }
 
         public void CopyFrom( hull_t src )
         {
-            this.clipnodes = src.clipnodes;
-            this.planes = src.planes;
-            this.firstclipnode = src.firstclipnode;
-            this.lastclipnode = src.lastclipnode;
-            this.clip_mins = src.clip_mins;
-            this.clip_maxs = src.clip_maxs;
+            clipnodes = src.clipnodes;
+            planes = src.planes;
+            firstclipnode = src.firstclipnode;
+            lastclipnode = src.lastclipnode;
+            clip_mins = src.clip_mins;
+            clip_maxs = src.clip_maxs;
         }
     }
 
@@ -583,8 +583,8 @@ namespace SharpQuake
 
         public aliashdr_t()
         {
-            this.gl_texturenum = new int[Mod.MAX_SKINS, 4];
-            this.texels = new object[Mod.MAX_SKINS];
+            gl_texturenum = new int[Mod.MAX_SKINS, 4];
+            texels = new object[Mod.MAX_SKINS];
         }
     }
 
@@ -662,138 +662,142 @@ namespace SharpQuake
 
         public void Clear()
         {
-            this.name = null;
-            this.needload = false;
-            this.type = 0;
-            this.numframes = 0;
-            this.synctype = 0;
-            this.flags = 0;
-            this.mins = Vector3.Zero;
-            this.maxs = Vector3.Zero;
-            this.radius = 0;
-            this.clipbox = false;
-            this.clipmins = Vector3.Zero;
-            this.clipmaxs = Vector3.Zero;
-            this.firstmodelsurface = 0;
-            this.nummodelsurfaces = 0;
+            name = null;
+            needload = false;
+            type = 0;
+            numframes = 0;
+            synctype = 0;
+            flags = 0;
+            mins = Vector3.Zero;
+            maxs = Vector3.Zero;
+            radius = 0;
+            clipbox = false;
+            clipmins = Vector3.Zero;
+            clipmaxs = Vector3.Zero;
+            firstmodelsurface = 0;
+            nummodelsurfaces = 0;
 
-            this.numsubmodels = 0;
-            this.submodels = null;
+            numsubmodels = 0;
+            submodels = null;
 
-            this.numplanes = 0;
-            this.planes = null;
+            numplanes = 0;
+            planes = null;
 
-            this.numleafs = 0;
-            this.leafs = null;
+            numleafs = 0;
+            leafs = null;
 
-            this.numvertexes = 0;
-            this.vertexes = null;
+            numvertexes = 0;
+            vertexes = null;
 
-            this.numedges = 0;
-            this.edges = null;
+            numedges = 0;
+            edges = null;
 
-            this.numnodes = 0;
-            this.nodes = null;
+            numnodes = 0;
+            nodes = null;
 
-            this.numtexinfo = 0;
-            this.texinfo = null;
+            numtexinfo = 0;
+            texinfo = null;
 
-            this.numsurfaces = 0;
-            this.surfaces = null;
+            numsurfaces = 0;
+            surfaces = null;
 
-            this.numsurfedges = 0;
-            this.surfedges = null;
+            numsurfedges = 0;
+            surfedges = null;
 
-            this.numclipnodes = 0;
-            this.clipnodes = null;
+            numclipnodes = 0;
+            clipnodes = null;
 
-            this.nummarksurfaces = 0;
-            this.marksurfaces = null;
+            nummarksurfaces = 0;
+            marksurfaces = null;
 
-            foreach( hull_t h in this.hulls )
+            foreach( hull_t h in hulls )
+            {
                 h.Clear();
+            }
 
-            this.numtextures = 0;
-            this.textures = null;
+            numtextures = 0;
+            textures = null;
 
-            this.visdata = null;
-            this.lightdata = null;
-            this.entities = null;
+            visdata = null;
+            lightdata = null;
+            entities = null;
 
-            this.cache = null;
+            cache = null;
         }
 
         public void CopyFrom( model_t src )
         {
-            this.name = src.name;
-            this.needload = src.needload;
-            this.type = src.type;
-            this.numframes = src.numframes;
-            this.synctype = src.synctype;
-            this.flags = src.flags;
-            this.mins = src.mins;
-            this.maxs = src.maxs;
-            this.radius = src.radius;
-            this.clipbox = src.clipbox;
-            this.clipmins = src.clipmins;
-            this.clipmaxs = src.clipmaxs;
-            this.firstmodelsurface = src.firstmodelsurface;
-            this.nummodelsurfaces = src.nummodelsurfaces;
+            name = src.name;
+            needload = src.needload;
+            type = src.type;
+            numframes = src.numframes;
+            synctype = src.synctype;
+            flags = src.flags;
+            mins = src.mins;
+            maxs = src.maxs;
+            radius = src.radius;
+            clipbox = src.clipbox;
+            clipmins = src.clipmins;
+            clipmaxs = src.clipmaxs;
+            firstmodelsurface = src.firstmodelsurface;
+            nummodelsurfaces = src.nummodelsurfaces;
 
-            this.numsubmodels = src.numsubmodels;
-            this.submodels = src.submodels;
+            numsubmodels = src.numsubmodels;
+            submodels = src.submodels;
 
-            this.numplanes = src.numplanes;
-            this.planes = src.planes;
+            numplanes = src.numplanes;
+            planes = src.planes;
 
-            this.numleafs = src.numleafs;
-            this.leafs = src.leafs;
+            numleafs = src.numleafs;
+            leafs = src.leafs;
 
-            this.numvertexes = src.numvertexes;
-            this.vertexes = src.vertexes;
+            numvertexes = src.numvertexes;
+            vertexes = src.vertexes;
 
-            this.numedges = src.numedges;
-            this.edges = src.edges;
+            numedges = src.numedges;
+            edges = src.edges;
 
-            this.numnodes = src.numnodes;
-            this.nodes = src.nodes;
+            numnodes = src.numnodes;
+            nodes = src.nodes;
 
-            this.numtexinfo = src.numtexinfo;
-            this.texinfo = src.texinfo;
+            numtexinfo = src.numtexinfo;
+            texinfo = src.texinfo;
 
-            this.numsurfaces = src.numsurfaces;
-            this.surfaces = src.surfaces;
+            numsurfaces = src.numsurfaces;
+            surfaces = src.surfaces;
 
-            this.numsurfedges = src.numsurfedges;
-            this.surfedges = src.surfedges;
+            numsurfedges = src.numsurfedges;
+            surfedges = src.surfedges;
 
-            this.numclipnodes = src.numclipnodes;
-            this.clipnodes = src.clipnodes;
+            numclipnodes = src.numclipnodes;
+            clipnodes = src.clipnodes;
 
-            this.nummarksurfaces = src.nummarksurfaces;
-            this.marksurfaces = src.marksurfaces;
+            nummarksurfaces = src.nummarksurfaces;
+            marksurfaces = src.marksurfaces;
 
             for( int i = 0; i < src.hulls.Length; i++ )
             {
-                this.hulls[i].CopyFrom( src.hulls[i] );
+                hulls[i].CopyFrom( src.hulls[i] );
             }
 
-            this.numtextures = src.numtextures;
-            this.textures = src.textures;
+            numtextures = src.numtextures;
+            textures = src.textures;
 
-            this.visdata = src.visdata;
-            this.lightdata = src.lightdata;
-            this.entities = src.entities;
+            visdata = src.visdata;
+            lightdata = src.lightdata;
+            entities = src.entities;
 
-            this.cache = src.cache;
+            cache = src.cache;
         }
 
         public model_t()
         {
-            this.hulls = new hull_t[BspFile.MAX_MAP_HULLS];
+            hulls = new hull_t[BspFile.MAX_MAP_HULLS];
 
-            for( int i = 0; i < this.hulls.Length; i++ )
-                this.hulls[i] = new hull_t();
+            for( int i = 0; i < hulls.Length; i++ )
+            {
+                hulls[i] = new hull_t();
+            }
         }
     }
 

@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -113,9 +110,9 @@ namespace SharpQuake
         public const int VID_ROW_SIZE = 3;
         private const int WARP_WIDTH = 320;
         private const int WARP_HEIGHT = 200;
-        private static ushort[] _8to16table = new ushort[256];
-        private static uint[] _8to24table = new uint[256];
-        private static byte[] _15to8table = new byte[65536];
+        private static readonly ushort[] _8to16table = new ushort[256];
+        private static readonly uint[] _8to24table = new uint[256];
+        private static readonly byte[] _15to8table = new byte[65536];
 
         private static mode_t[] _Modes;
         private static int _ModeNum;
@@ -182,30 +179,38 @@ namespace SharpQuake
             foreach( DisplayResolution res in dev.AvailableResolutions )
             {
                 if( res.BitsPerPixel <= 8 )
+                {
                     continue;
+                }
 
                 Predicate<mode_t> SameMode = delegate ( mode_t m )
                 {
                     return ( m.width == res.Width && m.height == res.Height && m.bpp == res.BitsPerPixel );
                 };
                 if( tmp.Exists( SameMode ) )
+                {
                     continue;
+                }
 
-                mode_t mode = new mode_t();
-                mode.width = res.Width;
-                mode.height = res.Height;
-                mode.bpp = res.BitsPerPixel;
-                mode.refreshRate = res.RefreshRate;
+                mode_t mode = new mode_t
+                {
+                    width = res.Width,
+                    height = res.Height,
+                    bpp = res.BitsPerPixel,
+                    refreshRate = res.RefreshRate
+                };
                 tmp.Add( mode );
             }
             _Modes = tmp.ToArray();
 
-            mode_t mode1 = new mode_t();
-            mode1.width = dev.Width;
-            mode1.height = dev.Height;
-            mode1.bpp = dev.BitsPerPixel;
-            mode1.refreshRate = dev.RefreshRate;
-            mode1.fullScreen = true;
+            mode_t mode1 = new mode_t
+            {
+                width = dev.Width,
+                height = dev.Height,
+                bpp = dev.BitsPerPixel,
+                refreshRate = dev.RefreshRate,
+                fullScreen = true
+            };
 
             int width = dev.Width, height = dev.Height;
             int i = Common.CheckParm( "-width" );
@@ -225,7 +230,9 @@ namespace SharpQuake
 
             i = Common.CheckParm( "-height" );
             if( i > 0 && i < Common.Argc - 1 )
+            {
                 height = Common.atoi( Common.Argv( i + 1 ) );
+            }
 
             mode1.width = width;
             mode1.height = height;
@@ -259,23 +266,34 @@ namespace SharpQuake
 
             int i2 = Common.CheckParm( "-conwidth" );
             if( i2 > 0 )
+            {
                 Scr.vid.conwidth = Common.atoi( Common.Argv( i2 + 1 ) );
+            }
             else
+            {
                 Scr.vid.conwidth = 640;
+            }
 
             Scr.vid.conwidth &= 0xfff8; // make it a multiple of eight
 
             if( Scr.vid.conwidth < 320 )
+            {
                 Scr.vid.conwidth = 320;
+            }
 
             // pick a conheight that matches with correct aspect
             Scr.vid.conheight = Scr.vid.conwidth * 3 / 4;
 
             i2 = Common.CheckParm( "-conheight" );
             if( i2 > 0 )
+            {
                 Scr.vid.conheight = Common.atoi( Common.Argv( i2 + 1 ) );
+            }
+
             if( Scr.vid.conheight < 200 )
+            {
                 Scr.vid.conheight = 200;
+            }
 
             Scr.vid.maxwarpwidth = WARP_WIDTH;
             Scr.vid.maxwarpheight = WARP_HEIGHT;
@@ -293,15 +311,21 @@ namespace SharpQuake
             {
                 mode_t m = _Modes[i];
                 if( m.width != mode1.width || m.height != mode1.height )
+                {
                     continue;
+                }
 
                 _DefModeNum = i;
 
                 if( m.bpp == mode1.bpp && m.refreshRate == mode1.refreshRate )
+                {
                     break;
+                }
             }
             if( _DefModeNum == -1 )
+            {
                 _DefModeNum = 0;
+            }
 
             SetMode( _DefModeNum, palette );
 
@@ -368,9 +392,14 @@ namespace SharpQuake
 
             viddef_t vid = Scr.vid;
             if( vid.conheight > dev.Height )
+            {
                 vid.conheight = dev.Height;
+            }
+
             if( vid.conwidth > dev.Width )
+            {
                 vid.conwidth = dev.Width;
+            }
 
             vid.width = vid.conwidth;
             vid.height = vid.conheight;
@@ -396,10 +425,12 @@ namespace SharpQuake
         public static string GetModeDescription( int mode )
         {
             if( mode < 0 || mode >= _Modes.Length )
-                return String.Empty;
+            {
+                return string.Empty;
+            }
 
             mode_t m = _Modes[mode];
-            return String.Format( "{0}x{1}x{2} {3}", m.width, m.height, m.bpp, _Windowed ? "windowed" : "fullscreen" );
+            return string.Format( "{0}x{1}x{2} {3}", m.width, m.height, m.bpp, _Windowed ? "windowed" : "fullscreen" );
         }
 
         // called at startup and after any gamma correction
@@ -426,11 +457,8 @@ namespace SharpQuake
             Union4b val = Union4b.Empty;
             for( uint i = 0; i < ( 1 << 15 ); i++ )
             {
-                // Maps
-                // 000000000000000
-                // 000000000011111 = Red  = 0x1F
-                // 000001111100000 = Blue = 0x03E0
-                // 111110000000000 = Grn  = 0x7C00
+                // Maps 000000000000000 000000000011111 = Red = 0x1F 000001111100000 = Blue = 0x03E0
+                // 111110000000000 = Grn = 0x7C00
                 uint r = ( ( ( i & 0x1F ) << 3 ) + 4 );
                 uint g = ( ( ( i & 0x03E0 ) >> 2 ) + 4 );
                 uint b = ( ( ( i & 0x7C00 ) >> 7 ) + 4 );
@@ -466,10 +494,14 @@ namespace SharpQuake
             Con.Print( "GL_EXTENSIONS: {0}\n", _glExtensions );
 
             if( _glRenderer.StartsWith( "PowerVR", StringComparison.InvariantCultureIgnoreCase ) )
+            {
                 Scr.FullSbarDraw = true;
+            }
 
             if( _glRenderer.StartsWith( "Permedia", StringComparison.InvariantCultureIgnoreCase ) )
+            {
                 Scr.IsPermedia = true;
+            }
 
             CheckTextureExtensions();
             CheckMultiTextureExtensions();
@@ -495,9 +527,13 @@ namespace SharpQuake
         {
             int nummodes = _Modes.Length;
             if( nummodes == 1 )
+            {
                 Con.Print( "{0} video mode is available\n", nummodes );
+            }
             else
+            {
                 Con.Print( "{0} video modes are available\n", nummodes );
+            }
         }
 
         private static void DescribeCurrentMode_f()
@@ -533,21 +569,33 @@ namespace SharpQuake
                 string renderer = GL.GetString( StringName.Renderer );
                 string vendor = GL.GetString( StringName.Vendor );
                 if( renderer.Contains( "Voodoo" ) || vendor.Contains( "3Dfx" ) )
+                {
                     _Gamma = 1;
+                }
                 else
+                {
                     _Gamma = 0.7f; // default to 0.7 on non-3dfx hardware
+                }
             }
             else
+            {
                 _Gamma = float.Parse( Common.Argv( i + 1 ) );
+            }
 
             for( i = 0; i < pal.Length; i++ )
             {
                 double f = Math.Pow( ( pal[i] + 1 ) / 256.0, _Gamma );
                 double inf = f * 255 + 0.5;
                 if( inf < 0 )
+                {
                     inf = 0;
+                }
+
                 if( inf > 255 )
+                {
                     inf = 255;
+                }
+
                 pal[i] = (byte)inf;
             }
         }

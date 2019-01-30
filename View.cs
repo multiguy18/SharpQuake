@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -90,13 +87,13 @@ namespace SharpQuake
         private static Cvar _CenterMove;
         private static Cvar _CenterSpeed;
 
-        private static byte[] _GammaTable; // palette is sent through this
+        private static readonly byte[] _GammaTable; // palette is sent through this
         private static cshift_t _CShift_empty;
-        private static cshift_t _CShift_water;
-        private static cshift_t _CShift_slime;
-        private static cshift_t _CShift_lava;
+        private static readonly cshift_t _CShift_water;
+        private static readonly cshift_t _CShift_slime;
+        private static readonly cshift_t _CShift_lava;
 
-        private static byte[,] _Ramps = new byte[3, 256];
+        private static readonly byte[,] _Ramps = new byte[3, 256];
 
         private static Vector3 _Forward;
         private static Vector3 _Right;
@@ -161,13 +158,15 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// The player's clipping box goes from (-16 -16 -24) to (16 16 32) from
-        /// the entity origin, so any view position inside that will be valid
+        /// The player's clipping box goes from (-16 -16 -24) to (16 16 32) from the entity origin,
+        /// so any view position inside that will be valid
         /// </summary>
         public static void RenderView()
         {
             if( Con.ForcedUp )
+            {
                 return;
+            }
 
             // don't allow cheats in multiplayer
             if( Client.cl.maxclients > 1 )
@@ -183,7 +182,9 @@ namespace SharpQuake
                 CalcIntermissionRefDef();
             }
             else if( !Client.cl.paused )
+            {
                 CalcRefDef();
+            }
 
             Render.PushDlights();
 
@@ -227,9 +228,13 @@ namespace SharpQuake
 
             float value = _ClRollAngle.Value;
             if( side < _ClRollSpeed.Value )
+            {
                 side = side * value / _ClRollSpeed.Value;
+            }
             else
+            {
                 side = value;
+            }
 
             return side * sign;
         }
@@ -249,26 +254,34 @@ namespace SharpQuake
                     cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
                 }
                 for( int j = 0; j < 3; j++ )
+                {
                     if( cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j] )
                     {
                         isnew = true;
                         cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
                     }
+                }
             }
 
             // drop the damage value
             cl.cshifts[ColorShift.CSHIFT_DAMAGE].percent -= (int)( Host.FrameTime * 150 );
             if( cl.cshifts[ColorShift.CSHIFT_DAMAGE].percent < 0 )
+            {
                 cl.cshifts[ColorShift.CSHIFT_DAMAGE].percent = 0;
+            }
 
             // drop the bonus value
             cl.cshifts[ColorShift.CSHIFT_BONUS].percent -= (int)( Host.FrameTime * 100 );
             if( cl.cshifts[ColorShift.CSHIFT_BONUS].percent < 0 )
+            {
                 cl.cshifts[ColorShift.CSHIFT_BONUS].percent = 0;
+            }
 
             bool force = CheckGamma();
             if( !isnew && !force )
+            {
                 return;
+            }
 
             CalcBlend();
 
@@ -284,11 +297,19 @@ namespace SharpQuake
                 int ig = (int)( i * a + g );
                 int ib = (int)( i * a + b );
                 if( ir > 255 )
+                {
                     ir = 255;
+                }
+
                 if( ig > 255 )
+                {
                     ig = 255;
+                }
+
                 if( ib > 255 )
+                {
                     ib = 255;
+                }
 
                 _Ramps[0, i] = _GammaTable[ir];
                 _Ramps[1, i] = _GammaTable[ig];
@@ -354,7 +375,9 @@ namespace SharpQuake
                     float a2 = ( ( cshifts[j].percent * _glCShiftPercent.Value ) / 100.0f ) / 255.0f;
 
                     if( a2 == 0 )
+                    {
                         continue;
+                    }
 
                     a = a + a2 * ( 1 - a );
 
@@ -370,9 +393,14 @@ namespace SharpQuake
             Blend.B = b / 255.0f;
             Blend.A = a;
             if( Blend.A > 1 )
+            {
                 Blend.A = 1;
+            }
+
             if( Blend.A < 0 )
+            {
                 Blend.A = 0;
+            }
         }
 
         public static void ParseDamage()
@@ -383,16 +411,23 @@ namespace SharpQuake
 
             float count = blood * 0.5f + armor * 0.5f;
             if( count < 10 )
+            {
                 count = 10;
+            }
 
             client_state_t cl = Client.cl;
             cl.faceanimtime = (float)cl.time + 0.2f; // put sbar face into pain frame
 
             cl.cshifts[ColorShift.CSHIFT_DAMAGE].percent += (int)( 3 * count );
             if( cl.cshifts[ColorShift.CSHIFT_DAMAGE].percent < 0 )
+            {
                 cl.cshifts[ColorShift.CSHIFT_DAMAGE].percent = 0;
+            }
+
             if( cl.cshifts[ColorShift.CSHIFT_DAMAGE].percent > 150 )
+            {
                 cl.cshifts[ColorShift.CSHIFT_DAMAGE].percent = 150;
+            }
 
             if( armor > blood )
             {
@@ -418,9 +453,7 @@ namespace SharpQuake
 
             from -= ent.origin;
             Mathlib.Normalize( ref from );
-
-            Vector3 forward, right, up;
-            Mathlib.AngleVectors( ref ent.angles, out forward, out right, out up );
+            Mathlib.AngleVectors( ref ent.angles, out Vector3 forward, out Vector3 right, out Vector3 up );
 
             float side = Vector3.Dot( from, right );
 
@@ -473,9 +506,15 @@ namespace SharpQuake
                 {
                     int inf = (int)( 255 * Math.Pow( ( i + 0.5 ) / 255.5, g ) + 0.5 );
                     if( inf < 0 )
+                    {
                         inf = 0;
+                    }
+
                     if( inf > 255 )
+                    {
                         inf = 255;
+                    }
+
                     _GammaTable[i] = (byte)inf;
                 }
             }
@@ -525,8 +564,8 @@ namespace SharpQuake
             // view is the weapon model (only visible from inside body)
             entity_t view = Client.ViewEnt;
 
-            // transform the view offset by the model's matrix to get the offset from
-            // model origin for the view
+            // transform the view offset by the model's matrix to get the offset from model origin
+            // for the view
             ent.angles.Y = Client.cl.viewangles.Y; // the model should face the view dir
             ent.angles.X = -Client.cl.viewangles.X; // ^
 
@@ -552,9 +591,7 @@ namespace SharpQuake
             // offsets
             Vector3 angles = ent.angles;
             angles.X = -angles.X; // because entity pitches are actually backward
-
-            Vector3 forward, right, up;
-            Mathlib.AngleVectors( ref angles, out forward, out right, out up );
+            Mathlib.AngleVectors( ref angles, out Vector3 forward, out Vector3 right, out Vector3 up );
 
             rdef.vieworg += forward * _ScrOfsX.Value + right * _ScrOfsY.Value + up * _ScrOfsZ.Value;
 
@@ -574,13 +611,21 @@ namespace SharpQuake
             float viewSize = Scr.ViewSize.Value;
 
             if( viewSize == 110 )
+            {
                 view.origin.Z += 1;
+            }
             else if( viewSize == 100 )
+            {
                 view.origin.Z += 2;
+            }
             else if( viewSize == 90 )
+            {
                 view.origin.Z += 1;
+            }
             else if( viewSize == 80 )
+            {
                 view.origin.Z += 0.5f;
+            }
 
             view.model = cl.model_precache[cl.stats[QStats.STAT_WEAPON]];
             view.frame = cl.stats[QStats.STAT_WEAPONFRAME];
@@ -594,21 +639,33 @@ namespace SharpQuake
             {
                 float steptime = (float)( cl.time - cl.oldtime );
                 if( steptime < 0 )
+                {
                     steptime = 0;
+                }
 
                 _OldZ += steptime * 80;
                 if( _OldZ > ent.origin.Z )
+                {
                     _OldZ = ent.origin.Z;
+                }
+
                 if( ent.origin.Z - _OldZ > 12 )
+                {
                     _OldZ = ent.origin.Z - 12;
+                }
+
                 rdef.vieworg.Z += _OldZ - ent.origin.Z;
                 view.origin.Z += _OldZ - ent.origin.Z;
             }
             else
+            {
                 _OldZ = ent.origin.Z;
+            }
 
             if( Chase.IsActive )
+            {
                 Chase.Update();
+            }
         }
 
         // Idle swaying
@@ -645,9 +702,13 @@ namespace SharpQuake
             if( cl.nodrift )
             {
                 if( Math.Abs( cl.cmd.forwardmove ) < Client.ForwardSpeed )
+                {
                     cl.driftmove = 0;
+                }
                 else
+                {
                     cl.driftmove += (float)Host.FrameTime;
+                }
 
                 if( cl.driftmove > _CenterMove.Value )
                 {
@@ -694,19 +755,27 @@ namespace SharpQuake
             float cycle = (float)( cl.time - (int)( cl.time / bobCycle ) * bobCycle );
             cycle /= bobCycle;
             if( cycle < bobUp )
+            {
                 cycle = (float)Math.PI * cycle / bobUp;
+            }
             else
+            {
                 cycle = (float)( Math.PI + Math.PI * ( cycle - bobUp ) / ( 1.0 - bobUp ) );
+            }
 
-            // bob is proportional to velocity in the xy plane
-            // (don't count Z, or jumping messes it up)
+            // bob is proportional to velocity in the xy plane (don't count Z, or jumping messes it up)
             Vector2 tmp = cl.velocity.Xy;
             double bob = tmp.Length * _ClBob.Value;
             bob = bob * 0.3 + bob * 0.7 * Math.Sin( cycle );
             if( bob > 4 )
+            {
                 bob = 4;
+            }
             else if( bob < -7 )
+            {
                 bob = -7;
+            }
+
             return (float)bob;
         }
 
@@ -741,19 +810,31 @@ namespace SharpQuake
              */
             refdef_t rdef = Render.RefDef;
             if( rdef.vieworg.X < ent.origin.X - 14 )
+            {
                 rdef.vieworg.X = ent.origin.X - 14;
+            }
             else if( rdef.vieworg.X > ent.origin.X + 14 )
+            {
                 rdef.vieworg.X = ent.origin.X + 14;
+            }
 
             if( rdef.vieworg.Y < ent.origin.Y - 14 )
+            {
                 rdef.vieworg.Y = ent.origin.Y - 14;
+            }
             else if( rdef.vieworg.Y > ent.origin.Y + 14 )
+            {
                 rdef.vieworg.Y = ent.origin.Y + 14;
+            }
 
             if( rdef.vieworg.Z < ent.origin.Z - 22 )
+            {
                 rdef.vieworg.Z = ent.origin.Z - 22;
+            }
             else if( rdef.vieworg.Z > ent.origin.Z + 30 )
+            {
                 rdef.vieworg.Z = ent.origin.Z + 30;
+            }
         }
 
         private static void CalcGunAngle()
@@ -764,35 +845,55 @@ namespace SharpQuake
 
             yaw = AngleDelta( yaw - rdef.viewangles.Y ) * 0.4f;
             if( yaw > 10 )
+            {
                 yaw = 10;
+            }
+
             if( yaw < -10 )
+            {
                 yaw = -10;
+            }
+
             pitch = AngleDelta( -pitch - rdef.viewangles.X ) * 0.4f;
             if( pitch > 10 )
+            {
                 pitch = 10;
+            }
+
             if( pitch < -10 )
+            {
                 pitch = -10;
+            }
+
             float move = (float)Host.FrameTime * 20;
             if( yaw > _OldYaw )
             {
                 if( _OldYaw + move < yaw )
+                {
                     yaw = _OldYaw + move;
+                }
             }
             else
             {
                 if( _OldYaw - move > yaw )
+                {
                     yaw = _OldYaw - move;
+                }
             }
 
             if( pitch > _OldPitch )
             {
                 if( _OldPitch + move < pitch )
+                {
                     pitch = _OldPitch + move;
+                }
             }
             else
             {
                 if( _OldPitch - move > pitch )
+                {
                     pitch = _OldPitch - move;
+                }
             }
 
             _OldYaw = yaw;
@@ -812,7 +913,10 @@ namespace SharpQuake
         {
             a = Mathlib.AngleMod( a );
             if( a > 180 )
+            {
                 a -= 360;
+            }
+
             return a;
         }
 
@@ -848,13 +952,17 @@ namespace SharpQuake
                 cl.cshifts[ColorShift.CSHIFT_POWERUP].percent = 30;
             }
             else
+            {
                 cl.cshifts[ColorShift.CSHIFT_POWERUP].percent = 0;
+            }
         }
 
         private static bool CheckGamma()
         {
             if( _Gamma.Value == _OldGammaValue )
+            {
                 return false;
+            }
 
             _OldGammaValue = _Gamma.Value;
 

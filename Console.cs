@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -93,14 +90,16 @@ namespace SharpQuake
         private static bool _ForcedUp;// because no entities to refresh
         private static int _NotifyLines;// scan lines to clear for notify lines
         private static Cvar _NotifyTime;//seconds
-        private static float _CursorSpeed = 4;
+        private static readonly float _CursorSpeed = 4;
         private static FileStream _Log;
 
         public static void CheckResize()
         {
             int width = ( Scr.vid.width >> 3 ) - 2;
             if( width == _LineWidth )
+            {
                 return;
+            }
 
             if( width < 1 ) // video hasn't been initialized yet
             {
@@ -118,12 +117,16 @@ namespace SharpQuake
                 int numlines = oldtotallines;
 
                 if( _TotalLines < numlines )
+                {
                     numlines = _TotalLines;
+                }
 
                 int numchars = oldwidth;
 
                 if( _LineWidth < numchars )
+                {
                     numchars = _LineWidth;
+                }
 
                 char[] tmp = _Text;
                 _Text = new char[CON_TEXTSIZE];
@@ -152,7 +155,9 @@ namespace SharpQuake
             {
                 string path = Path.Combine( Common.GameDir, LOG_FILE_NAME );
                 if( File.Exists( path ) )
+                {
                     File.Delete( path );
+                }
 
                 _Log = new FileStream( path, FileMode.Create, FileAccess.Write, FileShare.Read );
             }
@@ -179,7 +184,9 @@ namespace SharpQuake
         public static void Draw( int lines, bool drawinput )
         {
             if( lines <= 0 )
+            {
                 return;
+            }
 
             // draw the background
             Drawer.DrawConsoleBackground( lines );
@@ -194,39 +201,53 @@ namespace SharpQuake
             {
                 int j = i - BackScroll;
                 if( j < 0 )
+                {
                     j = 0;
+                }
 
                 int offset = ( j % _TotalLines ) * _LineWidth;
 
                 for( int x = 0; x < _LineWidth; x++ )
+                {
                     Drawer.DrawCharacter( ( x + 1 ) << 3, y, _Text[offset + x] );
+                }
             }
 
             // draw the input prompt, user text, and cursor if desired
             if( drawinput )
+            {
                 DrawInput();
+            }
         }
 
         public static void Print( string fmt, params object[] args )
         {
-            string msg = ( args.Length > 0 ? String.Format( fmt, args ) : fmt );
+            string msg = ( args.Length > 0 ? string.Format( fmt, args ) : fmt );
 
             // log all messages to file
             if( _DebugLog )
+            {
                 DebugLog( msg );
+            }
 
             if( !_IsInitialized )
+            {
                 return;
+            }
 
             if( Client.cls.state == cactive_t.ca_dedicated )
+            {
                 return;  // no graphics mode
+            }
 
             // write it to the scrollable buffer
             Print( msg );
 
             // update the screen if the console is displayed
             if( Client.cls.signon != Client.SIGNONS && !Scr.IsDisabledForLoading )
+            {
                 Scr.UpdateScreen();
+            }
         }
 
         public static void Shutdown()
@@ -242,7 +263,9 @@ namespace SharpQuake
         public static void DPrint( string fmt, params object[] args )
         {
             if( Host.IsDeveloper )
+            {
                 Print( fmt, args );
+            }
         }
 
         public static void SafePrint( string fmt, params object[] args )
@@ -259,13 +282,21 @@ namespace SharpQuake
             for( int i = _Current - NUM_CON_TIMES + 1; i <= _Current; i++ )
             {
                 if( i < 0 )
+                {
                     continue;
+                }
+
                 double time = _Times[i % NUM_CON_TIMES];
                 if( time == 0 )
+                {
                     continue;
+                }
+
                 time = Host.RealTime - time;
                 if( time > _NotifyTime.Value )
+                {
                     continue;
+                }
 
                 int textOffset = ( i % _TotalLines ) * _LineWidth;
 
@@ -273,7 +304,9 @@ namespace SharpQuake
                 Scr.CopyTop = true;
 
                 for( int x = 0; x < _LineWidth; x++ )
+                {
                     Drawer.DrawCharacter( ( x + 1 ) << 3, v, _Text[textOffset + x] );
+                }
 
                 v += 8;
             }
@@ -296,13 +329,17 @@ namespace SharpQuake
             }
 
             if( v > _NotifyLines )
+            {
                 _NotifyLines = v;
+            }
         }
 
         public static void ClearNotify()
         {
             for( int i = 0; i < NUM_CON_TIMES; i++ )
+            {
                 _Times[i] = 0;
+            }
         }
 
         public static void ToggleConsole_f()
@@ -321,7 +358,9 @@ namespace SharpQuake
                 }
             }
             else
+            {
                 Key.Destination = keydest_t.key_console;
+            }
 
             Scr.EndLoadingPlaque();
             Array.Clear( _Times, 0, _Times.Length );
@@ -338,8 +377,10 @@ namespace SharpQuake
 
         private static void Print( string txt )
         {
-            if( String.IsNullOrEmpty( txt ) )
+            if( string.IsNullOrEmpty( txt ) )
+            {
                 return;
+            }
 
             int mask, offset = 0;
 
@@ -357,7 +398,9 @@ namespace SharpQuake
                 offset++;
             }
             else
+            {
                 mask = 0;
+            }
 
             while( offset < txt.Length )
             {
@@ -368,12 +411,16 @@ namespace SharpQuake
                 for( l = 0; l < _LineWidth && offset + l < txt.Length; l++ )
                 {
                     if( txt[offset + l] <= ' ' )
+                    {
                         break;
+                    }
                 }
 
                 // word wrap
                 if( l != _LineWidth && ( _X + l > _LineWidth ) )
+                {
                     _X = 0;
+                }
 
                 offset++;
 
@@ -388,7 +435,9 @@ namespace SharpQuake
                     LineFeed();
                     // mark time for transparent overlay
                     if( _Current >= 0 )
+                    {
                         _Times[_Current % NUM_CON_TIMES] = Host.RealTime; // realtime
+                    }
                 }
 
                 switch( c )
@@ -407,7 +456,10 @@ namespace SharpQuake
                         _Text[y * _LineWidth + _X] = (char)( c | mask );
                         _X++;
                         if( _X >= _LineWidth )
+                        {
                             _X = 0;
+                        }
+
                         break;
                 }
             }
@@ -444,25 +496,33 @@ namespace SharpQuake
         private static void DrawInput()
         {
             if( Key.Destination != keydest_t.key_console && !_ForcedUp )
+            {
                 return;  // don't draw anything
+            }
 
             // add the cursor frame
             Key.Lines[Key.EditLine][Key.LinePos] = (char)( 10 + ( (int)( Host.RealTime * _CursorSpeed ) & 1 ) );
 
             // fill out remainder with spaces
             for( int i = Key.LinePos + 1; i < _LineWidth; i++ )
+            {
                 Key.Lines[Key.EditLine][i] = ' ';
+            }
 
             // prestep if horizontally scrolling
             int offset = 0;
             if( Key.LinePos >= _LineWidth )
+            {
                 offset = 1 + Key.LinePos - _LineWidth;
+            }
 
             // draw it
             int y = _VisLines - 16;
 
             for( int i = 0; i < _LineWidth; i++ )
+            {
                 Drawer.DrawCharacter( ( i + 1 ) << 3, _VisLines - 16, Key.Lines[Key.EditLine][offset + i] );
+            }
 
             // remove cursor
             Key.Lines[Key.EditLine][Key.LinePos] = '\0';

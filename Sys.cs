@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -47,7 +44,7 @@ namespace SharpQuake
         /// </summary>
         public static void Error( string fmt, params object[] args )
         {
-            throw new QuakeSystemError( args.Length > 0 ? String.Format( fmt, args ) : fmt );
+            throw new QuakeSystemError( args.Length > 0 ? string.Format( fmt, args ) : fmt );
         }
 
         public static FileStream FileOpenRead( string path )
@@ -110,13 +107,18 @@ namespace SharpQuake
 
         public static DateTime GetFileTime( string path )
         {
-            if( String.IsNullOrEmpty( path ) || path.LastIndexOf( '*' ) != -1 )
+            if( string.IsNullOrEmpty( path ) || path.LastIndexOf( '*' ) != -1 )
+            {
                 return DateTime.MinValue;
+            }
+
             try
             {
                 DateTime result = File.GetLastWriteTimeUtc( path );
                 if( result.Year == 1601 )
+                {
                     return DateTime.MinValue; // file does not exists
+                }
 
                 return result.ToLocalTime();
             }

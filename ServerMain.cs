@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -60,7 +57,9 @@ namespace SharpQuake
             }
 
             for( int i = 0; i < QDef.MAX_MODELS; i++ )
+            {
                 _LocalModels[i] = "*" + i.ToString();
+            }
         }
 
         /// <summary>
@@ -69,7 +68,9 @@ namespace SharpQuake
         public static void StartParticle( ref Vector3 org, ref Vector3 dir, int color, int count )
         {
             if( sv.datagram.Length > QDef.MAX_DATAGRAM - 16 )
+            {
                 return;
+            }
 
             sv.datagram.WriteByte( Protocol.svc_particle );
             sv.datagram.WriteCoord( org.X );
@@ -105,24 +106,36 @@ namespace SharpQuake
         public static void StartSound( edict_t entity, int channel, string sample, int volume, float attenuation )
         {
             if( volume < 0 || volume > 255 )
+            {
                 Sys.Error( "SV_StartSound: volume = {0}", volume );
+            }
 
             if( attenuation < 0 || attenuation > 4 )
+            {
                 Sys.Error( "SV_StartSound: attenuation = {0}", attenuation );
+            }
 
             if( channel < 0 || channel > 7 )
+            {
                 Sys.Error( "SV_StartSound: channel = {0}", channel );
+            }
 
             if( sv.datagram.Length > QDef.MAX_DATAGRAM - 16 )
+            {
                 return;
+            }
 
             // find precache number for sound
             int sound_num;
             for( sound_num = 1; sound_num < QDef.MAX_SOUNDS && sv.sound_precache[sound_num] != null; sound_num++ )
+            {
                 if( sample == sv.sound_precache[sound_num] )
+                {
                     break;
+                }
+            }
 
-            if( sound_num == QDef.MAX_SOUNDS || String.IsNullOrEmpty( sv.sound_precache[sound_num] ) )
+            if( sound_num == QDef.MAX_SOUNDS || string.IsNullOrEmpty( sv.sound_precache[sound_num] ) )
             {
                 Con.Print( "SV_StartSound: {0} not precacheed\n", sample );
                 return;
@@ -134,21 +147,31 @@ namespace SharpQuake
 
             int field_mask = 0;
             if( volume != Sound.DEFAULT_SOUND_PACKET_VOLUME )
+            {
                 field_mask |= Protocol.SND_VOLUME;
+            }
+
             if( attenuation != Sound.DEFAULT_SOUND_PACKET_ATTENUATION )
+            {
                 field_mask |= Protocol.SND_ATTENUATION;
+            }
 
             // directed messages go only to the entity the are targeted on
             sv.datagram.WriteByte( Protocol.svc_sound );
             sv.datagram.WriteByte( field_mask );
             if( ( field_mask & Protocol.SND_VOLUME ) != 0 )
+            {
                 sv.datagram.WriteByte( volume );
+            }
+
             if( ( field_mask & Protocol.SND_ATTENUATION ) != 0 )
+            {
                 sv.datagram.WriteByte( (int)( attenuation * 64 ) );
+            }
+
             sv.datagram.WriteShort( channel );
             sv.datagram.WriteByte( sound_num );
-            v3f v;
-            Mathlib.VectorAdd( ref entity.v.mins, ref entity.v.maxs, out v );
+            Mathlib.VectorAdd( ref entity.v.mins, ref entity.v.maxs, out v3f v );
             Mathlib.VectorMA( ref entity.v.origin, 0.5f, ref v, out v );
             sv.datagram.WriteCoord( v.x );
             sv.datagram.WriteCoord( v.y );
@@ -180,8 +203,8 @@ namespace SharpQuake
 
                 if( client.edict != null && client.spawned )
                 {
-                    // call the prog function for removing a client
-                    // this will set the body to a dead frame, among other things
+                    // call the prog function for removing a client this will set the body to a dead
+                    // frame, among other things
                     int saveSelf = Progs.GlobalStruct.self;
                     Progs.GlobalStruct.self = EdictToProg( client.edict );
                     Progs.Execute( Progs.GlobalStruct.ClientDisconnect );
@@ -206,7 +229,9 @@ namespace SharpQuake
             {
                 client_t cl = Server.svs.clients[i];
                 if( !cl.active )
+                {
                     continue;
+                }
 
                 cl.message.WriteByte( Protocol.svc_updatename );
                 cl.message.WriteByte( Host.ClientNum );
@@ -231,12 +256,16 @@ namespace SharpQuake
                 Host.HostClient = svs.clients[i];
 
                 if( !Host.HostClient.active )
+                {
                     continue;
+                }
 
                 if( Host.HostClient.spawned )
                 {
                     if( !SendClientDatagram( Host.HostClient ) )
+                    {
                         continue;
+                    }
                 }
                 else
                 {
@@ -249,7 +278,10 @@ namespace SharpQuake
                     if( !Host.HostClient.sendsignon )
                     {
                         if( Host.RealTime - Host.HostClient.last_message > 5 )
+                        {
                             SendNop( Host.HostClient );
+                        }
+
                         continue; // don't send out non-signon messages
                     }
                 }
@@ -267,14 +299,21 @@ namespace SharpQuake
                 if( Host.HostClient.message.Length > 0 || Host.HostClient.dropasap )
                 {
                     if( !Net.CanSendMessage( Host.HostClient.netconnection ) )
+                    {
                         continue;
+                    }
 
                     if( Host.HostClient.dropasap )
+                    {
                         DropClient( false ); // went to another level
+                    }
                     else
                     {
                         if( Net.SendMessage( Host.HostClient.netconnection, Host.HostClient.message ) == -1 )
+                        {
                             DropClient( true ); // if the message couldn't send, kick off
+                        }
+
                         Host.HostClient.message.Clear();
                         Host.HostClient.last_message = Host.RealTime;
                         Host.HostClient.sendsignon = false;
@@ -293,37 +332,48 @@ namespace SharpQuake
 
         public static int ModelIndex( string name )
         {
-            if( String.IsNullOrEmpty( name ) )
+            if( string.IsNullOrEmpty( name ) )
+            {
                 return 0;
+            }
 
             int i;
             for( i = 0; i < QDef.MAX_MODELS && sv.model_precache[i] != null; i++ )
+            {
                 if( sv.model_precache[i] == name )
+                {
                     return i;
+                }
+            }
 
-            if( i == QDef.MAX_MODELS || String.IsNullOrEmpty( sv.model_precache[i] ) )
+            if( i == QDef.MAX_MODELS || string.IsNullOrEmpty( sv.model_precache[i] ) )
+            {
                 Sys.Error( "SV_ModelIndex: model {0} not precached", name );
+            }
+
             return i;
         }
 
         // FIXME: make this just a stuffed echo?
         public static void ClientPrint( string fmt, params object[] args )
         {
-            string tmp = String.Format( fmt, args );
+            string tmp = string.Format( fmt, args );
             Host.HostClient.message.WriteByte( Protocol.svc_print );
             Host.HostClient.message.WriteString( tmp );
         }
 
         public static void BroadcastPrint( string fmt, params object[] args )
         {
-            string tmp = args.Length > 0 ? String.Format( fmt, args ) : fmt;
+            string tmp = args.Length > 0 ? string.Format( fmt, args ) : fmt;
             for( int i = 0; i < svs.maxclients; i++ )
+            {
                 if( svs.clients[i].active && svs.clients[i].spawned )
                 {
                     MsgWriter msg = svs.clients[i].message;
                     msg.WriteByte( Protocol.svc_print );
                     msg.WriteString( tmp );
                 }
+            }
         }
 
         public static void WriteClientDataToMessage( edict_t ent, MsgWriter msg )
@@ -345,7 +395,7 @@ namespace SharpQuake
 
             SetIdealPitch();  // how much to look up / down ideally
 
-            // a fixangle might get lost in a dropped packet.  Oh well.
+            // a fixangle might get lost in a dropped packet. Oh well.
             if( ent.v.fixangle != 0 )
             {
                 msg.WriteByte( Protocol.svc_setangle );
@@ -358,46 +408,78 @@ namespace SharpQuake
             int bits = 0;
 
             if( ent.v.view_ofs.z != Protocol.DEFAULT_VIEWHEIGHT )
+            {
                 bits |= Protocol.SU_VIEWHEIGHT;
+            }
 
             if( ent.v.idealpitch != 0 )
+            {
                 bits |= Protocol.SU_IDEALPITCH;
+            }
 
             // stuff the sigil bits into the high bits of items for sbar, or else mix in items2
             float val = Progs.GetEdictFieldFloat( ent, "items2", 0 );
             int items;
             if( val != 0 )
+            {
                 items = (int)ent.v.items | ( (int)val << 23 );
+            }
             else
+            {
                 items = (int)ent.v.items | ( (int)Progs.GlobalStruct.serverflags << 28 );
+            }
 
             bits |= Protocol.SU_ITEMS;
 
             if( ( (int)ent.v.flags & EdictFlags.FL_ONGROUND ) != 0 )
+            {
                 bits |= Protocol.SU_ONGROUND;
+            }
 
             if( ent.v.waterlevel >= 2 )
+            {
                 bits |= Protocol.SU_INWATER;
+            }
 
             if( ent.v.punchangle.x != 0 )
+            {
                 bits |= Protocol.SU_PUNCH1;
+            }
+
             if( ent.v.punchangle.y != 0 )
+            {
                 bits |= Protocol.SU_PUNCH2;
+            }
+
             if( ent.v.punchangle.z != 0 )
+            {
                 bits |= Protocol.SU_PUNCH3;
+            }
 
             if( ent.v.velocity.x != 0 )
+            {
                 bits |= Protocol.SU_VELOCITY1;
+            }
+
             if( ent.v.velocity.y != 0 )
+            {
                 bits |= Protocol.SU_VELOCITY2;
+            }
+
             if( ent.v.velocity.z != 0 )
+            {
                 bits |= Protocol.SU_VELOCITY3;
+            }
 
             if( ent.v.weaponframe != 0 )
+            {
                 bits |= Protocol.SU_WEAPONFRAME;
+            }
 
             if( ent.v.armorvalue != 0 )
+            {
                 bits |= Protocol.SU_ARMOR;
+            }
 
             bits |= Protocol.SU_WEAPON;
 
@@ -407,35 +489,62 @@ namespace SharpQuake
             msg.WriteShort( bits );
 
             if( ( bits & Protocol.SU_VIEWHEIGHT ) != 0 )
+            {
                 msg.WriteChar( (int)ent.v.view_ofs.z );
+            }
 
             if( ( bits & Protocol.SU_IDEALPITCH ) != 0 )
+            {
                 msg.WriteChar( (int)ent.v.idealpitch );
+            }
 
             if( ( bits & Protocol.SU_PUNCH1 ) != 0 )
+            {
                 msg.WriteChar( (int)ent.v.punchangle.x );
+            }
+
             if( ( bits & Protocol.SU_VELOCITY1 ) != 0 )
+            {
                 msg.WriteChar( (int)( ent.v.velocity.x / 16 ) );
+            }
 
             if( ( bits & Protocol.SU_PUNCH2 ) != 0 )
+            {
                 msg.WriteChar( (int)ent.v.punchangle.y );
+            }
+
             if( ( bits & Protocol.SU_VELOCITY2 ) != 0 )
+            {
                 msg.WriteChar( (int)( ent.v.velocity.y / 16 ) );
+            }
 
             if( ( bits & Protocol.SU_PUNCH3 ) != 0 )
+            {
                 msg.WriteChar( (int)ent.v.punchangle.z );
+            }
+
             if( ( bits & Protocol.SU_VELOCITY3 ) != 0 )
+            {
                 msg.WriteChar( (int)( ent.v.velocity.z / 16 ) );
+            }
 
             // always sent
             msg.WriteLong( items );
 
             if( ( bits & Protocol.SU_WEAPONFRAME ) != 0 )
+            {
                 msg.WriteByte( (int)ent.v.weaponframe );
+            }
+
             if( ( bits & Protocol.SU_ARMOR ) != 0 )
+            {
                 msg.WriteByte( (int)ent.v.armorvalue );
+            }
+
             if( ( bits & Protocol.SU_WEAPON ) != 0 )
+            {
                 msg.WriteByte( ModelIndex( Progs.GetString( ent.v.weaponmodel ) ) );
+            }
 
             msg.WriteShort( (int)ent.v.health );
             msg.WriteByte( (int)ent.v.currentammo );
@@ -468,18 +577,24 @@ namespace SharpQuake
             {
                 qsocket_t ret = Net.CheckNewConnections();
                 if( ret == null )
+                {
                     break;
+                }
 
                 // init a new client structure
                 int i;
                 for( i = 0; i < svs.maxclients; i++ )
                 {
                     if( !svs.clients[i].active )
+                    {
                         break;
+                    }
                 }
 
                 if( i == svs.maxclients )
+                {
                     Sys.Error( "Host_CheckForNewClients: no free clients" );
+                }
 
                 svs.clients[i].netconnection = ret;
                 ConnectClient( i );
@@ -489,8 +604,7 @@ namespace SharpQuake
         }
 
         /// <summary>
-        /// Grabs the current state of each client for saving across the
-        /// transition to another level
+        /// Grabs the current state of each client for saving across the transition to another level
         /// </summary>
         public static void SaveSpawnparms()
         {
@@ -500,7 +614,9 @@ namespace SharpQuake
             {
                 Host.HostClient = Server.svs.clients[i];
                 if( !Host.HostClient.active )
+                {
                     continue;
+                }
 
                 // call the progs to get default spawn parms for the new client
                 Progs.GlobalStruct.self = EdictToProg( Host.HostClient.edict );
@@ -512,8 +628,10 @@ namespace SharpQuake
         public static void SpawnServer( string server )
         {
             // let's not have any servers with no name
-            if( String.IsNullOrEmpty( Net.HostName ) )
+            if( string.IsNullOrEmpty( Net.HostName ) )
+            {
                 Cvar.Set( "hostname", "UNNAMED" );
+            }
 
             Scr.CenterTimeOff = 0;
 
@@ -528,13 +646,20 @@ namespace SharpQuake
 
             // make cvars consistant
             if( Host.IsCoop )
+            {
                 Cvar.Set( "deathmatch", 0 );
+            }
 
             Host.CurrentSkill = (int)( Host.Skill + 0.5 );
             if( Host.CurrentSkill < 0 )
+            {
                 Host.CurrentSkill = 0;
+            }
+
             if( Host.CurrentSkill > 3 )
+            {
                 Host.CurrentSkill = 3;
+            }
 
             Cvar.Set( "skill", (float)Host.CurrentSkill );
 
@@ -569,7 +694,7 @@ namespace SharpQuake
             sv.state = server_state_t.Loading;
             sv.paused = false;
             sv.time = 1.0;
-            sv.modelname = String.Format( "maps/{0}.bsp", server );
+            sv.modelname = string.Format( "maps/{0}.bsp", server );
             sv.worldmodel = Mod.ForName( sv.modelname, false );
             if( sv.worldmodel == null )
             {
@@ -582,8 +707,8 @@ namespace SharpQuake
             // clear world interaction links
             ClearWorld();
 
-            sv.sound_precache[0] = String.Empty;
-            sv.model_precache[0] = String.Empty;
+            sv.sound_precache[0] = string.Empty;
+            sv.model_precache[0] = string.Empty;
 
             sv.model_precache[1] = sv.modelname;
             for( int i = 1; i < sv.worldmodel.numsubmodels; i++ )
@@ -605,9 +730,13 @@ namespace SharpQuake
             ent.v.movetype = Movetypes.MOVETYPE_PUSH;
 
             if( Host.IsCoop )
+            {
                 Progs.GlobalStruct.coop = 1; //coop.value;
+            }
             else
+            {
                 Progs.GlobalStruct.deathmatch = Host.Deathmatch;
+            }
 
             int offset = Progs.NewString( sv.name );
             Progs.GlobalStruct.mapname = offset;
@@ -635,7 +764,9 @@ namespace SharpQuake
             {
                 Host.HostClient = svs.clients[i];
                 if( Host.HostClient.active )
+                {
                     SendServerInfo( Host.HostClient );
+                }
             }
 
             GC.Collect();
@@ -660,7 +791,10 @@ namespace SharpQuake
             msg.WriteChar( Protocol.svc_nop );
 
             if( Net.SendUnreliableMessage( client.netconnection, msg ) == -1 )
+            {
                 DropClient( true ); // if the message couldn't send, kick off
+            }
+
             client.last_message = Host.RealTime;
         }
 
@@ -678,7 +812,9 @@ namespace SharpQuake
 
             // copy the server datagram if there is space
             if( msg.Length + sv.datagram.Length < msg.Capacity )
+            {
                 msg.Write( sv.datagram.Data, 0, sv.datagram.Length );
+            }
 
             // send the datagram
             if( Net.SendUnreliableMessage( client.netconnection, msg ) == -1 )
@@ -705,16 +841,24 @@ namespace SharpQuake
                 {
                     // ignore ents without visible models
                     string mname = Progs.GetString( ent.v.model );
-                    if( String.IsNullOrEmpty( mname ) )
+                    if( string.IsNullOrEmpty( mname ) )
+                    {
                         continue;
+                    }
 
                     int i;
                     for( i = 0; i < ent.num_leafs; i++ )
+                    {
                         if( ( pvs[ent.leafnums[i] >> 3] & ( 1 << ( ent.leafnums[i] & 7 ) ) ) != 0 )
+                        {
                             break;
+                        }
+                    }
 
                     if( i == ent.num_leafs )
+                    {
                         continue; // not visible
+                    }
                 }
 
                 if( msg.Capacity - msg.Length < 16 )
@@ -725,80 +869,148 @@ namespace SharpQuake
 
                 // send an update
                 int bits = 0;
-                v3f miss;
-                Mathlib.VectorSubtract( ref ent.v.origin, ref ent.baseline.origin, out miss );
+                Mathlib.VectorSubtract( ref ent.v.origin, ref ent.baseline.origin, out v3f miss );
                 if( miss.x < -0.1f || miss.x > 0.1f )
+                {
                     bits |= Protocol.U_ORIGIN1;
+                }
+
                 if( miss.y < -0.1f || miss.y > 0.1f )
+                {
                     bits |= Protocol.U_ORIGIN2;
+                }
+
                 if( miss.z < -0.1f || miss.z > 0.1f )
+                {
                     bits |= Protocol.U_ORIGIN3;
+                }
 
                 if( ent.v.angles.x != ent.baseline.angles.x )
+                {
                     bits |= Protocol.U_ANGLE1;
+                }
 
                 if( ent.v.angles.y != ent.baseline.angles.y )
+                {
                     bits |= Protocol.U_ANGLE2;
+                }
 
                 if( ent.v.angles.z != ent.baseline.angles.z )
+                {
                     bits |= Protocol.U_ANGLE3;
+                }
 
                 if( ent.v.movetype == Movetypes.MOVETYPE_STEP )
+                {
                     bits |= Protocol.U_NOLERP; // don't mess up the step animation
+                }
 
                 if( ent.baseline.colormap != ent.v.colormap )
+                {
                     bits |= Protocol.U_COLORMAP;
+                }
 
                 if( ent.baseline.skin != ent.v.skin )
+                {
                     bits |= Protocol.U_SKIN;
+                }
 
                 if( ent.baseline.frame != ent.v.frame )
+                {
                     bits |= Protocol.U_FRAME;
+                }
 
                 if( ent.baseline.effects != ent.v.effects )
+                {
                     bits |= Protocol.U_EFFECTS;
+                }
 
                 if( ent.baseline.modelindex != ent.v.modelindex )
+                {
                     bits |= Protocol.U_MODEL;
+                }
 
                 if( e >= 256 )
+                {
                     bits |= Protocol.U_LONGENTITY;
+                }
 
                 if( bits >= 256 )
+                {
                     bits |= Protocol.U_MOREBITS;
+                }
 
                 // write the message
                 msg.WriteByte( bits | Protocol.U_SIGNAL );
 
                 if( ( bits & Protocol.U_MOREBITS ) != 0 )
+                {
                     msg.WriteByte( bits >> 8 );
+                }
+
                 if( ( bits & Protocol.U_LONGENTITY ) != 0 )
+                {
                     msg.WriteShort( e );
+                }
                 else
+                {
                     msg.WriteByte( e );
+                }
 
                 if( ( bits & Protocol.U_MODEL ) != 0 )
+                {
                     msg.WriteByte( (int)ent.v.modelindex );
+                }
+
                 if( ( bits & Protocol.U_FRAME ) != 0 )
+                {
                     msg.WriteByte( (int)ent.v.frame );
+                }
+
                 if( ( bits & Protocol.U_COLORMAP ) != 0 )
+                {
                     msg.WriteByte( (int)ent.v.colormap );
+                }
+
                 if( ( bits & Protocol.U_SKIN ) != 0 )
+                {
                     msg.WriteByte( (int)ent.v.skin );
+                }
+
                 if( ( bits & Protocol.U_EFFECTS ) != 0 )
+                {
                     msg.WriteByte( (int)ent.v.effects );
+                }
+
                 if( ( bits & Protocol.U_ORIGIN1 ) != 0 )
+                {
                     msg.WriteCoord( ent.v.origin.x );
+                }
+
                 if( ( bits & Protocol.U_ANGLE1 ) != 0 )
+                {
                     msg.WriteAngle( ent.v.angles.x );
+                }
+
                 if( ( bits & Protocol.U_ORIGIN2 ) != 0 )
+                {
                     msg.WriteCoord( ent.v.origin.y );
+                }
+
                 if( ( bits & Protocol.U_ANGLE2 ) != 0 )
+                {
                     msg.WriteAngle( ent.v.angles.y );
+                }
+
                 if( ( bits & Protocol.U_ORIGIN3 ) != 0 )
+                {
                     msg.WriteCoord( ent.v.origin.z );
+                }
+
                 if( ( bits & Protocol.U_ANGLE3 ) != 0 )
+                {
                     msg.WriteAngle( ent.v.angles.z );
+                }
             }
         }
 
@@ -830,7 +1042,9 @@ namespace SharpQuake
                     {
                         byte[] pvs = Mod.LeafPVS( (mleaf_t)node, sv.worldmodel );
                         for( int i = 0; i < _FatBytes; i++ )
+                        {
                             _FatPvs[i] |= pvs[i];
+                        }
                     }
                     return;
                 }
@@ -839,9 +1053,13 @@ namespace SharpQuake
                 mplane_t plane = n.plane;
                 float d = Vector3.Dot( org, plane.normal ) - plane.dist;
                 if( d > 8 )
+                {
                     node = n.children[0];
+                }
                 else if( d < -8 )
+                {
                     node = n.children[1];
+                }
                 else
                 {
                     // go down both
@@ -863,7 +1081,9 @@ namespace SharpQuake
                     {
                         client_t client = svs.clients[j];
                         if( !client.active )
+                        {
                             continue;
+                        }
 
                         client.message.WriteByte( Protocol.svc_updatefrags );
                         client.message.WriteByte( i );
@@ -878,7 +1098,10 @@ namespace SharpQuake
             {
                 client_t client = svs.clients[j];
                 if( !client.active )
+                {
                     continue;
+                }
+
                 client.message.Write( sv.reliable_datagram.Data, 0, sv.reliable_datagram.Length );
             }
 
@@ -963,16 +1186,20 @@ namespace SharpQuake
             MsgWriter writer = client.message;
 
             writer.WriteByte( Protocol.svc_print );
-            writer.WriteString( String.Format( "{0}\nVERSION {1,4:F2} SERVER ({2} CRC)", (char)2, QDef.VERSION, Progs.Crc ) );
+            writer.WriteString( string.Format( "{0}\nVERSION {1,4:F2} SERVER ({2} CRC)", (char)2, QDef.VERSION, Progs.Crc ) );
 
             writer.WriteByte( Protocol.svc_serverinfo );
             writer.WriteLong( Protocol.PROTOCOL_VERSION );
             writer.WriteByte( svs.maxclients );
 
             if( !Host.IsCoop && Host.Deathmatch != 0 )
+            {
                 writer.WriteByte( Protocol.GAME_DEATHMATCH );
+            }
             else
+            {
                 writer.WriteByte( Protocol.GAME_COOP );
+            }
 
             string message = Progs.GetString( sv.edicts[0].v.message );
 
@@ -981,8 +1208,11 @@ namespace SharpQuake
             for( int i = 1; i < sv.model_precache.Length; i++ )
             {
                 string tmp = sv.model_precache[i];
-                if( String.IsNullOrEmpty( tmp ) )
+                if( string.IsNullOrEmpty( tmp ) )
+                {
                     break;
+                }
+
                 writer.WriteString( tmp );
             }
             writer.WriteByte( 0 );
@@ -991,7 +1221,10 @@ namespace SharpQuake
             {
                 string tmp = sv.sound_precache[i];
                 if( tmp == null )
+                {
                     break;
+                }
+
                 writer.WriteString( tmp );
             }
             writer.WriteByte( 0 );
@@ -1022,7 +1255,9 @@ namespace SharpQuake
             Net.SendToAll( msg, 5 );
 
             if( Client.cls.state != cactive_t.ca_dedicated )
+            {
                 Cmd.ExecuteString( "reconnect\n", cmd_source_t.src_command );
+            }
         }
 
         private static void CreateBaseline()
@@ -1032,9 +1267,14 @@ namespace SharpQuake
                 // get the current server version
                 edict_t svent = EdictNum( entnum );
                 if( svent.free )
+                {
                     continue;
+                }
+
                 if( entnum > svs.maxclients && svent.v.modelindex == 0 )
+                {
                     continue;
+                }
 
                 // create entity baseline
                 svent.baseline.origin = svent.v.origin;

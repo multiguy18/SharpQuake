@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -230,7 +227,9 @@ namespace SharpQuake
         public static void Init()
         {
             for( int i2 = 0; i2 < _HostCache.Length; i2++ )
+            {
                 _HostCache[i2] = new hostcache_t();
+            }
 
             if( _Drivers == null )
             {
@@ -260,34 +259,52 @@ namespace SharpQuake
             }
 
             if( Common.HasParam( "-record" ) )
+            {
                 _IsRecording = true;
+            }
 
             int i = Common.CheckParm( "-port" );
             if( i == 0 )
+            {
                 i = Common.CheckParm( "-udpport" );
+            }
+
             if( i == 0 )
+            {
                 i = Common.CheckParm( "-ipxport" );
+            }
 
             if( i > 0 )
             {
                 if( i < Common.Argc - 1 )
+                {
                     _DefHostPort = Common.atoi( Common.Argv( i + 1 ) );
+                }
                 else
+                {
                     Sys.Error( "Net.Init: you must specify a number after -port!" );
+                }
             }
             HostPort = _DefHostPort;
 
             if( Common.HasParam( "-listen" ) || Client.cls.state == cactive_t.ca_dedicated )
+            {
                 _IsListening = true;
+            }
+
             int numsockets = Server.svs.maxclientslimit;
             if( Client.cls.state != cactive_t.ca_dedicated )
+            {
                 numsockets++;
+            }
 
             _FreeSockets = new List<qsocket_t>( numsockets );
             _ActiveSockets = new List<qsocket_t>( numsockets );
 
             for( i = 0; i < numsockets; i++ )
+            {
                 _FreeSockets.Add( new qsocket_t() );
+            }
 
             SetNetTime();
 
@@ -318,8 +335,10 @@ namespace SharpQuake
                 _DriverLevel++;
             }
 
-            if( !String.IsNullOrEmpty( _MyTcpIpAddress ) )
+            if( !string.IsNullOrEmpty( _MyTcpIpAddress ) )
+            {
                 Con.DPrint( "TCP/IP address {0}\n", _MyTcpIpAddress );
+            }
         }
 
         public static void Shutdown()
@@ -330,7 +349,9 @@ namespace SharpQuake
             {
                 qsocket_t[] tmp = _ActiveSockets.ToArray();
                 foreach( qsocket_t sock in tmp )
+                {
                     Close( sock );
+                }
             }
 
             // shutdown the drivers
@@ -339,7 +360,9 @@ namespace SharpQuake
                 for( _DriverLevel = 0; _DriverLevel < _Drivers.Length; _DriverLevel++ )
                 {
                     if( _Drivers[_DriverLevel].IsInitialized )
+                    {
                         _Drivers[_DriverLevel].Shutdown();
+                    }
                 }
             }
         }
@@ -351,10 +374,14 @@ namespace SharpQuake
             for( _DriverLevel = 0; _DriverLevel < _Drivers.Length; _DriverLevel++ )
             {
                 if( !_Drivers[_DriverLevel].IsInitialized )
+                {
                     continue;
+                }
 
                 if( _DriverLevel > 0 && !_IsListening )
+                {
                     continue;
+                }
 
                 qsocket_t ret = Net.Driver.CheckNewConnections();
                 if( ret != null )
@@ -371,7 +398,9 @@ namespace SharpQuake
                         int extra = NET_NAMELEN - count;
                         Host.VcrWriter.Write( buf, 0, count );
                         for( int i = 0; i < extra; i++ )
+                        {
                             Host.VcrWriter.Write( (byte)0 );
+                        }
                     }
                     return ret;
                 }
@@ -395,8 +424,10 @@ namespace SharpQuake
 
             SetNetTime();
 
-            if( String.IsNullOrEmpty( host ) )
+            if( string.IsNullOrEmpty( host ) )
+            {
                 host = null;
+            }
 
             if( host != null )
             {
@@ -423,12 +454,17 @@ namespace SharpQuake
             Slist_f();
 
             while( _SlistInProgress )
+            {
                 Poll();
+            }
 
             if( host == null )
             {
                 if( HostCacheCount != 1 )
+                {
                     return null;
+                }
+
                 host = _HostCache[0].cname;
                 Con.Print( "Connecting to...\n{0} @ {1}\n\n", _HostCache[0].name, host );
             }
@@ -449,10 +485,16 @@ JustDoIt:
             foreach( INetDriver drv in _Drivers )
             {
                 if( !drv.IsInitialized )
+                {
                     continue;
+                }
+
                 qsocket_t ret = drv.Connect( host );
                 if( ret != null )
+                {
                     return ret;
+                }
+
                 _DriverLevel++;
             }
 
@@ -470,10 +512,14 @@ JustDoIt:
         public static bool CanSendMessage( qsocket_t sock )
         {
             if( sock == null )
+            {
                 return false;
+            }
 
             if( sock.disconnected )
+            {
                 return false;
+            }
 
             SetNetTime();
 
@@ -502,7 +548,9 @@ JustDoIt:
         public static int GetMessage( qsocket_t sock )
         {
             if( sock == null )
+            {
                 return -1;
+            }
 
             if( sock.disconnected )
             {
@@ -530,9 +578,13 @@ JustDoIt:
                 {
                     sock.lastMessageTime = _Time;
                     if( ret == 1 )
+                    {
                         _MessagesReceived++;
+                    }
                     else if( ret == 2 )
+                    {
                         _UnreliableMessagesReceived++;
+                    }
                 }
 
                 if( _IsRecording )
@@ -573,7 +625,9 @@ JustDoIt:
         public static int SendMessage( qsocket_t sock, MsgWriter data )
         {
             if( sock == null )
+            {
                 return -1;
+            }
 
             if( sock.disconnected )
             {
@@ -585,7 +639,9 @@ JustDoIt:
 
             int r = _Drivers[sock.driver].SendMessage( sock, data );
             if( r == 1 && sock.driver != 0 )
+            {
                 _MessagesSent++;
+            }
 
             if( _IsRecording )
             {
@@ -609,7 +665,9 @@ JustDoIt:
         public static int SendUnreliableMessage( qsocket_t sock, MsgWriter data )
         {
             if( sock == null )
+            {
                 return -1;
+            }
 
             if( sock.disconnected )
             {
@@ -621,7 +679,9 @@ JustDoIt:
 
             int r = _Drivers[sock.driver].SendUnreliableMessage( sock, data );
             if( r == 1 && sock.driver != 0 )
+            {
                 _UnreliableMessagesSent++;
+            }
 
             if( _IsRecording )
             {
@@ -646,7 +706,9 @@ JustDoIt:
             {
                 Host.HostClient = Server.svs.clients[i];
                 if( Host.HostClient.netconnection == null )
+                {
                     continue;
+                }
 
                 if( Host.HostClient.active )
                 {
@@ -705,7 +767,9 @@ JustDoIt:
                     }
                 }
                 if( ( Sys.GetFloatTime() - start ) > blocktime )
+                {
                     break;
+                }
             }
             return count;
         }
@@ -713,10 +777,14 @@ JustDoIt:
         public static void Close( qsocket_t sock )
         {
             if( sock == null )
+            {
                 return;
+            }
 
             if( sock.disconnected )
+            {
                 return;
+            }
 
             SetNetTime();
 
@@ -730,7 +798,9 @@ JustDoIt:
         {
             // remove it from active list
             if( !_ActiveSockets.Remove( sock ) )
+            {
                 Sys.Error( "NET_FreeQSocket: not active\n" );
+            }
 
             // add it to free list
             _FreeSockets.Add( sock );
@@ -744,7 +814,9 @@ JustDoIt:
             for( PollProcedure pp = _PollProcedureList; pp != null; pp = pp.next )
             {
                 if( pp.nextTime > _Time )
+                {
                     break;
+                }
 
                 _PollProcedureList = pp.next;
                 pp.procedure( pp.arg );
@@ -760,7 +832,9 @@ JustDoIt:
         public static void Slist_f()
         {
             if( _SlistInProgress )
+            {
                 return;
+            }
 
             if( !Net.SlistSilent )
             {
@@ -780,10 +854,14 @@ JustDoIt:
         public static qsocket_t NewSocket()
         {
             if( _FreeSockets.Count == 0 )
+            {
                 return null;
+            }
 
             if( Net.ActiveConnections >= Server.svs.maxclients )
+            {
                 return null;
+            }
 
             // get one from free list
             int i = _FreeSockets.Count - 1;
@@ -827,9 +905,13 @@ JustDoIt:
             {
                 hostcache_t hc = _HostCache[i];
                 if( hc.maxusers != 0 )
+                {
                     Con.Print( "{0,-15} {1,-15}\n {2,2}/{3,2}\n", Common.Copy( hc.name, 15 ), Common.Copy( hc.map, 15 ), hc.users, hc.maxusers );
+                }
                 else
+                {
                     Con.Print( "{0,-15} {1,-15}\n", Common.Copy( hc.name, 15 ), Common.Copy( hc.map, 15 ) );
+                }
             }
             _SlistLastShown = i;
         }
@@ -837,9 +919,13 @@ JustDoIt:
         private static void PrintSlistTrailer()
         {
             if( HostCacheCount != 0 )
+            {
                 Con.Print( "== end list ==\n\n" );
+            }
             else
+            {
                 Con.Print( "No Quake servers found.\n\n" );
+            }
         }
 
         private static void SchedulePollProcedure( PollProcedure proc, double timeOffset )
@@ -849,7 +935,10 @@ JustDoIt:
             for( pp = _PollProcedureList, prev = null; pp != null; pp = pp.next )
             {
                 if( pp.nextTime >= proc.nextTime )
+                {
                     break;
+                }
+
                 prev = pp;
             }
 
@@ -899,7 +988,10 @@ JustDoIt:
 
             int n = Common.atoi( Cmd.Argv( 1 ) );
             if( n < 1 )
+            {
                 n = 1;
+            }
+
             if( n > Server.svs.maxclientslimit )
             {
                 n = Server.svs.maxclientslimit;
@@ -907,16 +999,24 @@ JustDoIt:
             }
 
             if( n == 1 && _IsListening )
+            {
                 Cbuf.AddText( "listen 0\n" );
+            }
 
             if( n > 1 && !_IsListening )
+            {
                 Cbuf.AddText( "listen 1\n" );
+            }
 
             Server.svs.maxclients = n;
             if( n == 1 )
+            {
                 Cvar.Set( "deathmatch", "0" );
+            }
             else
+            {
                 Cvar.Set( "deathmatch", "1" );
+            }
         }
 
         private static void Port_f()
@@ -950,15 +1050,22 @@ JustDoIt:
             for( _DriverLevel = 0; _DriverLevel < _Drivers.Length; _DriverLevel++ )
             {
                 if( !Net.SlistLocal && _DriverLevel == 0 )
+                {
                     continue;
+                }
+
                 if( !_Drivers[_DriverLevel].IsInitialized )
+                {
                     continue;
+                }
 
                 _Drivers[_DriverLevel].SearchForHosts( true );
             }
 
             if( ( Sys.GetFloatTime() - _SlistStartTime ) < 0.5 )
+            {
                 SchedulePollProcedure( _SlistSendProcedure, 0.75 );
+            }
         }
 
         private static void SlistPoll( object arg )
@@ -966,15 +1073,22 @@ JustDoIt:
             for( _DriverLevel = 0; _DriverLevel < _Drivers.Length; _DriverLevel++ )
             {
                 if( !Net.SlistLocal && _DriverLevel == 0 )
+                {
                     continue;
+                }
+
                 if( !_Drivers[_DriverLevel].IsInitialized )
+                {
                     continue;
+                }
 
                 _Drivers[_DriverLevel].SearchForHosts( false );
             }
 
             if( !Net.SlistSilent )
+            {
                 PrintSlist();
+            }
 
             if( ( Sys.GetFloatTime() - _SlistStartTime ) < 1.5 )
             {
@@ -983,7 +1097,9 @@ JustDoIt:
             }
 
             if( !Net.SlistSilent )
+            {
                 PrintSlistTrailer();
+            }
 
             _SlistInProgress = false;
             Net.SlistSilent = false;
@@ -1042,7 +1158,7 @@ JustDoIt:
         {
             get
             {
-                return Net.LanDrivers[this.landriver];
+                return Net.LanDrivers[landriver];
             }
         }
 
@@ -1077,24 +1193,24 @@ JustDoIt:
 
         public void ClearBuffers()
         {
-            this.sendMessageLength = 0;
-            this.receiveMessageLength = 0;
+            sendMessageLength = 0;
+            receiveMessageLength = 0;
         }
 
         public int Read( byte[] buf, int len, ref EndPoint ep )
         {
-            return this.LanDriver.Read( this.socket, buf, len, ref ep );
+            return LanDriver.Read( socket, buf, len, ref ep );
         }
 
         public int Write( byte[] buf, int len, EndPoint ep )
         {
-            return this.LanDriver.Write( this.socket, buf, len, ep );
+            return LanDriver.Write( socket, buf, len, ep );
         }
 
         public qsocket_t()
         {
-            this.sendMessage = new byte[Net.NET_MAXMESSAGE];
-            this.receiveMessage = new byte[Net.NET_MAXMESSAGE];
+            sendMessage = new byte[Net.NET_MAXMESSAGE];
+            receiveMessage = new byte[Net.NET_MAXMESSAGE];
             disconnected = true;
         }
     }
@@ -1110,7 +1226,7 @@ JustDoIt:
         {
             this.next = next;
             this.nextTime = nextTime;
-            this.procedure = handler;
+            procedure = handler;
             this.arg = arg;
         }
     }

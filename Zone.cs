@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 namespace SharpQuake
@@ -48,7 +45,9 @@ namespace SharpQuake
             CacheEntry cs = (CacheEntry)c;
 
             if( cs == null || cs.data == null )
+            {
                 return null;
+            }
 
             // move to head of LRU
             cs.RemoveFromLRU();
@@ -60,7 +59,9 @@ namespace SharpQuake
         public static cache_user_t Alloc( int size, string name )
         {
             if( size <= 0 )
+            {
                 Sys.Error( "Cache_Alloc: size {0}", size );
+            }
 
             size = ( size + 15 ) & ~15;
 
@@ -71,11 +72,15 @@ namespace SharpQuake
             {
                 entry = TryAlloc( size );
                 if( entry != null )
+                {
                     break;
+                }
 
                 // free the least recently used cahedat
                 if( _Head.LruPrev == _Head )
+                {
                     Sys.Error( "Cache_Alloc: out of memory" );
+                }
 
                 // not enough memory at all
                 Free( _Head.LruPrev );
@@ -95,14 +100,18 @@ namespace SharpQuake
         private static void Flush()
         {
             while( _Head.Next != _Head )
+            {
                 Free( _Head.Next ); // reclaim the space
+            }
         }
 
         // Frees the memory and removes it from the LRU list
         private static void Free( cache_user_t c )
         {
             if( c.data == null )
+            {
                 Sys.Error( "Cache_Free: not allocated" );
+            }
 
             CacheEntry entry = (CacheEntry)c;
             entry.Remove();
@@ -111,7 +120,9 @@ namespace SharpQuake
         private static CacheEntry TryAlloc( int size )
         {
             if( _BytesAllocated + size > _Capacity )
+            {
                 return null;
+            }
 
             CacheEntry result = new CacheEntry( size );
             _Head.InsertBefore( result );
@@ -162,7 +173,9 @@ namespace SharpQuake
             public void RemoveFromLRU()
             {
                 if( _LruNext == null || _LruPrev == null )
+                {
                     Sys.Error( "Cache_UnlinkLRU: NULL link" );
+                }
 
                 _LruNext._LruPrev = _LruPrev;
                 _LruPrev._LruNext = _LruNext;
@@ -173,7 +186,9 @@ namespace SharpQuake
             public void LRUInstertAfter( CacheEntry prev )
             {
                 if( _LruNext != null || _LruPrev != null )
+                {
                     Sys.Error( "Cache_MakeLRU: active link" );
+                }
 
                 prev._LruNext._LruPrev = this;
                 _LruNext = prev._LruNext;
@@ -186,18 +201,29 @@ namespace SharpQuake
             {
                 _Next = next;
                 if( next._Prev != null )
+                {
                     _Prev = next._Prev;
+                }
                 else
+                {
                     _Prev = next;
+                }
 
                 if( next._Prev != null )
+                {
                     next._Prev._Next = this;
+                }
                 else
+                {
                     next._Prev = this;
+                }
+
                 next._Prev = this;
 
                 if( next._Next == null )
+                {
                     next._Next = this;
+                }
             }
 
             public void Remove()

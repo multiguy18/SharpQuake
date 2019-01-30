@@ -1,20 +1,18 @@
 /// <remarks>
 /// Copyright (C) 2010 Yury Kiselev.
 ///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
+/// This program is free software; you can redistribute it and/or modify it under the terms of the
+/// GNU General Public License as published by the Free Software Foundation; either version 2 of the
+/// License, or (at your option) any later version.
 ///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+/// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+/// even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ///
 /// See the GNU General Public License for more details.
 ///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+/// You should have received a copy of the GNU General Public License along with this program; if
+/// not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+/// 02111-1307, USA.
 /// </remarks>
 
 using System;
@@ -99,15 +97,19 @@ namespace SharpQuake
         {
             base.OnFocusedChanged( e );
 
-            if( this.Focused )
+            if( Focused )
+            {
                 Sound.UnblockSound();
+            }
             else
+            {
                 Sound.BlockSound();
+            }
         }
 
         protected override void OnClosing( System.ComponentModel.CancelEventArgs e )
         {
-            if( this.ConfirmExit )
+            if( ConfirmExit )
             {
                 e.Cancel = ( MessageBox.Show( "Are you sure you want to quit?",
                     "Confirm Exit", MessageBoxButtons.YesNo ) != DialogResult.Yes );
@@ -119,8 +121,10 @@ namespace SharpQuake
         {
             try
             {
-                if( this.WindowState == OpenTK.WindowState.Minimized || Scr.BlockDrawing )
+                if( WindowState == OpenTK.WindowState.Minimized || Scr.BlockDrawing )
+                {
                     Scr.SkipUpdate = true; // no point in bothering to draw
+                }
 
                 _Swatch.Stop();
                 double ts = _Swatch.Elapsed.TotalSeconds;
@@ -179,7 +183,9 @@ namespace SharpQuake
                 DumpError( ex );
 
                 if( Debugger.IsAttached )
+                {
                     throw new Exception( "Exception in SafeShutdown()!", ex );
+                }
             }
         }
 
@@ -188,7 +194,9 @@ namespace SharpQuake
             DumpError( ex );
 
             if( Debugger.IsAttached )
+            {
                 throw new Exception( "Fatal error!", ex );
+            }
 
             Instance.CursorVisible = true;
             MessageBox.Show( ex.Message );
@@ -206,14 +214,17 @@ namespace SharpQuake
                 _DisplayDevice = DisplayDevice.Default;
 
                 if( File.Exists( DumpFilePath ) )
+                {
                     File.Delete( DumpFilePath );
+                }
 
-                quakeparms_t parms = new quakeparms_t();
-
-                parms.basedir = Application.StartupPath;
+                quakeparms_t parms = new quakeparms_t
+                {
+                    basedir = Application.StartupPath
+                };
 
                 string[] args2 = new string[args.Length + 1];
-                args2[0] = String.Empty;
+                args2[0] = string.Empty;
                 args.CopyTo( args2, 1 );
 
                 Common.InitArgv( args2 );
@@ -222,7 +233,9 @@ namespace SharpQuake
                 Common.Args.CopyTo( parms.argv, 0 );
 
                 if( Common.HasParam( "-dedicated" ) )
+                {
                     throw new QuakeException( "Dedicated server mode not supported!" );
+                }
 
                 Size size = new Size( 1366, 768 );
                 GraphicsMode mode = new GraphicsMode();
@@ -268,13 +281,19 @@ namespace SharpQuake
             _MouseBtnState = 0;
 
             if( e.Button == MouseButton.Left && e.IsPressed )
+            {
                 _MouseBtnState |= 1;
+            }
 
             if( e.Button == MouseButton.Right && e.IsPressed )
+            {
                 _MouseBtnState |= 2;
+            }
 
             if( e.Button == MouseButton.Middle && e.IsPressed )
+            {
                 _MouseBtnState |= 4;
+            }
 
             Input.MouseEvent( _MouseBtnState );
         }
@@ -290,10 +309,14 @@ namespace SharpQuake
             key &= 255;
 
             if( key >= _KeyTable.Length )
+            {
                 return 0;
+            }
 
             if( _KeyTable[key] == 0 )
+            {
                 Con.DPrint( "key 0x{0:X} has no translation\n", key );
+            }
 
             return _KeyTable[key];
         }
@@ -313,16 +336,16 @@ namespace SharpQuake
         {
             _Instance = new WeakReference( this );
             _Swatch = new Stopwatch();
-            this.VSync = VSyncMode.On;
-            this.Icon = Icon.ExtractAssociatedIcon( Application.ExecutablePath );
+            VSync = VSyncMode.On;
+            Icon = Icon.ExtractAssociatedIcon( Application.ExecutablePath );
 
-            this.KeyDown += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>( Keyboard_KeyDown );
-            this.KeyUp += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>( Keyboard_KeyUp );
+            KeyDown += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>( Keyboard_KeyDown );
+            KeyUp += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>( Keyboard_KeyUp );
 
-            this.MouseMove += new EventHandler<OpenTK.Input.MouseMoveEventArgs>( Mouse_Move );
-            this.MouseDown += new EventHandler<OpenTK.Input.MouseButtonEventArgs>( Mouse_ButtonEvent );
-            this.MouseUp += new EventHandler<OpenTK.Input.MouseButtonEventArgs>( Mouse_ButtonEvent );
-            this.MouseWheel += new EventHandler<OpenTK.Input.MouseWheelEventArgs>( Mouse_WheelChanged );
+            MouseMove += new EventHandler<OpenTK.Input.MouseMoveEventArgs>( Mouse_Move );
+            MouseDown += new EventHandler<OpenTK.Input.MouseButtonEventArgs>( Mouse_ButtonEvent );
+            MouseUp += new EventHandler<OpenTK.Input.MouseButtonEventArgs>( Mouse_ButtonEvent );
+            MouseWheel += new EventHandler<OpenTK.Input.MouseWheelEventArgs>( Mouse_WheelChanged );
         }
     }
 }

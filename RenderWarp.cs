@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -89,6 +86,7 @@ namespace SharpQuake
             int b = 0;
             Union4b rgba = Union4b.Empty;
             for( int i = 0; i < 128; i++ )
+            {
                 for( int j = 0; j < 128; j++ )
                 {
                     int p = src[offset + i * 256 + j + 128];
@@ -98,6 +96,7 @@ namespace SharpQuake
                     g += rgba.b1;
                     b += rgba.b2;
                 }
+            }
 
             rgba.b0 = (byte)( r / size );
             rgba.b1 = (byte)( g / size );
@@ -107,31 +106,43 @@ namespace SharpQuake
             uint transpix = rgba.ui0;
 
             if( _SolidSkyTexture == 0 )
+            {
                 _SolidSkyTexture = Drawer.GenerateTextureNumber();
+            }
+
             Drawer.Bind( _SolidSkyTexture );
             GL.TexImage2D( TextureTarget.Texture2D, 0, Drawer.SolidFormat, 128, 128, 0, PixelFormat.Rgba, PixelType.UnsignedByte, trans );
             Drawer.SetTextureFilters( TextureMinFilter.Linear, TextureMagFilter.Linear );
 
             for( int i = 0; i < 128; i++ )
+            {
                 for( int j = 0; j < 128; j++ )
                 {
                     int p = src[offset + i * 256 + j];
                     if( p == 0 )
+                    {
                         trans[( i * 128 ) + j] = transpix;
+                    }
                     else
+                    {
                         trans[( i * 128 ) + j] = v8to24[p];
+                    }
                 }
+            }
 
             if( _AlphaSkyTexture == 0 )
+            {
                 _AlphaSkyTexture = Drawer.GenerateTextureNumber();
+            }
+
             Drawer.Bind( _AlphaSkyTexture );
             GL.TexImage2D( TextureTarget.Texture2D, 0, Drawer.AlphaFormat, 128, 128, 0, PixelFormat.Rgba, PixelType.UnsignedByte, trans );
             Drawer.SetTextureFilters( TextureMinFilter.Linear, TextureMagFilter.Linear );
         }
 
         /// <summary>
-        /// Breaks a polygon up along axial 64 unit boundaries
-        /// so that turbulent and sky warps can be done reasonably.
+        /// Breaks a polygon up along axial 64 unit boundaries so that turbulent and sky warps can be
+        /// done reasonably.
         /// </summary>
         public static void SubdivideSurface( msurface_t fa )
         {
@@ -146,9 +157,13 @@ namespace SharpQuake
                 int lindex = loadmodel.surfedges[fa.firstedge + i];
 
                 if( lindex > 0 )
+                {
                     verts[numverts] = loadmodel.vertexes[loadmodel.edges[lindex].v[0]].position;
+                }
                 else
+                {
                     verts[numverts] = loadmodel.vertexes[loadmodel.edges[-lindex].v[1]].position;
+                }
 
                 numverts++;
             }
@@ -159,10 +174,11 @@ namespace SharpQuake
         private static void SubdividePolygon( int numverts, Vector3[] verts )
         {
             if( numverts > 60 )
+            {
                 Sys.Error( "numverts = {0}", numverts );
+            }
 
-            Vector3 mins, maxs;
-            BoundPoly( numverts, verts, out mins, out maxs );
+            BoundPoly( numverts, verts, out Vector3 mins, out Vector3 maxs );
 
             float[] dist = new float[64];
             for( int i = 0; i < 3; i++ )
@@ -170,13 +186,19 @@ namespace SharpQuake
                 double m = ( Mathlib.Comp( ref mins, i ) + Mathlib.Comp( ref maxs, i ) ) * 0.5;
                 m = Mod.SubdivideSize * Math.Floor( m / Mod.SubdivideSize + 0.5 );
                 if( Mathlib.Comp( ref maxs, i ) - m < 8 )
+                {
                     continue;
+                }
 
                 if( m - Mathlib.Comp( ref mins, i ) < 8 )
+                {
                     continue;
+                }
 
                 for( int j = 0; j < numverts; j++ )
+                {
                     dist[j] = (float)( Mathlib.Comp( ref verts[j], i ) - m );
+                }
 
                 Vector3[] front = new Vector3[64];
                 Vector3[] back = new Vector3[64];
@@ -199,7 +221,10 @@ namespace SharpQuake
                         b++;
                     }
                     if( dist[j] == 0 || dist[j + 1] == 0 )
+                    {
                         continue;
+                    }
+
                     if( ( dist[j] > 0 ) != ( dist[j + 1] > 0 ) )
                     {
                         // clip point
@@ -215,8 +240,10 @@ namespace SharpQuake
                 return;
             }
 
-            glpoly_t poly = new glpoly_t();
-            poly.next = _WarpFace.polys;
+            glpoly_t poly = new glpoly_t
+            {
+                next = _WarpFace.polys
+            };
             _WarpFace.polys = poly;
             poly.AllocVerts( numverts );
             for( int i = 0; i < numverts; i++ )
@@ -299,7 +326,9 @@ namespace SharpQuake
             _SpeedScale -= (int)_SpeedScale & ~127;
 
             for( msurface_t fa = s; fa != null; fa = fa.texturechain )
+            {
                 EmitSkyPolys( fa );
+            }
 
             GL.Enable( EnableCap.Blend );
             Drawer.Bind( _AlphaSkyTexture );
@@ -307,7 +336,9 @@ namespace SharpQuake
             _SpeedScale -= (int)_SpeedScale & ~127;
 
             for( msurface_t fa = s; fa != null; fa = fa.texturechain )
+            {
                 EmitSkyPolys( fa );
+            }
 
             GL.Disable( EnableCap.Blend );
         }

@@ -1,23 +1,20 @@
 /// <copyright>
-///
-/// Rewritten in C# by Yury Kiselev, 2010.
-///
-/// Copyright (C) 1996-1997 Id Software, Inc.
-///
-/// This program is free software; you can redistribute it and/or
-/// modify it under the terms of the GNU General Public License
-/// as published by the Free Software Foundation; either version 2
-/// of the License, or (at your option) any later version.
-///
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-///
-/// See the GNU General Public License for more details.
-///
-/// You should have received a copy of the GNU General Public License
-/// along with this program; if not, write to the Free Software
-/// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+///     Rewritten in C# by Yury Kiselev, 2010.
+///    
+///     Copyright (C) 1996-1997 Id Software, Inc.
+///    
+///     This program is free software; you can redistribute it and/or modify it under the terms of
+///     the GNU General Public License as published by the Free Software Foundation; either version 2
+///     of the License, or (at your option) any later version.
+///    
+///     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+///     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+///    
+///     See the GNU General Public License for more details.
+///    
+///     You should have received a copy of the GNU General Public License along with this program; if
+///     not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+///     02111-1307, USA.
 /// </copyright>
 
 using System;
@@ -52,7 +49,9 @@ namespace SharpQuake
         public void Init()
         {
             if( Client.cls.state == cactive_t.ca_dedicated )
+            {
                 return;
+            }
 
             _IsInitialized = true;
         }
@@ -64,13 +63,19 @@ namespace SharpQuake
         public void SearchForHosts( bool xmit )
         {
             if( !Server.sv.active )
+            {
                 return;
+            }
 
             Net.HostCacheCount = 1;
             if( Net.HostName == "UNNAMED" )
+            {
                 Net.HostCache[0].name = "local";
+            }
             else
+            {
                 Net.HostCache[0].name = Net.HostName;
+            }
 
             Net.HostCache[0].map = Server.sv.name;
             Net.HostCache[0].users = Net.ActiveConnections;
@@ -82,7 +87,9 @@ namespace SharpQuake
         public qsocket_t Connect( string host )
         {
             if( host != "local" )
+            {
                 return null;
+            }
 
             _LocalConnectPending = true;
 
@@ -121,7 +128,9 @@ namespace SharpQuake
         public qsocket_t CheckNewConnections()
         {
             if( !_LocalConnectPending )
+            {
                 return null;
+            }
 
             _LocalConnectPending = false;
             _Server.ClearBuffers();
@@ -134,7 +143,9 @@ namespace SharpQuake
         public int GetMessage( qsocket_t sock )
         {
             if( sock.receiveMessageLength == 0 )
+            {
                 return 0;
+            }
 
             int ret = sock.receiveMessage[0];
             int length = sock.receiveMessage[1] + ( sock.receiveMessage[2] << 8 );
@@ -147,10 +158,14 @@ namespace SharpQuake
             sock.receiveMessageLength -= length;
 
             if( sock.receiveMessageLength > 0 )
+            {
                 Array.Copy( sock.receiveMessage, length, sock.receiveMessage, 0, sock.receiveMessageLength );
+            }
 
             if( sock.driverdata != null && ret == 1 )
+            {
                 ( (qsocket_t)sock.driverdata ).canSend = true;
+            }
 
             return ret;
         }
@@ -158,12 +173,16 @@ namespace SharpQuake
         public int SendMessage( qsocket_t sock, MsgWriter data )
         {
             if( sock.driverdata == null )
+            {
                 return -1;
+            }
 
             qsocket_t sock2 = (qsocket_t)sock.driverdata;
 
             if( ( sock2.receiveMessageLength + data.Length + 4 ) > Net.NET_MAXMESSAGE )
+            {
                 Sys.Error( "Loop_SendMessage: overflow\n" );
+            }
 
             // message type
             int offset = sock2.receiveMessageLength;
@@ -187,12 +206,16 @@ namespace SharpQuake
         public int SendUnreliableMessage( qsocket_t sock, MsgWriter data )
         {
             if( sock.driverdata == null )
+            {
                 return -1;
+            }
 
             qsocket_t sock2 = (qsocket_t)sock.driverdata;
 
             if( ( sock2.receiveMessageLength + data.Length + sizeof( byte ) + sizeof( short ) ) > Net.NET_MAXMESSAGE )
+            {
                 return 0;
+            }
 
             int offset = sock2.receiveMessageLength;
 
@@ -216,7 +239,10 @@ namespace SharpQuake
         public bool CanSendMessage( qsocket_t sock )
         {
             if( sock.driverdata == null )
+            {
                 return false;
+            }
+
             return sock.canSend;
         }
 
@@ -228,14 +254,20 @@ namespace SharpQuake
         public void Close( qsocket_t sock )
         {
             if( sock.driverdata != null )
+            {
                 ( (qsocket_t)sock.driverdata ).driverdata = null;
+            }
 
             sock.ClearBuffers();
             sock.canSend = true;
             if( sock == _Client )
+            {
                 _Client = null;
+            }
             else
+            {
                 _Server = null;
+            }
         }
 
         public void Shutdown()
